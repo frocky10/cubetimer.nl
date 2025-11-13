@@ -59,6 +59,6 @@ const sunIcon = document.querySelector('.sun');
 toggle.addEventListener('click', () => {
     const isDark = html.getAttribute('data-theme') === 'dark';
     html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    moonIcon.classList.toggle('active', !isDark);
-    sunIcon.classList.toggle('active', isDark);
+    moonIcon.classList.toggle('active', isDark);
+    sunIcon.classList.toggle('active', !isDark);
 });
