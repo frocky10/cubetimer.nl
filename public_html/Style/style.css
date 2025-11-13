@@ -275,14 +275,11 @@ aside {
     border-color: var(--border-light);
 }
 
+/* Footer is part of the flex column layout, not fixed */
 footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
     padding: 8px;
     text-align: center;
-    z-index: 1000;
+    flex-shrink: 0;
 }
 
 #Scrambles {
