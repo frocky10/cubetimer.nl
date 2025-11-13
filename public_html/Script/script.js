@@ -38,6 +38,7 @@ function stopTimer() {
     clearInterval(interval);
     running = false;
     saveTime(lastDisplayTime);
+    generateScramble();
 }
 
 document.addEventListener('keydown', e => {

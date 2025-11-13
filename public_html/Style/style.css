@@ -140,6 +140,10 @@ th { font-weight: bold; color: #4bd3ff; }
     justify-self: anchor-center;
     border-radius: 8px;
     border: 1px solid var(--border-dark);
+    padding: 12px;
+    font-size: 1.2rem;
+    line-height: 1.4;
+    overflow-y: auto;
 }
 
 footer {
@@ -150,4 +154,11 @@ footer {
     padding: 8px;
     text-align: center;
     z-index: 1000;
+}
+
+#Scrambles {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 200%;
+    align-content: center;
 }
