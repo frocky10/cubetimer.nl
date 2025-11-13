@@ -1,0 +1,125 @@
+    :root {
+      --bg-dark: #0a0d1a;
+      --bg-light: #ffffff;
+      --text-gradient: linear-gradient(180deg, #4bd3ff 0%, #0077ff 100%);
+      --toggle-dark: #1a1d2e;
+      --toggle-light: #cfdfff;
+      --toggle-knob: linear-gradient(180deg, #4bd3ff 0%, #0077ff 100%);
+      --table-dark: rgba(255,255,255,0.06);
+      --table-light: rgba(0,0,0,0.06);
+      --border-dark: rgba(255,255,255,0.18);
+      --border-light: rgba(0,0,0,0.25);
+    }
+
+    body {
+      display: flex;
+      height: 100vh;
+      margin: 0;
+      user-select: none;
+      background: var(--bg-dark);
+      color: white;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    [data-theme="light"] body {
+      background: var(--bg-light);
+      color: black;
+    }
+
+    /* LOGO */
+    #logo {
+      position: absolute;
+      top: 15px;
+      left: 110px;
+      height: 50px;
+      width: auto;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    #times-table {
+      width: 260px;
+      padding: 20px;
+      margin-left: 20px;
+      margin-top: 70px;
+      background: var(--table-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      height: calc(80vh - 50px);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    [data-theme="light"] #times-table {
+      background: var(--table-light);
+      border-color: var(--border-light);
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { padding: 4px 6px; border-bottom: 1px solid var(--border-dark); }
+    [data-theme="light"] th, [data-theme="light"] td { border-color: var(--border-light); }
+    th { font-weight: bold; color: #4bd3ff; }
+    [data-theme="light"] th { color: #0077ff; }
+
+    #timer {
+      font-size: 5rem;
+      letter-spacing: 4px;
+      background: var(--text-gradient);
+      -webkit-background-clip: text;
+      color: transparent;
+      position: absolute;
+      left: calc(50% + 130px);
+      top: 50%;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    }
+
+    .toggle-wrapper {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .toggle {
+      width: 52px;
+      height: 26px;
+      background: var(--toggle-dark);
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="light"] .toggle {
+      background: var(--toggle-light);
+    }
+
+    .toggle-icon {
+      font-size: 14px;
+      opacity: 0.4;
+      transition: opacity 0.3s ease;
+    }
+
+    .toggle-icon.active {
+      opacity: 1;
+    }
+
+    .toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 22px;
+      height: 22px;
+      background: var(--toggle-knob);
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    [data-theme="light"] .toggle-knob {
+      transform: translateX(33px);
+    }
