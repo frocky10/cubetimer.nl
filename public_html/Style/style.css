@@ -146,6 +146,11 @@ th { font-weight: bold; color: #4bd3ff; }
     overflow-y: auto;
 }
 
+[data-theme="light"] .ScrambleBox {
+    background: var(--table-light);
+    border-color: var(--border-light);
+}
+
 footer {
     position: fixed;
     bottom: 0;
