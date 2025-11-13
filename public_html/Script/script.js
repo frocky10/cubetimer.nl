@@ -1,17 +1,21 @@
 let startTime = null;
 let running = false;
-let interval = null;
 let times = [];
 let lastDisplayTime = 0;
 
 function formatTime(ms) {
     const total = Math.floor(ms);
-    return `${String(Math.floor(total / 60000)).padStart(2,'0')}:${String(Math.floor((total % 60000)/1000)).padStart(2,'0')}:${String(total % 1000).padStart(3,'0')}`;
+    const minutes = Math.floor(total / 60000);
+    const seconds = Math.floor((total % 60000) / 1000);
+    const milliseconds = total % 1000;
+    return `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}:${String(milliseconds).padStart(3,'0')}`;
 }
 
 function updateTimer() {
+    if (!running) return;
     lastDisplayTime = performance.now() - startTime;
     document.getElementById("timer").textContent = formatTime(lastDisplayTime);
+    requestAnimationFrame(updateTimer);
 }
 
 function calculateAverage(list, count) {
@@ -30,12 +34,11 @@ function saveTime(ms) {
 
 function startTimer() {
     startTime = performance.now();
-    interval = setInterval(updateTimer, 10);
     running = true;
+    updateTimer();
 }
 
 function stopTimer() {
-    clearInterval(interval);
     running = false;
     saveTime(lastDisplayTime);
 }
