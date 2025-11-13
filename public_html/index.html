@@ -1,35 +1,41 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="google-adsense-account" content="ca-pub-9889350952616788">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="keywords" content="timer, cubetimer, rubiks cube timer, online timer, webtimer, speedcube, cubeing, wca, wcatimer, speedcubetimer, cube record, stopwatch">
-  <title>CubeTimer</title>
-  <link rel="icon" type="image/png" href="Pictures\CubeTimerFavicon_V2.png" />
-  <link rel="stylesheet" href="Style/style.css" />
-  <script src="Script/script.js" defer></script>
-</head>
-<body>
-  <img id="logo" src="Pictures\CubeTimerLogo_V2.png" alt="Logo" />
+    <head>
+    <meta charset="UTF-8" />
+    <meta name="google-adsense-account" content="ca-pub-9889350952616788">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="keywords" content="timer, cubetimer, rubiks cube timer, online timer, webtimer, speedcube, cubeing, wca, wcatimer, speedcubetimer, cube record, stopwatch">
+    <title>CubeTimer</title>
+    <link rel="icon" type="image/png" href="Pictures\CubeTimerFavicon_V2.png" />
+    <link rel="stylesheet" href="Style/style.css" />
+    <script src="Script/script.js" defer></script>
+    </head>
+    <body>
+        <header>
+            <img id="logo" src="Pictures\CubeTimerLogo_V2.png" alt="Logo" />
+        </header>
+        <main>
+            <div id="times-table">
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Time</th><th>AO5</th><th>AO12</th></tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+            <div class="toggle-wrapper">
+                <div class="toggle" id="theme-toggle">
+                    <span class="toggle-icon moon active">🌙</span>
+                    <span class="toggle-icon sun">☀️</span>
+                    <div class="toggle-knob"></div>
+                </div>
+            </div>
+            <div id="timer">00:00:000</div>
+        </main>
+        <footer>
+            <div id="Scrambles" class="ScrambleBox">
 
-  <div id="times-table">
-    <table>
-      <thead>
-        <tr><th>#</th><th>Time</th><th>AO5</th><th>AO12</th></tr>
-      </thead>
-      <tbody id="table-body"></tbody>
-    </table>
-  </div>
-
-  <div class="toggle-wrapper">
-    <div class="toggle" id="theme-toggle">
-      <span class="toggle-icon moon active">🌙</span>
-      <span class="toggle-icon sun">☀️</span>
-      <div class="toggle-knob"></div>
-    </div>
-  </div>
-
-  <div id="timer">00:00:000</div>
-</body>
+            </div>
+        </footer>
+    </body>
 </html>
