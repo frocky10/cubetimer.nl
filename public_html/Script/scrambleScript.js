@@ -1,4 +1,4 @@
-import { randomScrambleForEvent } from "https://cdn.cubing.net/cubing/scramble";
+import { randomScrambleForEvent } from "https://cdn.cubing.net/v0/js/cubing/scramble";
 
 const scrambleBox = document.getElementById("Scrambles");
 
