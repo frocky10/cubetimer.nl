@@ -1,3 +1,10 @@
+    @font-face {
+      font-family: 'Digital-7';
+      src: url('../Fonts/digital-7.mono.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
     :root {
       --bg-dark: #0a0d1a;
       --bg-light: #ffffff;
@@ -63,10 +70,12 @@
     [data-theme="light"] th { color: #0077ff; }
 
     #timer {
+      font-family: 'Digital-7', monospace;
       font-size: 5rem;
       letter-spacing: 4px;
       background: var(--text-gradient);
       -webkit-background-clip: text;
+      background-clip: text;
       color: transparent;
       position: absolute;
       left: calc(50% + 130px);
