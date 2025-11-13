@@ -41,6 +41,7 @@ function startTimer() {
 function stopTimer() {
     running = false;
     saveTime(lastDisplayTime);
+    generateScramble();
 }
 
 document.addEventListener('keydown', e => {
