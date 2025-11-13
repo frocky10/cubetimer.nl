@@ -18,14 +18,15 @@
     --border-light: rgba(0,0,0,0.25);
 }
 
-body {
-    display: flex;
-    height: 100vh;
+html, body {
+    height: 100%;
     margin: 0;
+    padding: 0;
     user-select: none;
     background: var(--bg-dark);
     color: white;
     transition: background 0.3s ease, color 0.3s ease;
+    overflow: hidden;
 }
 
 [data-theme="light"] body {
@@ -33,29 +34,74 @@ body {
     color: black;
 }
 
+.container-fluid {
+    background: inherit;
+    color: inherit;
+}
+
 /* LOGO */
+header {
+    min-height: 70px;
+}
+
 #logo {
-    position: absolute;
-    top: 15px;
-    left: 110px;
     height: 50px;
     width: auto;
     object-fit: contain;
     pointer-events: none;
     user-select: none;
+    margin-left: 20px;
+}
+
+/* Times Table Sidebar */
+main.row {
+    min-height: 0; /* Critical for flex children to respect height constraints */
+    height: 100%;
+}
+
+aside {
+    min-height: 0;
+    height: 100%;
+    overflow: hidden; /* Prevent aside from growing */
 }
 
 #times-table {
-    width: 260px;
     padding: 20px;
-    margin-left: 20px;
-    margin-top: 70px;
+    margin: 10px;
     background: var(--table-dark);
     border: 1px solid var(--border-dark);
     border-radius: 8px;
-    height: calc(80vh - 50px);
     overflow-y: auto;
-    flex-shrink: 0;
+    overflow-x: hidden;
+    flex: 1 1 auto;
+    min-height: 0; /* Critical for scrolling in flex containers */
+}
+
+/* Custom scrollbar styling */
+#times-table::-webkit-scrollbar {
+    width: 8px;
+}
+
+#times-table::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+}
+
+#times-table::-webkit-scrollbar-thumb {
+    background: rgba(75, 211, 255, 0.3);
+    border-radius: 4px;
+}
+
+#times-table::-webkit-scrollbar-thumb:hover {
+    background: rgba(75, 211, 255, 0.5);
+}
+
+[data-theme="light"] #times-table::-webkit-scrollbar-thumb {
+    background: rgba(0, 119, 255, 0.3);
+}
+
+[data-theme="light"] #times-table::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 119, 255, 0.5);
 }
 
 [data-theme="light"] #times-table {
@@ -63,31 +109,106 @@ body {
     border-color: var(--border-light);
 }
 
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td { padding: 4px 6px; border-bottom: 1px solid var(--border-dark); }
-[data-theme="light"] th, [data-theme="light"] td { border-color: var(--border-light); }
-th { font-weight: bold; color: #4bd3ff; }
-[data-theme="light"] th { color: #0077ff; }
+#times-table table {
+    width: 100%;
+    font-size: 14px;
+    margin-bottom: 0;
+    color: inherit;
+}
 
+#times-table .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: inherit;
+    border-color: var(--border-dark);
+}
+
+[data-theme="light"] #times-table .table {
+    border-color: var(--border-light);
+}
+
+#times-table thead {
+    position: sticky;
+    top: 0;
+    background: var(--table-dark);
+    z-index: 10;
+}
+
+[data-theme="light"] #times-table thead {
+    background: var(--table-light);
+}
+
+#times-table th, 
+#times-table td { 
+    padding: 8px 6px; 
+    border-bottom: 1px solid var(--border-dark);
+    white-space: nowrap;
+}
+
+[data-theme="light"] #times-table th, 
+[data-theme="light"] #times-table td { 
+    border-color: var(--border-light); 
+}
+
+#times-table th { 
+    font-weight: bold; 
+    color: #4bd3ff; 
+    background: var(--table-dark);
+}
+
+[data-theme="light"] #times-table th { 
+    color: #0077ff;
+    background: var(--table-light);
+}
+
+#times-table tbody tr:hover {
+    background: rgba(75, 211, 255, 0.1);
+    --bs-table-hover-bg: rgba(75, 211, 255, 0.1);
+}
+
+[data-theme="light"] #times-table tbody tr:hover {
+    background: rgba(0, 119, 255, 0.1);
+    --bs-table-hover-bg: rgba(0, 119, 255, 0.1);
+}
+
+/* Override Bootstrap table defaults */
+#times-table .table-hover > tbody > tr:hover > * {
+    --bs-table-hover-bg: rgba(75, 211, 255, 0.1);
+    background-color: rgba(75, 211, 255, 0.1);
+}
+
+[data-theme="light"] #times-table .table-hover > tbody > tr:hover > * {
+    --bs-table-hover-bg: rgba(0, 119, 255, 0.1);
+    background-color: rgba(0, 119, 255, 0.1);
+}
+
+/* Timer */
 #timer {
     font-family: 'Digital-7', monospace;
-    font-size: 5rem;
-    letter-spacing: 4px;
+    font-size: clamp(2.5rem, 8vw, 8rem);
+    letter-spacing: 6px;
     background: var(--text-gradient);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    position: absolute;
-    left: calc(50% + 130px);
-    top: 50%;
-    transform: translate(-50%, -50%);
     white-space: nowrap;
+    text-align: center;
+    width: 100%;
+    padding: 20px;
+}
+
+/* Extra large timer on desktop */
+@media (min-width: 992px) {
+    #timer {
+        font-size: clamp(5rem, 10vw, 9rem);
+        letter-spacing: 8px;
+    }
 }
 
 .toggle-wrapper {
     position: absolute;
     top: 20px;
     right: 20px;
+    z-index: 1000;
 }
 
 .toggle {
@@ -133,17 +254,20 @@ th { font-weight: bold; color: #4bd3ff; }
     transform: translateX(33px);
 }
 
+/* Scrambles */
 .ScrambleBox {
     background: var(--table-dark);
-    height: 10vh;
-    width: 80vw;
-    justify-self: anchor-center;
+    max-height: 150px;
+    min-height: 80px;
+    width: 100%;
+    max-width: 900px;
     border-radius: 8px;
     border: 1px solid var(--border-dark);
-    padding: 12px;
-    font-size: 1.2rem;
-    line-height: 1.4;
+    padding: 15px;
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    line-height: 1.6;
     overflow-y: auto;
+    text-align: center;
 }
 
 [data-theme="light"] .ScrambleBox {
@@ -151,19 +275,62 @@ th { font-weight: bold; color: #4bd3ff; }
     border-color: var(--border-light);
 }
 
+/* Footer is part of the flex column layout, not fixed */
 footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
     padding: 8px;
     text-align: center;
-    z-index: 1000;
+    flex-shrink: 0;
 }
 
 #Scrambles {
     white-space: pre-wrap;
     word-wrap: break-word;
-    font-size: 200%;
     align-content: center;
+    margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    #times-table {
+        max-height: 300px;
+        margin: 10px;
+    }
+    
+    #timer {
+        font-size: clamp(2rem, 10vw, 4rem);
+        padding: 15px;
+    }
+    
+    .ScrambleBox {
+        max-height: 120px;
+        font-size: clamp(0.8rem, 2.5vw, 1rem);
+        padding: 12px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    #logo {
+        height: 40px;
+        margin-left: 10px;
+    }
+    
+    #times-table {
+        max-height: 250px;
+        padding: 15px;
+        margin: 5px;
+    }
+    
+    #times-table table {
+        font-size: 12px;
+    }
+    
+    #timer {
+        font-size: clamp(1.8rem, 12vw, 3rem);
+        letter-spacing: 2px;
+    }
+    
+    .ScrambleBox {
+        max-height: 100px;
+        padding: 10px;
+    }
 }
