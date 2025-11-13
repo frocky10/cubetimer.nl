@@ -275,6 +275,16 @@ aside {
     border-color: var(--border-light);
 }
 
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 8px;
+    text-align: center;
+    z-index: 1000;
+}
+
 #Scrambles {
     white-space: pre-wrap;
     word-wrap: break-word;
