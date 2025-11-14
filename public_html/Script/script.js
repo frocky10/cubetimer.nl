@@ -5,6 +5,9 @@ let lastDisplayTime = 0;
 let holdTimeout = null;
 let ready = false;
 
+const light1 = document.getElementById('light1');
+const light2 = document.getElementById('light2');
+
 function formatTime(ms) {
     const total = Math.floor(ms);
     const minutes = Math.floor(total / 60000);
@@ -35,12 +38,14 @@ function saveTime(ms) {
 }
 
 function startTimer() {
+    resetLights();
     startTime = performance.now();
     running = true;
     updateTimer();
 }
 
 function stopTimer() {
+    resetLights()
     ready = false;
     running = false;
     clearTimeout(holdTimeout);
@@ -50,15 +55,18 @@ function stopTimer() {
 
 document.addEventListener('keydown', e => {
     if (e.code === 'Space') {
-    e.preventDefault();
-    if (running) {
-        stopTimer();
-        return;
+        if(e.repeat)return;
+        e.preventDefault();
+        if (running) {
+            stopTimer();
+            return;
     }
 
+    showReadyLights();
         // WCA HOLD
     holdTimeout = setTimeout(() => {
             ready = true;
+            turnLightsGreen();
         }, 500); // hold 0.5s
     }
 });
@@ -85,9 +93,11 @@ document.addEventListener("touchstart", (e) =>{
         return;
     }
     
+    showReadyLights();
     // WCA HOLD
     holdTimeout = setTimeout(() => {
         ready = true;
+        turnLightsGreen();
     }, 500);
 });
 
@@ -112,3 +122,23 @@ toggle.addEventListener('click', () => {
     moonIcon.classList.toggle('active', isDark);
     sunIcon.classList.toggle('active', !isDark);
 });
+
+function resetLights() {
+    light1.classList.remove('active');
+    light2.classList.remove('active');
+    light1.classList.remove('green');
+    light2.classList.remove('green');
+}
+
+function showReadyLights() {
+    resetLights();
+    setTimeout(() => light1.classList.add('active'), 100);
+    setTimeout(() => light2.classList.add('active'), 300);
+}
+
+function turnLightsGreen() {
+    light1.classList.remove('active');
+    light2.classList.remove('active');
+    light1.classList.add('green');
+    light2.classList.add('green');
+}
