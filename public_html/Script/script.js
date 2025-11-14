@@ -2,6 +2,8 @@ let startTime = null;
 let running = false;
 let times = [];
 let lastDisplayTime = 0;
+let holdTimeout = null;
+let ready = false;
 
 function formatTime(ms) {
     const total = Math.floor(ms);
@@ -39,7 +41,9 @@ function startTimer() {
 }
 
 function stopTimer() {
+    ready = false;
     running = false;
+    clearTimeout(holdTimeout);
     saveTime(lastDisplayTime);
     generateScramble();
 }
@@ -47,8 +51,54 @@ function stopTimer() {
 document.addEventListener('keydown', e => {
     if (e.code === 'Space') {
     e.preventDefault();
-    running ? stopTimer() : startTimer();
+    if (running) {
+        stopTimer();
+        return;
     }
+
+        // WCA HOLD
+    holdTimeout = setTimeout(() => {
+            ready = true;
+        }, 500); // hold 0.5s
+    }
+});
+
+document.addEventListener('keyup', e => {
+    if (e.code === 'Space') {
+        e.preventDefault();
+        clearTimeout(holdTimeout);
+
+        if (ready && !running) startTimer();
+
+        ready = false;
+    }
+});
+
+document.addEventListener("touchstart", (e) =>{
+    if(window.innerWidth > 900) return;
+    if(e.touches.length > 1) return;
+    if(e.target.closest('#theme-toggle')) return;
+    if(e.target.closest('#times-table')) return;
+    e.preventDefault();
+    if (running) {
+        stopTimer();
+        return;
+    }
+    
+    // WCA HOLD
+    holdTimeout = setTimeout(() => {
+        ready = true;
+    }, 500);
+});
+
+document.addEventListener("touchend", (e) => {
+    if (window.innerWidth > 900) return;
+
+    clearTimeout(holdTimeout);
+
+    if (ready && !running) startTimer();
+
+    ready = false;
 });
 
 const toggle = document.getElementById('theme-toggle');
