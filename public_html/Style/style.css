@@ -388,3 +388,29 @@ footer {
         padding: 10px;
     }
 }
+
+#ready-lights {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.ready-light {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #400;        /* dark red (off) */
+    box-shadow: 0 0 0px red;
+    transition: 0.2s;
+}
+
+.ready-light.active {
+    background: #f00;
+    box-shadow: 0 0 12px red;
+}
+
+.ready-light.green {
+    background: #0f0;
+    box-shadow: 0 0 12px #0f0;
+}
