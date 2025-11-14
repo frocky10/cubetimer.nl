@@ -390,7 +390,7 @@ footer {
 }
 
 #ready-lights {
-    display: flex;
+    display: block;
     gap: 10px;
     margin-top: 10px;
     justify-content: center;
@@ -413,4 +413,8 @@ footer {
 .ready-light.green {
     background: #0f0;
     box-shadow: 0 0 12px #0f0;
+}
+
+#light1{
+    margin-bottom: 15px;
 }
