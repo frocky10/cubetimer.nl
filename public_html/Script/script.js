@@ -4,9 +4,17 @@ let times = [];
 let lastDisplayTime = 0;
 let holdTimeout = null;
 let ready = false;
+let holdActive = false;
 
 const light1 = document.getElementById('light1');
 const light2 = document.getElementById('light2');
+const timerDisplay = document.getElementById('timer');
+const readyLightsContainer = document.getElementById('ready-lights');
+
+let inspectionState = 'idle';
+let inspectionStartTime = null;
+let inspectionAnimationFrame = null;
+const inspectionColorClasses = ['inspection-orange', 'inspection-red'];
 
 function formatTime(ms) {
     const total = Math.floor(ms);
@@ -19,21 +27,99 @@ function formatTime(ms) {
 function updateTimer() {
     if (!running) return;
     lastDisplayTime = performance.now() - startTime;
-    document.getElementById("timer").textContent = formatTime(lastDisplayTime);
+    timerDisplay.textContent = formatTime(lastDisplayTime);
     requestAnimationFrame(updateTimer);
 }
 
 function calculateAverage(list, count) {
     if (list.length < count) return "-";
-    const arr = list.slice(-count).map(t => t.raw).sort((a,b)=>a-b);
+    const recent = list.slice(-count);
+    if (recent.some(t => t.raw === null)) return "-";
+    const arr = recent.map(t => t.raw).sort((a,b)=>a-b);
     const trimmed = arr.slice(1, arr.length-1);
     return formatTime(trimmed.reduce((a,b)=>a+b,0) / trimmed.length);
 }
 
+function applyInspectionDisplay(seconds) {
+    const clamped = Math.min(seconds, 15);
+    timerDisplay.classList.add('inspection-mode');
+    timerDisplay.classList.remove(...inspectionColorClasses);
+    if (clamped >= 12) {
+        timerDisplay.classList.add('inspection-red');
+    } else if (clamped >= 8) {
+        timerDisplay.classList.add('inspection-orange');
+    }
+    timerDisplay.textContent = String(clamped).padStart(2, '0');
+}
+
+function clearInspectionDisplay(resetText = true) {
+    timerDisplay.classList.remove('inspection-mode', ...inspectionColorClasses);
+    if (resetText) {
+        timerDisplay.textContent = "00:00:000";
+    }
+}
+
+function startInspectionTimer() {
+    inspectionState = 'running';
+    inspectionStartTime = performance.now();
+    readyLightsContainer.classList.add('lights-hidden');
+    updateInspectionTimer();
+}
+
+function updateInspectionTimer() {
+    if (inspectionState !== 'running') return;
+    const elapsedSeconds = Math.floor((performance.now() - inspectionStartTime) / 1000) + 1;
+    applyInspectionDisplay(Math.min(elapsedSeconds, 15));
+    if (elapsedSeconds >= 15) {
+        finishInspection(true);
+        return;
+    }
+    inspectionAnimationFrame = requestAnimationFrame(updateInspectionTimer);
+}
+
+function finishInspection(keepDisplay = false) {
+    if (inspectionAnimationFrame) {
+        cancelAnimationFrame(inspectionAnimationFrame);
+        inspectionAnimationFrame = null;
+    }
+    if (inspectionState === 'idle') return;
+    inspectionState = 'finished';
+    if (!keepDisplay) {
+        clearInspectionDisplay();
+    }
+}
+
+function resetInspectionCycle() {
+    if (inspectionAnimationFrame) {
+        cancelAnimationFrame(inspectionAnimationFrame);
+        inspectionAnimationFrame = null;
+    }
+    inspectionState = 'idle';
+    inspectionStartTime = null;
+}
+
+function registerDNF() {
+    resetLights();
+    readyLightsContainer.classList.add('lights-hidden');
+    ready = false;
+    running = false;
+    holdActive = false;
+    clearTimeout(holdTimeout);
+    clearInspectionDisplay(false);
+    timerDisplay.textContent = "DNF";
+    saveTime(null);
+    resetInspectionCycle();
+    generateScramble("333");
+}
+
 function saveTime(ms) {
-    times.push({ raw: ms, formatted: formatTime(ms) });
+    const entry = {
+        raw: ms,
+        formatted: ms === null ? 'DNF' : formatTime(ms)
+    };
+    times.push(entry);
     const row = document.createElement('tr');
-    row.innerHTML = `<td>${times.length}</td><td>${formatTime(ms)}</td><td>${calculateAverage(times,5)}</td><td>${calculateAverage(times,12)}</td>`;
+    row.innerHTML = `<td>${times.length}</td><td>${entry.formatted}</td><td>${calculateAverage(times,5)}</td><td>${calculateAverage(times,12)}</td>`;
     document.getElementById('table-body').appendChild(row);
 }
 
@@ -41,45 +127,52 @@ function startTimer() {
     resetLights();
     startTime = performance.now();
     running = true;
+    holdActive = false;
     updateTimer();
 }
 
 function stopTimer() {
-    resetLights()
+    resetLights();
+    readyLightsContainer.classList.remove('lights-hidden');
     ready = false;
     running = false;
+    holdActive = false;
     clearTimeout(holdTimeout);
     saveTime(lastDisplayTime);
+    resetInspectionCycle();
     generateScramble("333");
 }
 
 document.addEventListener('keydown', e => {
-    if (e.code === 'Space') {
-        if(e.repeat)return;
-        e.preventDefault();
-        if (running) {
-            stopTimer();
-            return;
+    if (e.code !== 'Space') return;
+    if (e.repeat) return;
+    e.preventDefault();
+    if (running) {
+        stopTimer();
+        return;
     }
 
-    showReadyLights();
-        // WCA HOLD
-    holdTimeout = setTimeout(() => {
-            ready = true;
-            turnLightsGreen();
-        }, 500); // hold 0.5s
+    if (inspectionState === 'idle') {
+        startInspectionTimer();
+        return;
     }
+
+    finishInspection();
+    beginHoldSequence();
 });
 
 document.addEventListener('keyup', e => {
-    if (e.code === 'Space') {
-        e.preventDefault();
-        clearTimeout(holdTimeout);
-        resetLights();
-        if (ready && !running) startTimer();
-
-        ready = false;
+    if (e.code !== 'Space') return;
+    e.preventDefault();
+    clearTimeout(holdTimeout);
+    resetLights();
+    if (ready && !running) {
+        startTimer();
+    } else if (!running && holdActive) {
+        registerDNF();
     }
+    ready = false;
+    holdActive = false;
 });
 
 document.addEventListener("touchstart", (e) =>{
@@ -92,23 +185,30 @@ document.addEventListener("touchstart", (e) =>{
         stopTimer();
         return;
     }
-    
-    showReadyLights();
-    // WCA HOLD
-    holdTimeout = setTimeout(() => {
-        ready = true;
-        turnLightsGreen();
-    }, 500);
+
+    if (inspectionState === 'idle') {
+        startInspectionTimer();
+        return;
+    }
+
+    finishInspection();
+    beginHoldSequence();
 });
 
 document.addEventListener("touchend", (e) => {
     if (window.innerWidth > 900) return;
 
     clearTimeout(holdTimeout);
+    resetLights();
 
-    if (ready && !running) startTimer();
+    if (ready && !running) {
+        startTimer();
+    } else if (!running && holdActive) {
+        registerDNF();
+    }
 
     ready = false;
+    holdActive = false;
 });
 
 const toggle = document.getElementById('theme-toggle');
@@ -141,4 +241,14 @@ function turnLightsGreen() {
     light2.classList.remove('active');
     light1.classList.add('green');
     light2.classList.add('green');
+}
+
+function beginHoldSequence() {
+    readyLightsContainer.classList.remove('lights-hidden');
+    showReadyLights();
+    holdActive = true;
+    holdTimeout = setTimeout(() => {
+        ready = true;
+        turnLightsGreen();
+    }, 500);
 }
