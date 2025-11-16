@@ -233,6 +233,22 @@ aside {
     padding: 20px;
 }
 
+#timer.inspection-mode {
+    background: none !important;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: #00ff80;
+    -webkit-text-fill-color: currentColor;
+}
+
+#timer.inspection-mode.inspection-orange {
+    color: #ffb347;
+}
+
+#timer.inspection-mode.inspection-red {
+    color: #ff4b4b;
+}
+
 /* Extra large timer on desktop */
 @media (min-width: 992px) {
     #timer {
@@ -397,6 +413,13 @@ footer {
     justify-content: center;
     align-items: center;
     position: relative;
+    opacity: 1;
+    transition: opacity 0.05s linear;
+}
+
+#ready-lights.lights-hidden {
+    visibility: hidden;
+    opacity: 0;
 }
 
 .ready-light {
