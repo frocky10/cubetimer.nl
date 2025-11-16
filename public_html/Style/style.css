@@ -410,6 +410,8 @@ aside {
     min-height: 80px;
     width: 100%;
     max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
     border-radius: 8px;
     border: 1px solid var(--border-dark);
     padding: 15px;
@@ -652,4 +654,70 @@ footer {
 
 [data-theme="light"] #modal-date {
     color: rgba(0, 0, 0, 0.55) !important;
+}
+.session-graph {
+    position: fixed;
+    right: 40px;
+    bottom: 160px;
+    width: 260px;
+    height: 150px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    z-index: 1500;
+}
+
+[data-theme="light"] .session-graph {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0,0,0,0.1);
+}
+
+.session-graph canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.session-pr {
+    font-family: 'Digital-7', monospace;
+    font-size: clamp(1.2rem, 4vw, 2.5rem);
+    letter-spacing: 4px;
+    background: linear-gradient(180deg, #7bff8a 0%, #1bff4b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .session-pr {
+    background: linear-gradient(180deg, #2fbf43 0%, #0d7d1f 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+@media (max-width: 992px) {
+    .session-graph {
+        display: none;
+    }
+}
+
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 3000;
+}
+
+#confetti-canvas.active {
+    opacity: 1;
 }

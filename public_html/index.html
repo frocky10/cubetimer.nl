@@ -65,12 +65,15 @@
                         </div>
                     </header>
                       
-                    <div class="flex-grow-1 d-flex align-items-center justify-content-center gap-4">
-                        <div id="ready-lights">
-                            <div class="ready-light" id="light1"></div>
-                            <div class="ready-light" id="light2"></div>
+                    <div class="flex-grow-1 d-flex flex-column align-items-center justify-content-center gap-3">
+                        <div class="d-flex align-items-center gap-4">
+                            <div id="ready-lights">
+                                <div class="ready-light" id="light1"></div>
+                                <div class="ready-light" id="light2"></div>
+                            </div>
+                            <div id="timer">00:00:000</div>
                         </div>
-                        <div id="timer">00:00:000</div>
+                        <div id="session-pr" class="session-pr">Session PR: --</div>
                     </div>
                       
                     <!-- Scrambles at bottom of main component -->
@@ -81,6 +84,10 @@
                 </div>
             </div>
         </div>
+        <div id="session-graph" class="session-graph d-none d-md-block">
+            <canvas id="session-graph-canvas" width="260" height="150"></canvas>
+        </div>
+        <canvas id="confetti-canvas"></canvas>
         <div id="time-modal" class="time-modal" aria-hidden="true">
         <div class="time-modal__dialog">
             <button class="time-modal__close" type="button" data-close-modal>&times;</button>

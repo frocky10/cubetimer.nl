@@ -34,8 +34,18 @@ const sessionNewBtn = document.getElementById('session-new');
 const sessionRenameBtn = document.getElementById('session-rename');
 const sessionResetBtn = document.getElementById('session-reset');
 const sessionDeleteBtn = document.getElementById('session-delete');
+const sessionGraphCanvas = document.getElementById('session-graph-canvas');
+const sessionGraphCtx = sessionGraphCanvas ? sessionGraphCanvas.getContext('2d') : null;
+const sessionPrDisplay = document.getElementById('session-pr');
+const confettiCanvas = document.getElementById('confetti-canvas');
+const confettiCtx = confettiCanvas ? confettiCanvas.getContext('2d') : null;
+const confettiColors = ['#4bd3ff', '#ff6ec7', '#ffd54f', '#7bff8a', '#ff4b4b'];
 
 let editIndex = null;
+let lastBestTime = null;
+let confettiPieces = [];
+let confettiAnimationFrame = null;
+let confettiEndTime = 0;
 
 function formatTime(ms) {
     const total = Math.floor(ms);
@@ -137,6 +147,80 @@ function resetInspectionCycle() {
     inspectionStartTime = null;
 }
 
+function resizeConfettiCanvas() {
+    if (!confettiCanvas || !confettiCtx) return;
+    const ratio = window.devicePixelRatio || 1;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    confettiCanvas.width = width * ratio;
+    confettiCanvas.height = height * ratio;
+    confettiCanvas.style.width = `${width}px`;
+    confettiCanvas.style.height = `${height}px`;
+    confettiCtx.setTransform(1, 0, 0, 1, 0, 0);
+    confettiCtx.scale(ratio, ratio);
+}
+
+function triggerConfetti() {
+    if (!confettiCtx || !confettiCanvas) return;
+    stopConfetti();
+    resizeConfettiCanvas();
+    confettiCanvas.classList.add('active');
+    const centerX = window.innerWidth / 2;
+    const spread = Math.min(240, window.innerWidth / 2);
+    confettiPieces = Array.from({ length: 160 }, () => ({
+        x: centerX + (Math.random() - 0.5) * spread,
+        y: window.innerHeight + Math.random() * 40,
+        size: 8 + Math.random() * 6,
+        color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+        velocityX: (Math.random() - 0.5) * 6,
+        velocityY: -(8 + Math.random() * 6),
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10
+    }));
+    confettiEndTime = performance.now() + 4200;
+    if (!confettiAnimationFrame) {
+        confettiAnimationFrame = requestAnimationFrame(animateConfetti);
+    }
+}
+
+function animateConfetti() {
+    if (!confettiCtx || !confettiCanvas) return;
+    const now = performance.now();
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    confettiCtx.clearRect(0, 0, width, height);
+    confettiPieces.forEach(piece => {
+        confettiCtx.save();
+        confettiCtx.translate(piece.x, piece.y);
+        confettiCtx.rotate((piece.rotation * Math.PI) / 180);
+        confettiCtx.fillStyle = piece.color;
+        confettiCtx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size);
+        confettiCtx.restore();
+        piece.x += piece.velocityX;
+        piece.y += piece.velocityY;
+        piece.rotation += piece.rotationSpeed;
+        piece.velocityY += 0.12;
+    });
+    confettiPieces = confettiPieces.filter(piece => piece.y < height + 200);
+    if (now < confettiEndTime && confettiPieces.length) {
+        confettiAnimationFrame = requestAnimationFrame(animateConfetti);
+    } else {
+        stopConfetti();
+    }
+}
+
+function stopConfetti() {
+    if (confettiAnimationFrame) {
+        cancelAnimationFrame(confettiAnimationFrame);
+        confettiAnimationFrame = null;
+    }
+    if (confettiCtx) {
+        confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+    confettiPieces = [];
+    confettiCanvas?.classList.remove('active');
+}
+
 function generateSessionId() {
     return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -185,6 +269,7 @@ function syncActiveSessionTimes() {
         createDefaultSession();
     }
     times = sessions[activeSessionId].times || [];
+    lastBestTime = null;
 }
 
 function refreshSessionSelect() {
@@ -271,6 +356,8 @@ function renderTimes() {
         `;
         tableBody.appendChild(row);
     });
+    renderGraph();
+    renderSessionPr();
 }
 
 function registerDNF() {
@@ -358,6 +445,7 @@ document.addEventListener("touchstart", (e) =>{
     if(e.touches.length > 1) return;
     if(e.target.closest('#theme-toggle')) return;
     if(e.target.closest('#times-table')) return;
+    if (editModal && editModal.classList.contains('visible')) return;
     e.preventDefault();
     if (running) {
         stopTimer();
@@ -375,7 +463,7 @@ document.addEventListener("touchstart", (e) =>{
 
 document.addEventListener("touchend", (e) => {
     if (window.innerWidth > 900) return;
-
+    if (editModal && editModal.classList.contains('visible')) return;
     clearTimeout(holdTimeout);
     resetLights();
 
@@ -399,6 +487,7 @@ toggle.addEventListener('click', () => {
     html.setAttribute('data-theme', isDark ? 'light' : 'dark');
     moonIcon.classList.toggle('active', isDark);
     sunIcon.classList.toggle('active', !isDark);
+    renderGraph();
 });
 
 function resetLights() {
@@ -510,6 +599,102 @@ function deleteLastSolve() {
     persistSessions();
 }
 
+function renderGraph() {
+    if (!sessionGraphCtx || !sessionGraphCanvas) return;
+    const ctx = sessionGraphCtx;
+    const width = sessionGraphCanvas.width;
+    const height = sessionGraphCanvas.height;
+    ctx.clearRect(0, 0, width, height);
+    const data = times
+        .map(entry => getEffectiveTime(entry))
+        .map((value, index) => ({ value, index }))
+        .filter(point => point.value !== null);
+    if (!data.length) {
+        const emptyColor = document.documentElement.getAttribute('data-theme') === 'light'
+            ? 'rgba(0,0,0,0.6)'
+            : 'rgba(255,255,255,0.6)';
+        ctx.fillStyle = emptyColor;
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('No solves yet', width / 2, height / 2);
+        return;
+    }
+    const minValue = Math.min(...data.map(d => d.value));
+    const maxValue = Math.max(...data.map(d => d.value));
+    const range = Math.max(maxValue - minValue, 1000);
+    const padding = 10;
+    const usableWidth = width - padding * 2;
+    const usableHeight = height - padding * 2;
+    const isLightTheme = document.documentElement.getAttribute('data-theme') === 'light';
+    const gridColor = isLightTheme ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)';
+    const textColor = isLightTheme ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.85)';
+
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 3]);
+    const labelValues = [maxValue, minValue + range / 2, minValue];
+    ctx.font = '10px monospace';
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    labelValues.forEach(val => {
+        const clampedVal = Math.min(Math.max(val, minValue), maxValue);
+        const normalized = (clampedVal - minValue) / range;
+        const y = height - padding - usableHeight * normalized;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+        ctx.fillText(formatTime(Math.round(clampedVal)), padding + 4, y - 1);
+    });
+    ctx.setLineDash([]);
+
+    ctx.lineWidth = 2;
+    const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
+    gradient.addColorStop(0, '#4bd3ff');
+    gradient.addColorStop(1, '#0077ff');
+    ctx.strokeStyle = gradient;
+    ctx.beginPath();
+    data.forEach((point, idx) => {
+        const x = padding + (usableWidth * idx) / Math.max(data.length - 1, 1);
+        const normalized = (point.value - minValue) / range;
+        const y = height - padding - usableHeight * normalized;
+        if (idx === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = '#4bd3ff';
+    data.forEach((point, idx) => {
+        const x = padding + (usableWidth * idx) / Math.max(data.length - 1, 1);
+        const normalized = (point.value - minValue) / range;
+        const y = height - padding - usableHeight * normalized;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function renderSessionPr() {
+    if (!sessionPrDisplay) return;
+    const previousBest = lastBestTime;
+    const validTimes = times.map(getEffectiveTime).filter(v => v !== null);
+    if (!validTimes.length) {
+        sessionPrDisplay.textContent = 'PR: --';
+        lastBestTime = null;
+        return;
+    }
+    const best = Math.min(...validTimes);
+    sessionPrDisplay.textContent = `PR: ${formatTime(best)}`;
+    if (previousBest !== null && best < previousBest) {
+        triggerConfetti();
+    }
+    lastBestTime = best;
+}
+
 if (tableBody) {
     tableBody.addEventListener('click', e => {
         const row = e.target.closest('tr');
@@ -580,6 +765,9 @@ if (editModal) {
         }
     });
 }
+
+window.addEventListener('resize', resizeConfettiCanvas);
+resizeConfettiCanvas();
 
 loadSessionsFromStorage();
 syncActiveSessionTimes();
