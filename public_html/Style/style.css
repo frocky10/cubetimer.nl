@@ -229,7 +229,7 @@ aside {
     color: transparent;
     white-space: nowrap;
     text-align: center;
-    width: 100%;
+    width: auto;
     padding: 20px;
 }
 
@@ -390,10 +390,13 @@ footer {
 }
 
 #ready-lights {
-    display: block;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
-    margin-top: 10px;
+    margin-right: 20px; /* space between lights and timer */
     justify-content: center;
+    align-items: center;
+    position: relative;
 }
 
 .ready-light {
