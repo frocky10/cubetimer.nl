@@ -153,6 +153,19 @@ aside {
     color: inherit;
 }
 
+.time-cell {
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.time-cell.time-plus2 {
+    color: #ffb347;
+}
+
+.time-cell.time-dnf {
+    color: #ff4b4b;
+}
+
 #times-table .table {
     --bs-table-bg: transparent;
     --bs-table-color: inherit;
@@ -195,6 +208,10 @@ aside {
 [data-theme="light"] #times-table th { 
     color: #0077ff;
     background: var(--table-light);
+}
+
+#times-table tbody tr {
+    cursor: pointer;
 }
 
 #times-table tbody tr:hover {
@@ -439,6 +456,118 @@ footer {
 .ready-light.green {
     background: #0f0;
     box-shadow: 0 0 12px #0f0;
+}
+
+.time-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.time-modal.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.time-modal__dialog {
+    background: var(--bg-dark);
+    color: inherit;
+    border: 1px solid var(--border-dark);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 360px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+[data-theme="light"] .time-modal__dialog {
+    background: var(--bg-light);
+    border-color: var(--border-light);
+}
+
+.time-modal__close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.time-modal__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.time-modal__actions button,
+.time-modal__footer button {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    background: rgba(75, 211, 255, 0.15);
+    color: inherit;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.time-modal__actions button:hover,
+.time-modal__footer button:hover {
+    background: rgba(75, 211, 255, 0.25);
+}
+
+.time-modal__actions button:active,
+.time-modal__footer button:active {
+    transform: scale(0.97);
+}
+
+.time-modal__actions .danger {
+    background: rgba(255, 75, 75, 0.2);
+}
+
+.time-modal__actions .danger:hover {
+    background: rgba(255, 75, 75, 0.35);
+}
+
+.time-modal__actions .delete {
+    background: rgba(255, 139, 64, 0.2);
+}
+
+.time-modal__actions .delete:hover {
+    background: rgba(255, 139, 64, 0.35);
+}
+
+.time-modal__footer {
+    margin-top: 16px;
+    text-align: right;
+}
+
+.time-modal__scramble {
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 8px;
+    font-family: monospace;
+    max-height: 120px;
+    overflow-y: auto;
+    word-break: break-word;
+    font-size: 0.9rem;
+}
+
+[data-theme="light"] .time-modal__scramble {
+    background: rgba(0,0,0,0.05);
 }
 
 #light1{
