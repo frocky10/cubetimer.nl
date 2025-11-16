@@ -50,7 +50,7 @@ function stopTimer() {
     running = false;
     clearTimeout(holdTimeout);
     saveTime(lastDisplayTime);
-    generateScramble();
+    generateScramble("333");
 }
 
 document.addEventListener('keydown', e => {
@@ -75,7 +75,7 @@ document.addEventListener('keyup', e => {
     if (e.code === 'Space') {
         e.preventDefault();
         clearTimeout(holdTimeout);
-
+        resetLights();
         if (ready && !running) startTimer();
 
         ready = false;

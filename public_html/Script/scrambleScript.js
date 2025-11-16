@@ -2,10 +2,10 @@ import { randomScrambleForEvent } from "https://cdn.cubing.net/v0/js/cubing/scra
 
 const scrambleBox = document.getElementById("Scrambles");
 
-async function generateScramble() {
-    const scramble = await randomScrambleForEvent("333");
+async function generateScramble(eventType) {
+    const scramble = await randomScrambleForEvent(eventType);
     scrambleBox.textContent = scramble;
 }
 
-generateScramble();
+generateScramble("333");
 window.generateScramble = generateScramble;
