@@ -4,8 +4,9 @@ const scrambleBox = document.getElementById("Scrambles");
 
 async function generateScramble(eventType) {
     const scramble = await randomScrambleForEvent(eventType);
-    scrambleBox.textContent = scramble;
-    window.currentScramble = scramble;
+    const scrambleText = typeof scramble === 'string' ? scramble : scramble?.toString?.() || '';
+    scrambleBox.textContent = scrambleText;
+    window.currentScramble = scrambleText;
 }
 
 generateScramble("333");
