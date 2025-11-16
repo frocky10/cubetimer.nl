@@ -70,5 +70,26 @@
                 </div>
             </div>
         </div>
+        <div id="time-modal" class="time-modal" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-modal>&times;</button>
+            <h2 class="h5 mb-2">Edit Solve</h2>
+            <p id="modal-current-time" class="mb-1 fw-semibold">Solve #1: 00:00:000</p>
+            <p id="modal-date" class="text-muted small mb-2">Date: --</p>
+            <div class="mb-3">
+                <p class="mb-1 fw-semibold">Scramble</p>
+                <p id="modal-scramble" class="time-modal__scramble small">Loading...</p>
+            </div>
+            <div class="time-modal__actions">
+                <button id="modal-plus2" type="button">Add / remove +2</button>
+                <button id="modal-dnf" type="button" class="danger">Mark as DNF</button>
+                <button id="modal-normalize" type="button">Clear penalty</button>
+                <button id="modal-delete" type="button" class="delete">Delete solve</button>
+            </div>
+            <div class="time-modal__footer">
+                <button type="button" data-close-modal>Close</button>
+            </div>
+        </div>
+        </div>
     </body>
 </html>

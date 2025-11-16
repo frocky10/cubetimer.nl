@@ -10,11 +10,24 @@ const light1 = document.getElementById('light1');
 const light2 = document.getElementById('light2');
 const timerDisplay = document.getElementById('timer');
 const readyLightsContainer = document.getElementById('ready-lights');
+const scrambleDisplay = document.getElementById('Scrambles');
 
 let inspectionState = 'idle';
 let inspectionStartTime = null;
 let inspectionAnimationFrame = null;
 const inspectionColorClasses = ['inspection-orange', 'inspection-red'];
+const tableBody = document.getElementById('table-body');
+const editModal = document.getElementById('time-modal');
+const modalCurrentTime = document.getElementById('modal-current-time');
+const modalNormalBtn = document.getElementById('modal-normalize');
+const modalPlusTwoBtn = document.getElementById('modal-plus2');
+const modalDnfBtn = document.getElementById('modal-dnf');
+const modalDeleteBtn = document.getElementById('modal-delete');
+const modalCloseBtns = document.querySelectorAll('[data-close-modal]');
+const modalDateField = document.getElementById('modal-date');
+const modalScrambleField = document.getElementById('modal-scramble');
+
+let editIndex = null;
 
 function formatTime(ms) {
     const total = Math.floor(ms);
@@ -31,11 +44,29 @@ function updateTimer() {
     requestAnimationFrame(updateTimer);
 }
 
+function getEffectiveTime(entry) {
+    if (!entry) return null;
+    if (entry.penalty === 'dnf' || entry.raw === null) return null;
+    let total = entry.raw;
+    if (entry.penalty === 'plus2') total += 2000;
+    return total;
+}
+
+function getDisplayLabel(entry) {
+    if (!entry) return '';
+    if (entry.penalty === 'dnf' || entry.raw === null) return 'DNF';
+    const time = getEffectiveTime(entry);
+    if (time === null) return 'DNF';
+    const formatted = formatTime(time);
+    return entry.penalty === 'plus2' ? `${formatted}+` : formatted;
+}
+
 function calculateAverage(list, count) {
     if (list.length < count) return "-";
     const recent = list.slice(-count);
-    if (recent.some(t => t.raw === null)) return "-";
-    const arr = recent.map(t => t.raw).sort((a,b)=>a-b);
+    const values = recent.map(getEffectiveTime);
+    if (values.some(v => v === null)) return "-";
+    const arr = values.slice().sort((a,b)=>a-b);
     const trimmed = arr.slice(1, arr.length-1);
     return formatTime(trimmed.reduce((a,b)=>a+b,0) / trimmed.length);
 }
@@ -98,6 +129,27 @@ function resetInspectionCycle() {
     inspectionStartTime = null;
 }
 
+function renderTimes() {
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    times.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        row.dataset.index = index;
+        const timeLabel = getDisplayLabel(entry);
+        const timeClass = entry.penalty === 'dnf' || entry.raw === null ? 'time-dnf' : entry.penalty === 'plus2' ? 'time-plus2' : '';
+        const upto = times.slice(0, index + 1);
+        const ao5 = calculateAverage(upto, 5);
+        const ao12 = calculateAverage(upto, 12);
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td class="time-cell ${timeClass}">${timeLabel}</td>
+            <td>${ao5}</td>
+            <td>${ao12}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
 function registerDNF() {
     resetLights();
     readyLightsContainer.classList.add('lights-hidden');
@@ -112,15 +164,17 @@ function registerDNF() {
     generateScramble("333");
 }
 
-function saveTime(ms) {
+function saveTime(ms, penalty = null) {
+    const timestamp = new Date().toISOString();
+    const scramble = (window.currentScramble || scrambleDisplay?.textContent || '').trim();
     const entry = {
         raw: ms,
-        formatted: ms === null ? 'DNF' : formatTime(ms)
+        penalty: ms === null ? 'dnf' : penalty,
+        timestamp,
+        scramble
     };
     times.push(entry);
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${times.length}</td><td>${entry.formatted}</td><td>${calculateAverage(times,5)}</td><td>${calculateAverage(times,12)}</td>`;
-    document.getElementById('table-body').appendChild(row);
+    renderTimes();
 }
 
 function startTimer() {
@@ -252,3 +306,86 @@ function beginHoldSequence() {
         turnLightsGreen();
     }, 500);
 }
+
+function openEditModal(index) {
+    if (!editModal || !modalCurrentTime) return;
+    editIndex = index;
+    const entry = times[index];
+    if (!entry) return;
+    modalCurrentTime.textContent = `Solve #${index + 1}: ${getDisplayLabel(entry)}`;
+    if (modalDateField) {
+        const dateLabel = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : 'Unknown date';
+        modalDateField.textContent = `Date: ${dateLabel}`;
+    }
+    if (modalScrambleField) {
+        modalScrambleField.textContent = entry.scramble || 'Scramble unavailable';
+    }
+    editModal.classList.add('visible');
+}
+
+function closeEditModal() {
+    if (!editModal) return;
+    editModal.classList.remove('visible');
+    editIndex = null;
+}
+
+function applyPenaltyToEntry(penalty) {
+    if (editIndex === null) return;
+    const entry = times[editIndex];
+    if (!entry) return;
+    if (penalty === 'plus2') {
+        if (entry.raw === null) return;
+        entry.penalty = entry.penalty === 'plus2' ? null : 'plus2';
+    } else if (penalty === 'dnf') {
+        entry.penalty = 'dnf';
+    } else {
+        if (entry.raw !== null) entry.penalty = null;
+    }
+    renderTimes();
+    closeEditModal();
+}
+
+function deleteEntryAtIndex() {
+    if (editIndex === null) return;
+    times.splice(editIndex, 1);
+    renderTimes();
+    closeEditModal();
+}
+
+if (tableBody) {
+    tableBody.addEventListener('click', e => {
+        const row = e.target.closest('tr');
+        if (!row || row.dataset.index === undefined) return;
+        openEditModal(Number(row.dataset.index));
+    });
+}
+
+if (modalPlusTwoBtn) {
+    modalPlusTwoBtn.addEventListener('click', () => applyPenaltyToEntry('plus2'));
+}
+
+if (modalDnfBtn) {
+    modalDnfBtn.addEventListener('click', () => applyPenaltyToEntry('dnf'));
+}
+
+if (modalNormalBtn) {
+    modalNormalBtn.addEventListener('click', () => applyPenaltyToEntry('normal'));
+}
+
+if (modalDeleteBtn) {
+    modalDeleteBtn.addEventListener('click', deleteEntryAtIndex);
+}
+
+modalCloseBtns.forEach(btn => {
+    btn.addEventListener('click', closeEditModal);
+});
+
+if (editModal) {
+    editModal.addEventListener('click', e => {
+        if (e.target === editModal) {
+            closeEditModal();
+        }
+    });
+}
+
+renderTimes();

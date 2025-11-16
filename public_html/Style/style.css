@@ -573,3 +573,11 @@ footer {
 #light1{
     margin-bottom: 15px;
 }
+
+#modal-date {
+    color: rgba(255, 255, 255, 0.363) !important;
+}
+
+[data-theme="light"] #modal-date {
+    color: rgba(0, 0, 0, 0.55) !important;
+}

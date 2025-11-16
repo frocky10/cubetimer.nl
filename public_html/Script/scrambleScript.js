@@ -5,6 +5,7 @@ const scrambleBox = document.getElementById("Scrambles");
 async function generateScramble(eventType) {
     const scramble = await randomScrambleForEvent(eventType);
     scrambleBox.textContent = scramble;
+    window.currentScramble = scramble;
 }
 
 generateScramble("333");
