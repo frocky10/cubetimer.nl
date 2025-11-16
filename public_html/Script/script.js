@@ -352,6 +352,35 @@ function deleteEntryAtIndex() {
     closeEditModal();
 }
 
+function getLastEntryIndex() {
+    return times.length ? times.length - 1 : null;
+}
+
+function togglePlusTwoOnLastSolve() {
+    const index = getLastEntryIndex();
+    if (index === null) return;
+    const entry = times[index];
+    if (!entry || entry.raw === null) return;
+    entry.penalty = entry.penalty === 'plus2' ? null : 'plus2';
+    renderTimes();
+}
+
+function markLastSolveDNF() {
+    const index = getLastEntryIndex();
+    if (index === null) return;
+    const entry = times[index];
+    if (!entry) return;
+    entry.penalty = 'dnf';
+    renderTimes();
+}
+
+function deleteLastSolve() {
+    const index = getLastEntryIndex();
+    if (index === null) return;
+    times.splice(index, 1);
+    renderTimes();
+}
+
 if (tableBody) {
     tableBody.addEventListener('click', e => {
         const row = e.target.closest('tr');
@@ -359,6 +388,21 @@ if (tableBody) {
         openEditModal(Number(row.dataset.index));
     });
 }
+
+document.addEventListener('keydown', e => {
+    if (e.repeat) return;
+    if (running || inspectionState === 'running') return;
+    if (editModal && editModal.classList.contains('visible')) return;
+    if (!times.length) return;
+    if (e.code === 'Backspace') {
+        e.preventDefault();
+        deleteLastSolve();
+    } else if (e.key.toLowerCase() === 'd') {
+        markLastSolveDNF();
+    } else if (e.key === '2') {
+        togglePlusTwoOnLastSolve();
+    }
+});
 
 if (modalPlusTwoBtn) {
     modalPlusTwoBtn.addEventListener('click', () => applyPenaltyToEntry('plus2'));
