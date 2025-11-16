@@ -5,6 +5,9 @@ let lastDisplayTime = 0;
 let holdTimeout = null;
 let ready = false;
 let holdActive = false;
+const STORAGE_KEY = 'cubetimer_sessions_v1';
+let sessions = {};
+let activeSessionId = null;
 
 const light1 = document.getElementById('light1');
 const light2 = document.getElementById('light2');
@@ -26,6 +29,11 @@ const modalDeleteBtn = document.getElementById('modal-delete');
 const modalCloseBtns = document.querySelectorAll('[data-close-modal]');
 const modalDateField = document.getElementById('modal-date');
 const modalScrambleField = document.getElementById('modal-scramble');
+const sessionSelect = document.getElementById('session-select');
+const sessionNewBtn = document.getElementById('session-new');
+const sessionRenameBtn = document.getElementById('session-rename');
+const sessionResetBtn = document.getElementById('session-reset');
+const sessionDeleteBtn = document.getElementById('session-delete');
 
 let editIndex = null;
 
@@ -129,6 +137,121 @@ function resetInspectionCycle() {
     inspectionStartTime = null;
 }
 
+function generateSessionId() {
+    return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function persistSessions() {
+    if (typeof localStorage === 'undefined') return;
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessions, activeSessionId }));
+    } catch (err) {
+        console.warn('Unable to save sessions', err);
+    }
+}
+
+function loadSessionsFromStorage() {
+    if (typeof localStorage === 'undefined') {
+        createDefaultSession();
+        return;
+    }
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const data = JSON.parse(raw);
+            if (data?.sessions && Object.keys(data.sessions).length) {
+                sessions = data.sessions;
+                const fallbackId = Object.keys(sessions)[0];
+                activeSessionId = data.activeSessionId && sessions[data.activeSessionId] ? data.activeSessionId : fallbackId;
+                return;
+            }
+        }
+    } catch (err) {
+        console.warn('Unable to load sessions', err);
+    }
+    createDefaultSession();
+}
+
+function createDefaultSession() {
+    const id = generateSessionId();
+    sessions = {
+        [id]: { id, name: 'Session 1', times: [] }
+    };
+    activeSessionId = id;
+}
+
+function syncActiveSessionTimes() {
+    if (!sessions[activeSessionId]) {
+        createDefaultSession();
+    }
+    times = sessions[activeSessionId].times || [];
+}
+
+function refreshSessionSelect() {
+    if (!sessionSelect) return;
+    sessionSelect.innerHTML = '';
+    Object.values(sessions).forEach(session => {
+        const option = document.createElement('option');
+        option.value = session.id;
+        option.textContent = session.name;
+        if (session.id === activeSessionId) option.selected = true;
+        sessionSelect.appendChild(option);
+    });
+}
+
+function setActiveSession(id) {
+    if (!sessions[id]) return;
+    activeSessionId = id;
+    syncActiveSessionTimes();
+    renderTimes();
+    refreshSessionSelect();
+    persistSessions();
+}
+
+function createNewSession() {
+    const defaultName = `Session ${Object.keys(sessions).length + 1}`;
+    const input = prompt('Name for the new session?', defaultName);
+    const name = input && input.trim() ? input.trim() : defaultName;
+    const id = generateSessionId();
+    sessions[id] = { id, name, times: [] };
+    setActiveSession(id);
+}
+
+function renameActiveSession() {
+    const session = sessions[activeSessionId];
+    if (!session) return;
+    const input = prompt('Rename session:', session.name);
+    if (!input || !input.trim()) return;
+    session.name = input.trim();
+    refreshSessionSelect();
+    persistSessions();
+}
+
+function resetActiveSession() {
+    const session = sessions[activeSessionId];
+    if (!session) return;
+    if (!confirm('Reset this session? All times will be removed.')) return;
+    session.times = [];
+    syncActiveSessionTimes();
+    renderTimes();
+    persistSessions();
+}
+
+function deleteActiveSession() {
+    if (!confirm('Delete this session permanently?')) return;
+    delete sessions[activeSessionId];
+    const remainingIds = Object.keys(sessions);
+    if (!remainingIds.length) {
+        createDefaultSession();
+    } else {
+        activeSessionId = remainingIds[0];
+    }
+    syncActiveSessionTimes();
+    renderTimes();
+    refreshSessionSelect();
+    persistSessions();
+}
+
 function renderTimes() {
     if (!tableBody) return;
     tableBody.innerHTML = '';
@@ -175,6 +298,7 @@ function saveTime(ms, penalty = null) {
     };
     times.push(entry);
     renderTimes();
+    persistSessions();
 }
 
 function startTimer() {
@@ -342,6 +466,7 @@ function applyPenaltyToEntry(penalty) {
         if (entry.raw !== null) entry.penalty = null;
     }
     renderTimes();
+    persistSessions();
     closeEditModal();
 }
 
@@ -349,6 +474,7 @@ function deleteEntryAtIndex() {
     if (editIndex === null) return;
     times.splice(editIndex, 1);
     renderTimes();
+    persistSessions();
     closeEditModal();
 }
 
@@ -363,6 +489,7 @@ function togglePlusTwoOnLastSolve() {
     if (!entry || entry.raw === null) return;
     entry.penalty = entry.penalty === 'plus2' ? null : 'plus2';
     renderTimes();
+    persistSessions();
 }
 
 function markLastSolveDNF() {
@@ -372,6 +499,7 @@ function markLastSolveDNF() {
     if (!entry) return;
     entry.penalty = 'dnf';
     renderTimes();
+    persistSessions();
 }
 
 function deleteLastSolve() {
@@ -379,6 +507,7 @@ function deleteLastSolve() {
     if (index === null) return;
     times.splice(index, 1);
     renderTimes();
+    persistSessions();
 }
 
 if (tableBody) {
@@ -387,6 +516,26 @@ if (tableBody) {
         if (!row || row.dataset.index === undefined) return;
         openEditModal(Number(row.dataset.index));
     });
+}
+
+if (sessionSelect) {
+    sessionSelect.addEventListener('change', e => setActiveSession(e.target.value));
+}
+
+if (sessionNewBtn) {
+    sessionNewBtn.addEventListener('click', createNewSession);
+}
+
+if (sessionRenameBtn) {
+    sessionRenameBtn.addEventListener('click', renameActiveSession);
+}
+
+if (sessionResetBtn) {
+    sessionResetBtn.addEventListener('click', resetActiveSession);
+}
+
+if (sessionDeleteBtn) {
+    sessionDeleteBtn.addEventListener('click', deleteActiveSession);
 }
 
 document.addEventListener('keydown', e => {
@@ -432,4 +581,8 @@ if (editModal) {
     });
 }
 
+loadSessionsFromStorage();
+syncActiveSessionTimes();
+refreshSessionSelect();
 renderTimes();
+persistSessions();

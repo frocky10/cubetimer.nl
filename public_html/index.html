@@ -24,6 +24,7 @@
                         <img id="logo-sidebar" src="Pictures\CubeTimerLogo_V2.png" alt="Logo" />
                     </div>
                     <div id="times-table">
+                        <div class="table-container">
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
@@ -35,6 +36,16 @@
                             </thead>
                             <tbody id="table-body"></tbody>
                         </table>
+                        </div>
+                        <div class="session-controls">
+                            <select id="session-select" class="form-select form-select-sm flex-grow-1"></select>
+                            <div class="session-buttons">
+                                <button id="session-new" type="button" title="New session">+</button>
+                                <button id="session-rename" type="button" title="Rename session">✎</button>
+                                <button id="session-reset" type="button" title="Reset session">⟳</button>
+                                <button id="session-delete" type="button" class="danger" title="Delete session">✕</button>
+                            </div>
+                        </div>
                     </div>
                 </aside>
 

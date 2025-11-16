@@ -108,10 +108,11 @@ aside {
     background: var(--table-dark);
     border: 1px solid var(--border-dark);
     border-radius: 8px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
     flex: 1 1 auto;
     min-height: 0; /* Critical for scrolling in flex containers */
+    overflow: hidden;
 }
 
 /* Custom scrollbar styling */
@@ -151,6 +152,77 @@ aside {
     font-size: 14px;
     margin-bottom: 0;
     color: inherit;
+}
+
+#times-table .table-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.session-controls {
+    border-top: 1px solid var(--border-dark);
+    margin-top: 12px;
+    padding-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+[data-theme="light"] .session-controls {
+    border-color: var(--border-light);
+}
+
+.session-controls select {
+    background: rgba(0,0,0,0.2);
+    color: inherit;
+    border: 1px solid var(--border-dark);
+    flex: 1;
+}
+
+[data-theme="light"] .session-controls select {
+    background: rgba(255,255,255,0.8);
+    border-color: var(--border-light);
+    color: inherit;
+}
+
+.session-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.session-buttons button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    font-size: 1rem;
+    cursor: pointer;
+    background: rgba(75, 211, 255, 0.2);
+    color: inherit;
+    transition: background 0.2s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.session-buttons button:hover {
+    background: rgba(75, 211, 255, 0.35);
+}
+
+.session-buttons button:active {
+    transform: scale(0.97);
+}
+
+.session-buttons .danger {
+    background: rgba(255, 75, 75, 0.2);
+}
+
+.session-buttons .danger:hover {
+    background: rgba(255, 75, 75, 0.35);
 }
 
 .time-cell {
