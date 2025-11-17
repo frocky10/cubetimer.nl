@@ -19,6 +19,8 @@ let inspectionState = 'idle';
 let inspectionStartTime = null;
 let inspectionAnimationFrame = null;
 const inspectionColorClasses = ['inspection-orange', 'inspection-red'];
+const INSPECTION_LIMIT_MS = 15000;
+let pendingInspectionPlusTwo = false;
 const tableBody = document.getElementById('table-body');
 const editModal = document.getElementById('time-modal');
 const modalCurrentTime = document.getElementById('modal-current-time');
@@ -111,6 +113,7 @@ function clearInspectionDisplay(resetText = true) {
 function startInspectionTimer() {
     inspectionState = 'running';
     inspectionStartTime = performance.now();
+    pendingInspectionPlusTwo = false;
     readyLightsContainer.classList.add('lights-hidden');
     updateInspectionTimer();
 }
@@ -145,6 +148,7 @@ function resetInspectionCycle() {
     }
     inspectionState = 'idle';
     inspectionStartTime = null;
+    pendingInspectionPlusTwo = false;
 }
 
 function resizeConfettiCanvas() {
@@ -369,6 +373,7 @@ function registerDNF() {
     clearTimeout(holdTimeout);
     clearInspectionDisplay(false);
     timerDisplay.textContent = "DNF";
+    pendingInspectionPlusTwo = false;
     saveTime(null);
     resetInspectionCycle();
     generateScramble("333");
@@ -390,7 +395,13 @@ function saveTime(ms, penalty = null) {
 
 function startTimer() {
     resetLights();
-    startTime = performance.now();
+    const now = performance.now();
+    if (inspectionStartTime !== null) {
+        pendingInspectionPlusTwo = (now - inspectionStartTime) >= INSPECTION_LIMIT_MS;
+    } else {
+        pendingInspectionPlusTwo = false;
+    }
+    startTime = now;
     running = true;
     holdActive = false;
     updateTimer();
@@ -403,7 +414,9 @@ function stopTimer() {
     running = false;
     holdActive = false;
     clearTimeout(holdTimeout);
-    saveTime(lastDisplayTime);
+    const penalty = pendingInspectionPlusTwo ? 'plus2' : null;
+    saveTime(lastDisplayTime, penalty);
+    pendingInspectionPlusTwo = false;
     resetInspectionCycle();
     generateScramble("333");
 }
