@@ -9,5 +9,7 @@ async function generateScramble(eventType) {
     window.currentScramble = scrambleText;
 }
 
-generateScramble("333");
 window.generateScramble = generateScramble;
+const initialEvent = window.pendingScrambleEvent || "333";
+generateScramble(initialEvent);
+window.pendingScrambleEvent = null;

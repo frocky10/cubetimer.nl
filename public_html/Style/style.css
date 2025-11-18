@@ -188,6 +188,40 @@ aside {
     color: inherit;
 }
 
+.cube-controls {
+    border-top: 1px solid var(--border-dark);
+    margin-top: 12px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+[data-theme="light"] .cube-controls {
+    border-color: var(--border-light);
+}
+
+.cube-controls select {
+    background: rgba(0,0,0,0.2);
+    color: inherit;
+    border: 1px solid var(--border-dark);
+}
+
+[data-theme="light"] .cube-controls select {
+    background: rgba(255,255,255,0.8);
+    border-color: var(--border-light);
+    color: inherit;
+}
+
+.cube-display {
+    letter-spacing: 0.25px;
+    color: rgba(255,255,255,0.7);
+}
+
+[data-theme="light"] .cube-display {
+    color: rgba(0,0,0,0.65);
+}
+
 .session-buttons {
     display: flex;
     gap: 6px;

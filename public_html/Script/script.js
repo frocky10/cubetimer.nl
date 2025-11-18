@@ -8,6 +8,20 @@ let holdActive = false;
 const STORAGE_KEY = 'cubetimer_sessions_v1';
 let sessions = {};
 let activeSessionId = null;
+const EVENT_OPTIONS = [
+    { id: '333', label: '3x3' },
+    { id: '333bf', label: '3x3 Blindfolded' },
+    { id: '333fm', label: '3x3 Fewest Moves' },
+    { id: '222', label: '2x2' },
+    { id: '444', label: '4x4' },
+    { id: '777', label: '7x7' },
+    { id: 'sq1', label: 'Square-1' },
+    { id: 'minx', label: 'Megaminx' },
+    { id: 'clock', label: 'Clock' },
+    { id: 'fto', label: 'FTO' },
+    { id: 'master_tetraminx', label: 'Master Tetraminx' }
+];
+const DEFAULT_EVENT = EVENT_OPTIONS[0].id;
 
 const light1 = document.getElementById('light1');
 const light2 = document.getElementById('light2');
@@ -36,6 +50,8 @@ const sessionNewBtn = document.getElementById('session-new');
 const sessionRenameBtn = document.getElementById('session-rename');
 const sessionResetBtn = document.getElementById('session-reset');
 const sessionDeleteBtn = document.getElementById('session-delete');
+const cubeSelect = document.getElementById('cube-select');
+const cubeDisplay = document.getElementById('cube-display');
 const sessionGraphCanvas = document.getElementById('session-graph-canvas');
 const sessionGraphCtx = sessionGraphCanvas ? sessionGraphCanvas.getContext('2d') : null;
 const sessionPrDisplay = document.getElementById('session-pr');
@@ -229,6 +245,64 @@ function generateSessionId() {
     return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function getEventLabel(eventId) {
+    const match = EVENT_OPTIONS.find(option => option.id === eventId);
+    return match ? match.label : eventId;
+}
+
+function ensureSessionEvent(session) {
+    if (!session) return;
+    const isValid = EVENT_OPTIONS.some(option => option.id === session.event);
+    if (!isValid) {
+        session.event = DEFAULT_EVENT;
+    }
+}
+
+function getActiveSessionEvent() {
+    const session = sessions[activeSessionId];
+    if (!session) return DEFAULT_EVENT;
+    ensureSessionEvent(session);
+    return session.event;
+}
+
+function updateCubeDisplay() {
+    if (!cubeDisplay) return;
+    const session = sessions[activeSessionId];
+    const label = getEventLabel(getActiveSessionEvent());
+    if (session?.name) {
+        cubeDisplay.textContent = `${label} - ${session.name}`;
+    } else {
+        cubeDisplay.textContent = `Session cube: ${label}`;
+    }
+}
+
+function refreshCubeControls() {
+    if (cubeSelect) {
+        cubeSelect.value = getActiveSessionEvent();
+    }
+    updateCubeDisplay();
+}
+
+function populateCubeSelect() {
+    if (!cubeSelect) return;
+    cubeSelect.innerHTML = '';
+    EVENT_OPTIONS.forEach(option => {
+        const opt = document.createElement('option');
+        opt.value = option.id;
+        opt.textContent = option.label;
+        cubeSelect.appendChild(opt);
+    });
+}
+
+function generateScrambleForActiveEvent() {
+    const event = getActiveSessionEvent();
+    if (typeof window.generateScramble === 'function') {
+        window.generateScramble(event);
+    } else {
+        window.pendingScrambleEvent = event;
+    }
+}
+
 function persistSessions() {
     if (typeof localStorage === 'undefined') return;
     try {
@@ -249,6 +323,7 @@ function loadSessionsFromStorage() {
             const data = JSON.parse(raw);
             if (data?.sessions && Object.keys(data.sessions).length) {
                 sessions = data.sessions;
+                Object.values(sessions).forEach(ensureSessionEvent);
                 const fallbackId = Object.keys(sessions)[0];
                 activeSessionId = data.activeSessionId && sessions[data.activeSessionId] ? data.activeSessionId : fallbackId;
                 return;
@@ -263,7 +338,7 @@ function loadSessionsFromStorage() {
 function createDefaultSession() {
     const id = generateSessionId();
     sessions = {
-        [id]: { id, name: 'Session 1', times: [] }
+        [id]: { id, name: 'Session 1', times: [], event: DEFAULT_EVENT }
     };
     activeSessionId = id;
 }
@@ -272,6 +347,7 @@ function syncActiveSessionTimes() {
     if (!sessions[activeSessionId]) {
         createDefaultSession();
     }
+    ensureSessionEvent(sessions[activeSessionId]);
     times = sessions[activeSessionId].times || [];
     lastBestTime = null;
 }
@@ -291,10 +367,13 @@ function refreshSessionSelect() {
 function setActiveSession(id) {
     if (!sessions[id]) return;
     activeSessionId = id;
+    ensureSessionEvent(sessions[activeSessionId]);
     syncActiveSessionTimes();
     renderTimes();
     refreshSessionSelect();
     persistSessions();
+    refreshCubeControls();
+    generateScrambleForActiveEvent();
 }
 
 function createNewSession() {
@@ -302,7 +381,8 @@ function createNewSession() {
     const input = prompt('Name for the new session?', defaultName);
     const name = input && input.trim() ? input.trim() : defaultName;
     const id = generateSessionId();
-    sessions[id] = { id, name, times: [] };
+    const inheritedEvent = getActiveSessionEvent();
+    sessions[id] = { id, name, times: [], event: inheritedEvent };
     setActiveSession(id);
 }
 
@@ -313,6 +393,7 @@ function renameActiveSession() {
     if (!input || !input.trim()) return;
     session.name = input.trim();
     refreshSessionSelect();
+    updateCubeDisplay();
     persistSessions();
 }
 
@@ -324,6 +405,7 @@ function resetActiveSession() {
     syncActiveSessionTimes();
     renderTimes();
     persistSessions();
+    generateScrambleForActiveEvent();
 }
 
 function deleteActiveSession() {
@@ -339,6 +421,8 @@ function deleteActiveSession() {
     renderTimes();
     refreshSessionSelect();
     persistSessions();
+    refreshCubeControls();
+    generateScrambleForActiveEvent();
 }
 
 function renderTimes() {
@@ -376,7 +460,7 @@ function registerDNF() {
     pendingInspectionPlusTwo = false;
     saveTime(null);
     resetInspectionCycle();
-    generateScramble("333");
+    generateScrambleForActiveEvent();
 }
 
 function saveTime(ms, penalty = null) {
@@ -418,7 +502,7 @@ function stopTimer() {
     saveTime(lastDisplayTime, penalty);
     pendingInspectionPlusTwo = false;
     resetInspectionCycle();
-    generateScramble("333");
+    generateScrambleForActiveEvent();
 }
 
 document.addEventListener('keydown', e => {
@@ -736,6 +820,19 @@ if (sessionDeleteBtn) {
     sessionDeleteBtn.addEventListener('click', deleteActiveSession);
 }
 
+if (cubeSelect) {
+    populateCubeSelect();
+    cubeSelect.addEventListener('change', e => {
+        const session = sessions[activeSessionId];
+        if (!session) return;
+        session.event = e.target.value;
+        ensureSessionEvent(session);
+        updateCubeDisplay();
+        persistSessions();
+        generateScrambleForActiveEvent();
+    });
+}
+
 document.addEventListener('keydown', e => {
     if (e.repeat) return;
     if (running || inspectionState === 'running') return;
@@ -785,5 +882,7 @@ resizeConfettiCanvas();
 loadSessionsFromStorage();
 syncActiveSessionTimes();
 refreshSessionSelect();
+refreshCubeControls();
 renderTimes();
 persistSessions();
+generateScrambleForActiveEvent();
