@@ -504,19 +504,36 @@ footer {
 }
 
 @media (max-width: 767.98px) {
+    html, body {
+        overflow-y: auto;
+    }
+
+    aside {
+        height: auto;
+        overflow: visible;
+    }
+    
     #logo {
         height: 40px;
         margin-left: 10px;
     }
     
     #times-table {
-        max-height: 250px;
-        padding: 15px;
-        margin: 5px;
+        max-height: none;
+        padding: 20px;
+        margin: 10px 5px;
+        flex: none;
+        overflow: visible;
     }
     
+    #times-table .table-container {
+        max-height: none;
+        overflow: visible;
+        flex: none;
+    }
+
     #times-table table {
-        font-size: 12px;
+        font-size: 14px;
     }
     
     #timer {

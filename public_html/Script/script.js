@@ -550,6 +550,7 @@ document.addEventListener("touchstart", (e) =>{
     if(e.touches.length > 1) return;
     if(e.target.closest('#theme-toggle')) return;
     if(e.target.closest('#times-table')) return;
+    if(e.target.closest('.ScrambleBox')) return;
     if (editModal && editModal.classList.contains('visible')) return;
     e.preventDefault();
     if (running) {
@@ -569,6 +570,7 @@ document.addEventListener("touchstart", (e) =>{
 document.addEventListener("touchend", (e) => {
     if (window.innerWidth > 900) return;
     if (editModal && editModal.classList.contains('visible')) return;
+    if(e.target.closest('.ScrambleBox')) return;
     clearTimeout(holdTimeout);
     resetLights();
 
