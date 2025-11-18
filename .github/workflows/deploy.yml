@@ -3,7 +3,7 @@ name: Deploy to DirectAdmin (FTP)
 on:
   push:
     branches:
-      - release
+      - Release
 
 jobs:
   ftp-deploy:
