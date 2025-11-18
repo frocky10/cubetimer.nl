@@ -9,12 +9,12 @@ const STORAGE_KEY = 'cubetimer_sessions_v1';
 let sessions = {};
 let activeSessionId = null;
 const EVENT_OPTIONS = [
-    { id: '333', label: '3x3x3 Cube' },
-    { id: '222', label: '2x2x2 Cube' },
-    { id: '444', label: '4x4x4 Cube' },
-    { id: '555', label: '5x5x5 Cube' },
-    { id: '666', label: '6x6x6 Cube' },
-    { id: '777', label: '7x7x7 Cube' },
+    { id: '333', label: '3x3x3' },
+    { id: '222', label: '2x2x2' },
+    { id: '444', label: '4x4x4' },
+    { id: '555', label: '5x5x5' },
+    { id: '666', label: '6x6x6' },
+    { id: '777', label: '7x7x7' },
     { id: '333bf', label: '3x3x3 Blindfolded' },
     { id: '333fm', label: '3x3x3 Fewest Moves' },
     { id: '333oh', label: '3x3x3 One-Handed' },
