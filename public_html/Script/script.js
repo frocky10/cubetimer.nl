@@ -73,6 +73,10 @@ let confettiPieces = [];
 let confettiAnimationFrame = null;
 let confettiEndTime = 0;
 
+function isBluetoothCubeEventSupported(eventId = getActiveSessionEvent()) {
+    return eventId === '333';
+}
+
 function formatTime(ms) {
     const total = Math.floor(ms);
     const minutes = Math.floor(total / 60000);
@@ -471,14 +475,15 @@ function registerDNF() {
     generateScrambleForActiveEvent();
 }
 
-function saveTime(ms, penalty = null) {
+function saveTime(ms, penalty = null, metadata = {}) {
     const timestamp = new Date().toISOString();
     const scramble = (window.currentScramble || scrambleDisplay?.textContent || '').trim();
     const entry = {
         raw: ms,
         penalty: ms === null ? 'dnf' : penalty,
         timestamp,
-        scramble
+        scramble,
+        source: metadata.source || 'manual'
     };
     times.push(entry);
     renderTimes();
@@ -511,6 +516,32 @@ function stopTimer() {
     pendingInspectionPlusTwo = false;
     resetInspectionCycle();
     generateScrambleForActiveEvent();
+}
+
+function startTimerFromBluetooth() {
+    if (!isBluetoothCubeEventSupported()) return false;
+    if (running) return false;
+    if (editModal && editModal.classList.contains('visible')) return false;
+    if (inspectionState === 'running' || inspectionState === 'finished') {
+        finishInspection();
+    }
+    startTimer();
+    return true;
+}
+
+function startInspectionFromBluetooth() {
+    if (!isBluetoothCubeEventSupported()) return false;
+    if (running) return false;
+    if (editModal && editModal.classList.contains('visible')) return false;
+    if (inspectionState !== 'idle') return false;
+    startInspectionTimer();
+    return true;
+}
+
+function stopTimerFromBluetooth() {
+    if (!running) return false;
+    stopTimer();
+    return true;
 }
 
 document.addEventListener('keydown', e => {
@@ -840,6 +871,12 @@ if (cubeSelect) {
         updateCubeDisplay();
         persistSessions();
         generateScrambleForActiveEvent();
+        window.dispatchEvent(new CustomEvent('cubetimer:event-change', {
+            detail: {
+                eventId: session.event,
+                bluetoothSupported: isBluetoothCubeEventSupported(session.event)
+            }
+        }));
     });
 }
 
@@ -896,3 +933,23 @@ refreshCubeControls();
 renderTimes();
 persistSessions();
 generateScrambleForActiveEvent();
+
+window.cubeTimerApi = {
+    formatTime,
+    getState() {
+        return {
+            running,
+            ready,
+            holdActive,
+            inspectionState,
+            activeEvent: getActiveSessionEvent(),
+            currentScramble: window.currentScramble || '',
+            bluetoothSupported: isBluetoothCubeEventSupported()
+        };
+    },
+    startInspectionFromBluetooth,
+    startTimerFromBluetooth,
+    stopTimerFromBluetooth,
+    registerDNF,
+    isBluetoothCubeEventSupported
+};

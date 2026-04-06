@@ -13,9 +13,10 @@
     <link rel="stylesheet" href="Style/style.css" />
     <script src="Script/script.js" defer></script>
     <script type="module" src="Script/scrambleScript.js" defer></script>
+    <script type="module" src="Script/bluetoothCube.js" defer></script>
     <!-- Bootstrap 5.3 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9889350952616788" crossorigin="anonymous"></script>
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9889350952616788" crossorigin="anonymous"></script> -->
     </head>
     <body>
         <div class="container-fluid h-100 g-0">
@@ -57,7 +58,7 @@
                 </aside>
 
                 <!-- Main Timer Area -->
-                <div class="col-lg-9 col-md-8 col-12 order-lg-2 order-1 d-flex flex-column">
+                <div class="col-lg-9 col-md-8 col-12 order-lg-2 order-1 d-flex flex-column main-timer-column">
                     <!-- Header -->
                     <header class="position-relative py-3 flex-shrink-0">
                         <div class="logo-header-wrapper d-flex justify-content-center d-lg-none mb-2">
@@ -72,7 +73,7 @@
                         </div>
                     </header>
                       
-                    <div class="flex-grow-1 d-flex flex-column align-items-center justify-content-center gap-3">
+                    <div class="flex-grow-1 d-flex flex-column align-items-center justify-content-center gap-3 main-timer-stack">
                         <div class="d-flex align-items-center gap-4">
                             <div id="ready-lights">
                                 <div class="ready-light" id="light1"></div>
@@ -81,13 +82,66 @@
                             <div id="timer">00:00:000</div>
                         </div>
                         <div id="session-pr" class="session-pr">Session PR: --</div>
+                        <footer class="py-3 flex-shrink-0">
+                            <div id="Scrambles" class="ScrambleBox mx-auto">
+                            </div>
+                        </footer>
+                        <section id="bluetooth-panel" class="bluetooth-panel" aria-label="Bluetooth cube">
+                            <div class="bluetooth-panel__header">
+                                <div>
+                                    <p class="bluetooth-panel__eyebrow">Smart Cube</p>
+                                    <h2 class="bluetooth-panel__title">Bluetooth Cube</h2>
+                                </div>
+                                <div class="bluetooth-panel__buttons">
+                                    <button id="bluetooth-connect" type="button">Connect cube</button>
+                                    <button id="bluetooth-disconnect" type="button" disabled>Disconnect</button>
+                                    <button id="bluetooth-forget-mac" type="button">Forget MAC</button>
+                                </div>
+                            </div>
+                            <p id="bluetooth-status" class="bluetooth-panel__status">Use Chrome or Edge on desktop/mobile with Web Bluetooth to pair a GAN or QiYi/X-Man smart cube.</p>
+                            <div class="bluetooth-panel__content">
+                                <div class="bluetooth-panel__viewer">
+                                    <twisty-player
+                                        id="bluetooth-cube-player"
+                                        puzzle="3x3x3"
+                                        background="none"
+                                        control-panel="none"
+                                        hint-facelets="none"
+                                        visualization="3D"
+                                        camera-latitude="24"
+                                        camera-longitude="32"
+                                    ></twisty-player>
+                                </div>
+                                <div class="bluetooth-panel__stats">
+                                    <div class="bluetooth-stat">
+                                        <span class="bluetooth-stat__label">Device</span>
+                                        <span id="bluetooth-device-name" class="bluetooth-stat__value">Not connected</span>
+                                    </div>
+                                    <div class="bluetooth-stat">
+                                        <span class="bluetooth-stat__label">Battery</span>
+                                        <span id="bluetooth-battery" class="bluetooth-stat__value">--</span>
+                                    </div>
+                                    <div class="bluetooth-stat">
+                                        <span class="bluetooth-stat__label">Auto Timer</span>
+                                        <span id="bluetooth-auto-timer" class="bluetooth-stat__value">Waiting for first turn</span>
+                                    </div>
+                                    <div class="bluetooth-stat">
+                                        <span class="bluetooth-stat__label">Cube State</span>
+                                        <span id="bluetooth-cube-state" class="bluetooth-stat__value">Unknown</span>
+                                    </div>
+                                    <div class="bluetooth-stat">
+                                        <span class="bluetooth-stat__label">Scramble Track</span>
+                                        <span id="bluetooth-scramble-progress" class="bluetooth-stat__value">0 / 0 moves matched</span>
+                                    </div>
+                                    <div class="bluetooth-stat bluetooth-stat--wide">
+                                        <span class="bluetooth-stat__label">Move Stream</span>
+                                        <span id="bluetooth-move-stream" class="bluetooth-stat__value bluetooth-stat__value--mono">Waiting for moves...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                     </div>
                       
-                    <!-- Scrambles at bottom of main component -->
-                    <footer class="py-3 flex-shrink-0">
-                        <div id="Scrambles" class="ScrambleBox mx-auto">
-                        </div>
-                    </footer>
                 </div>
             </div>
         </div>

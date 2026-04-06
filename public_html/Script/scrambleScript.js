@@ -7,6 +7,12 @@ async function generateScramble(eventType) {
     const scrambleText = typeof scramble === 'string' ? scramble : scramble?.toString?.() || '';
     scrambleBox.textContent = scrambleText;
     window.currentScramble = scrambleText;
+    window.dispatchEvent(new CustomEvent('cubetimer:scramble-change', {
+        detail: {
+            eventType,
+            scramble: scrambleText
+        }
+    }));
 }
 
 window.generateScramble = generateScramble;
