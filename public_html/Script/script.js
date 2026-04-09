@@ -53,6 +53,11 @@ const modalDeleteBtn = document.getElementById('modal-delete');
 const modalCloseBtns = document.querySelectorAll('[data-close-modal]');
 const modalDateField = document.getElementById('modal-date');
 const modalScrambleField = document.getElementById('modal-scramble');
+const settingsModal = document.getElementById('settings-modal');
+const settingsOpenBtn = document.getElementById('settings-open');
+const settingsCloseBtns = document.querySelectorAll('[data-close-settings]');
+const settingsTabBtns = document.querySelectorAll('[data-settings-tab]');
+const settingsPanels = document.querySelectorAll('[data-settings-panel]');
 const sessionSelect = document.getElementById('session-select');
 const sessionNewBtn = document.getElementById('session-new');
 const sessionRenameBtn = document.getElementById('session-rename');
@@ -72,6 +77,10 @@ let lastBestTime = null;
 let confettiPieces = [];
 let confettiAnimationFrame = null;
 let confettiEndTime = 0;
+
+function isBluetoothCubeEventSupported(eventId = getActiveSessionEvent()) {
+    return eventId === '333';
+}
 
 function formatTime(ms) {
     const total = Math.floor(ms);
@@ -471,14 +480,15 @@ function registerDNF() {
     generateScrambleForActiveEvent();
 }
 
-function saveTime(ms, penalty = null) {
+function saveTime(ms, penalty = null, metadata = {}) {
     const timestamp = new Date().toISOString();
     const scramble = (window.currentScramble || scrambleDisplay?.textContent || '').trim();
     const entry = {
         raw: ms,
         penalty: ms === null ? 'dnf' : penalty,
         timestamp,
-        scramble
+        scramble,
+        source: metadata.source || 'manual'
     };
     times.push(entry);
     renderTimes();
@@ -511,6 +521,32 @@ function stopTimer() {
     pendingInspectionPlusTwo = false;
     resetInspectionCycle();
     generateScrambleForActiveEvent();
+}
+
+function startTimerFromBluetooth() {
+    if (!isBluetoothCubeEventSupported()) return false;
+    if (running) return false;
+    if (editModal && editModal.classList.contains('visible')) return false;
+    if (inspectionState === 'running' || inspectionState === 'finished') {
+        finishInspection();
+    }
+    startTimer();
+    return true;
+}
+
+function startInspectionFromBluetooth() {
+    if (!isBluetoothCubeEventSupported()) return false;
+    if (running) return false;
+    if (editModal && editModal.classList.contains('visible')) return false;
+    if (inspectionState !== 'idle') return false;
+    startInspectionTimer();
+    return true;
+}
+
+function stopTimerFromBluetooth() {
+    if (!running) return false;
+    stopTimer();
+    return true;
 }
 
 document.addEventListener('keydown', e => {
@@ -647,6 +683,28 @@ function closeEditModal() {
     if (!editModal) return;
     editModal.classList.remove('visible');
     editIndex = null;
+}
+
+function openSettingsModal() {
+    if (!settingsModal) return;
+    activateSettingsTab('general');
+    settingsModal.classList.add('visible');
+}
+
+function closeSettingsModal() {
+    if (!settingsModal) return;
+    settingsModal.classList.remove('visible');
+}
+
+function activateSettingsTab(tabId) {
+    settingsTabBtns.forEach(btn => {
+        const isActive = btn.dataset.settingsTab === tabId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    settingsPanels.forEach(panel => {
+        panel.hidden = panel.dataset.settingsPanel !== tabId;
+    });
 }
 
 function applyPenaltyToEntry(penalty) {
@@ -840,6 +898,12 @@ if (cubeSelect) {
         updateCubeDisplay();
         persistSessions();
         generateScrambleForActiveEvent();
+        window.dispatchEvent(new CustomEvent('cubetimer:event-change', {
+            detail: {
+                eventId: session.event,
+                bluetoothSupported: isBluetoothCubeEventSupported(session.event)
+            }
+        }));
     });
 }
 
@@ -874,8 +938,20 @@ if (modalDeleteBtn) {
     modalDeleteBtn.addEventListener('click', deleteEntryAtIndex);
 }
 
+if (settingsOpenBtn) {
+    settingsOpenBtn.addEventListener('click', openSettingsModal);
+}
+
 modalCloseBtns.forEach(btn => {
     btn.addEventListener('click', closeEditModal);
+});
+
+settingsCloseBtns.forEach(btn => {
+    btn.addEventListener('click', closeSettingsModal);
+});
+
+settingsTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => activateSettingsTab(btn.dataset.settingsTab));
 });
 
 if (editModal) {
@@ -886,8 +962,17 @@ if (editModal) {
     });
 }
 
+if (settingsModal) {
+    settingsModal.addEventListener('click', e => {
+        if (e.target === settingsModal) {
+            closeSettingsModal();
+        }
+    });
+}
+
 window.addEventListener('resize', resizeConfettiCanvas);
 resizeConfettiCanvas();
+activateSettingsTab('general');
 
 loadSessionsFromStorage();
 syncActiveSessionTimes();
@@ -896,3 +981,23 @@ refreshCubeControls();
 renderTimes();
 persistSessions();
 generateScrambleForActiveEvent();
+
+window.cubeTimerApi = {
+    formatTime,
+    getState() {
+        return {
+            running,
+            ready,
+            holdActive,
+            inspectionState,
+            activeEvent: getActiveSessionEvent(),
+            currentScramble: window.currentScramble || '',
+            bluetoothSupported: isBluetoothCubeEventSupported()
+        };
+    },
+    startInspectionFromBluetooth,
+    startTimerFromBluetooth,
+    stopTimerFromBluetooth,
+    registerDNF,
+    isBluetoothCubeEventSupported
+};
