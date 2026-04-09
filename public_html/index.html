@@ -75,7 +75,8 @@
                         <div class="logo-header-wrapper d-flex justify-content-center d-lg-none mb-2">
                             <img id="logo-header" src="Pictures\CubeTimerLogo_V2.png" alt="Logo" />
                         </div>
-                        <div class="toggle-wrapper">
+                        <div class="header-actions">
+                            <button id="settings-open" class="header-icon-button" type="button" aria-label="Open settings" title="Settings">⚙</button>
                             <div class="toggle" id="theme-toggle">
                                 <span class="toggle-icon moon active">🌙</span>
                                 <span class="toggle-icon sun">☀️</span>
@@ -93,66 +94,11 @@
                             <div id="timer">00:00:000</div>
                         </div>
                         <div id="session-pr" class="session-pr">Session PR: --</div>
-                        <footer class="py-3 flex-shrink-0">
-                            <div id="Scrambles" class="ScrambleBox mx-auto">
-                            </div>
-                        </footer>
-                        <section id="bluetooth-panel" class="bluetooth-panel" aria-label="Bluetooth cube">
-                            <div class="bluetooth-panel__header">
-                                <div>
-                                    <p class="bluetooth-panel__eyebrow">Smart Cube</p>
-                                    <h2 class="bluetooth-panel__title">Bluetooth Cube</h2>
-                                </div>
-                                <div class="bluetooth-panel__buttons">
-                                    <button id="bluetooth-connect" type="button">Connect cube</button>
-                                    <button id="bluetooth-disconnect" type="button" disabled>Disconnect</button>
-                                    <button id="bluetooth-forget-mac" type="button">Forget MAC</button>
-                                </div>
-                            </div>
-                            <p id="bluetooth-status" class="bluetooth-panel__status">Use Chrome or Edge on desktop/mobile with Web Bluetooth to pair a GAN or QiYi/X-Man smart cube.</p>
-                            <div class="bluetooth-panel__content">
-                                <div class="bluetooth-panel__viewer">
-                                    <twisty-player
-                                        id="bluetooth-cube-player"
-                                        puzzle="3x3x3"
-                                        background="none"
-                                        control-panel="none"
-                                        hint-facelets="none"
-                                        visualization="3D"
-                                        camera-latitude="24"
-                                        camera-longitude="32"
-                                    ></twisty-player>
-                                </div>
-                                <div class="bluetooth-panel__stats">
-                                    <div class="bluetooth-stat">
-                                        <span class="bluetooth-stat__label">Device</span>
-                                        <span id="bluetooth-device-name" class="bluetooth-stat__value">Not connected</span>
-                                    </div>
-                                    <div class="bluetooth-stat">
-                                        <span class="bluetooth-stat__label">Battery</span>
-                                        <span id="bluetooth-battery" class="bluetooth-stat__value">--</span>
-                                    </div>
-                                    <div class="bluetooth-stat">
-                                        <span class="bluetooth-stat__label">Auto Timer</span>
-                                        <span id="bluetooth-auto-timer" class="bluetooth-stat__value">Waiting for first turn</span>
-                                    </div>
-                                    <div class="bluetooth-stat">
-                                        <span class="bluetooth-stat__label">Cube State</span>
-                                        <span id="bluetooth-cube-state" class="bluetooth-stat__value">Unknown</span>
-                                    </div>
-                                    <div class="bluetooth-stat">
-                                        <span class="bluetooth-stat__label">Scramble Track</span>
-                                        <span id="bluetooth-scramble-progress" class="bluetooth-stat__value">0 / 0 moves matched</span>
-                                    </div>
-                                    <div class="bluetooth-stat bluetooth-stat--wide">
-                                        <span class="bluetooth-stat__label">Move Stream</span>
-                                        <span id="bluetooth-move-stream" class="bluetooth-stat__value bluetooth-stat__value--mono">Waiting for moves...</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
                     </div>
-                      
+                    <footer class="py-3 flex-shrink-0">
+                        <div id="Scrambles" class="ScrambleBox mx-auto">
+                        </div>
+                    </footer>
                 </div>
             </div>
         </div>
@@ -178,6 +124,81 @@
             </div>
             <div class="time-modal__footer">
                 <button type="button" data-close-modal>Close</button>
+            </div>
+        </div>
+        </div>
+        <div id="settings-modal" class="time-modal" aria-hidden="true">
+        <div class="time-modal__dialog settings-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-settings>&times;</button>
+            <h2 class="h5 mb-2">Settings</h2>
+            <div class="settings-layout">
+                <nav class="settings-nav" aria-label="Settings sections">
+                    <button class="settings-nav__item active" type="button" data-settings-tab="general" aria-pressed="true">General</button>
+                    <button class="settings-nav__item" type="button" data-settings-tab="smart-cube" aria-pressed="false">Smart Cube</button>
+                </nav>
+                <div class="settings-content">
+                    <section class="settings-section" data-settings-panel="general">
+                        <p class="settings-section__eyebrow">General</p>
+                        <h3 class="settings-section__title">Settings</h3>
+                    </section>
+                    <section id="bluetooth-panel" class="bluetooth-panel bluetooth-panel--modal" aria-label="Bluetooth cube" data-settings-panel="smart-cube" hidden>
+                        <div class="bluetooth-panel__header">
+                            <div>
+                                <p class="bluetooth-panel__eyebrow">Smart Cube</p>
+                                <h3 class="bluetooth-panel__title">Bluetooth Cube</h3>
+                            </div>
+                            <div class="bluetooth-panel__buttons">
+                                <button id="bluetooth-connect" type="button">Connect cube</button>
+                                <button id="bluetooth-disconnect" type="button" disabled>Disconnect</button>
+                                <button id="bluetooth-forget-mac" type="button">Forget MAC</button>
+                            </div>
+                        </div>
+                        <p id="bluetooth-status" class="bluetooth-panel__status">Use Chrome or Edge on desktop/mobile with Web Bluetooth to pair a GAN or QiYi/X-Man smart cube.</p>
+                        <div class="bluetooth-panel__content">
+                            <div class="bluetooth-panel__viewer">
+                                <twisty-player
+                                    id="bluetooth-cube-player"
+                                    puzzle="3x3x3"
+                                    background="none"
+                                    control-panel="none"
+                                    hint-facelets="none"
+                                    visualization="3D"
+                                    camera-latitude="24"
+                                    camera-longitude="32"
+                                ></twisty-player>
+                            </div>
+                            <div class="bluetooth-panel__stats">
+                                <div class="bluetooth-stat">
+                                    <span class="bluetooth-stat__label">Device</span>
+                                    <span id="bluetooth-device-name" class="bluetooth-stat__value">Not connected</span>
+                                </div>
+                                <div class="bluetooth-stat">
+                                    <span class="bluetooth-stat__label">Battery</span>
+                                    <span id="bluetooth-battery" class="bluetooth-stat__value">--</span>
+                                </div>
+                                <div class="bluetooth-stat">
+                                    <span class="bluetooth-stat__label">Auto Timer</span>
+                                    <span id="bluetooth-auto-timer" class="bluetooth-stat__value">Waiting for first turn</span>
+                                </div>
+                                <div class="bluetooth-stat">
+                                    <span class="bluetooth-stat__label">Cube State</span>
+                                    <span id="bluetooth-cube-state" class="bluetooth-stat__value">Unknown</span>
+                                </div>
+                                <div class="bluetooth-stat">
+                                    <span class="bluetooth-stat__label">Scramble Track</span>
+                                    <span id="bluetooth-scramble-progress" class="bluetooth-stat__value">0 / 0 moves matched</span>
+                                </div>
+                                <div class="bluetooth-stat bluetooth-stat--wide">
+                                    <span class="bluetooth-stat__label">Move Stream</span>
+                                    <span id="bluetooth-move-stream" class="bluetooth-stat__value bluetooth-stat__value--mono">Waiting for moves...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="time-modal__footer">
+                <button type="button" data-close-settings>Close</button>
             </div>
         </div>
         </div>

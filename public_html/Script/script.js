@@ -53,6 +53,11 @@ const modalDeleteBtn = document.getElementById('modal-delete');
 const modalCloseBtns = document.querySelectorAll('[data-close-modal]');
 const modalDateField = document.getElementById('modal-date');
 const modalScrambleField = document.getElementById('modal-scramble');
+const settingsModal = document.getElementById('settings-modal');
+const settingsOpenBtn = document.getElementById('settings-open');
+const settingsCloseBtns = document.querySelectorAll('[data-close-settings]');
+const settingsTabBtns = document.querySelectorAll('[data-settings-tab]');
+const settingsPanels = document.querySelectorAll('[data-settings-panel]');
 const sessionSelect = document.getElementById('session-select');
 const sessionNewBtn = document.getElementById('session-new');
 const sessionRenameBtn = document.getElementById('session-rename');
@@ -680,6 +685,28 @@ function closeEditModal() {
     editIndex = null;
 }
 
+function openSettingsModal() {
+    if (!settingsModal) return;
+    activateSettingsTab('general');
+    settingsModal.classList.add('visible');
+}
+
+function closeSettingsModal() {
+    if (!settingsModal) return;
+    settingsModal.classList.remove('visible');
+}
+
+function activateSettingsTab(tabId) {
+    settingsTabBtns.forEach(btn => {
+        const isActive = btn.dataset.settingsTab === tabId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    settingsPanels.forEach(panel => {
+        panel.hidden = panel.dataset.settingsPanel !== tabId;
+    });
+}
+
 function applyPenaltyToEntry(penalty) {
     if (editIndex === null) return;
     const entry = times[editIndex];
@@ -911,8 +938,20 @@ if (modalDeleteBtn) {
     modalDeleteBtn.addEventListener('click', deleteEntryAtIndex);
 }
 
+if (settingsOpenBtn) {
+    settingsOpenBtn.addEventListener('click', openSettingsModal);
+}
+
 modalCloseBtns.forEach(btn => {
     btn.addEventListener('click', closeEditModal);
+});
+
+settingsCloseBtns.forEach(btn => {
+    btn.addEventListener('click', closeSettingsModal);
+});
+
+settingsTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => activateSettingsTab(btn.dataset.settingsTab));
 });
 
 if (editModal) {
@@ -923,8 +962,17 @@ if (editModal) {
     });
 }
 
+if (settingsModal) {
+    settingsModal.addEventListener('click', e => {
+        if (e.target === settingsModal) {
+            closeSettingsModal();
+        }
+    });
+}
+
 window.addEventListener('resize', resizeConfettiCanvas);
 resizeConfettiCanvas();
+activateSettingsTab('general');
 
 loadSessionsFromStorage();
 syncActiveSessionTimes();

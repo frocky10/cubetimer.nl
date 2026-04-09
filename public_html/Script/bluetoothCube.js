@@ -93,7 +93,7 @@ function setValue(node, value) {
 function setButtons() {
     const bluetoothSupported = getTimerApi()?.getState?.().bluetoothSupported ?? true;
     if (connectBtn) {
-        connectBtn.disabled = connectionBusy || !!activeConnection || !bluetoothSupported || !navigator.bluetooth;
+        connectBtn.disabled = connectionBusy || !!activeConnection;
         connectBtn.title = navigator.bluetooth
             ? bluetoothSupported
                 ? ""
