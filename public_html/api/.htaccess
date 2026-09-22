@@ -1,0 +1,16 @@
+# De API stuurt altijd JSON; nooit een directorylisting.
+Options -Indexes
+
+# Blokkeer directe toegang tot alles wat geen endpoint is.
+<FilesMatch "^(config|config\.example|bootstrap)\.php$">
+    Require all denied
+</FilesMatch>
+
+# De lib-map bevat alleen klassen, geen endpoints.
+RedirectMatch 404 ^/api/lib/
+
+# Geen caching van API-antwoorden.
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-store"
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>
