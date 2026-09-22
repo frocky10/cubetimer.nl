@@ -191,11 +191,21 @@ try {
     $totalen = Xp::sync($userId, $herberekening);
     Challenges::evaluate($userId);
 
+    // Achievements als laatste: ze kijken naar XP en challenges, die hierboven
+    // net zijn bijgewerkt.
+    $metrics = Achievements::buildMetrics($userId, $herberekening['facts'], $herberekening);
+    $nieuweAchievements = Achievements::evaluate($userId, $metrics);
+    if ($nieuweAchievements !== []) {
+        // Achievements leveren XP op, dus het totaal klopt nu niet meer.
+        $totalen = Xp::recalculate($userId);
+    }
+
     $afgeleid = [
-        'records' => $herberekening['records'],
-        'flagged' => $herberekening['flagged'],
-        'xp'      => $totalen['xp'],
-        'level'   => $totalen['level'],
+        'records'      => $herberekening['records'],
+        'flagged'      => $herberekening['flagged'],
+        'xp'           => $totalen['xp'],
+        'level'        => $totalen['level'],
+        'achievements' => $nieuweAchievements,
     ];
 } catch (Throwable $e) {
     error_log('[cubetimer] herberekenen na synchronisatie mislukt: ' . $e->getMessage());

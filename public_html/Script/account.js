@@ -63,6 +63,7 @@
     const xpLog = document.getElementById('account-xp-log');
 
     const statStreak = document.getElementById('account-stat-streak');
+    const statAchievements = document.getElementById('account-stat-achievements');
     const statLongest = document.getElementById('account-stat-longest');
     const recordsHost = document.getElementById('account-records');
     const mainEventSelect = document.getElementById('account-main-event');
@@ -164,6 +165,10 @@
 
         statStreak.textContent = String(profile.streak.current);
         statLongest.textContent = String(profile.streak.longest);
+        if (statAchievements && profile.achievements) {
+            statAchievements.textContent =
+                `${profile.achievements.unlocked}/${profile.achievements.total}`;
+        }
 
         renderRecords();
         renderXpLog();
@@ -400,7 +405,16 @@
         setSyncState('syncing', 'Bezig met opslaan…');
 
         try {
-            await UI.api('sync/push.php', { body: { sessions: api.getSessions() } });
+            const response = await UI.api('sync/push.php', { body: { sessions: api.getSessions() } });
+
+            // De server meldt wat er onderweg ontgrendeld is.
+            const nieuw = response.derived?.achievements;
+            if (nieuw && nieuw.length) {
+                window.dispatchEvent(new CustomEvent('cubetimer:achievements-unlocked', {
+                    detail: { unlocked: nieuw }
+                }));
+            }
+
             setSyncState('synced', 'Je tijden staan op de server, bijgewerkt om ' +
                 new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) + '.');
             renderCounts();

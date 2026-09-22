@@ -5,7 +5,7 @@
 **Een rustige, snelle speedcubing-timer voor in je browser.**
 
 Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cubes
-· ranglijsten · daily challenges
+· ranglijsten · daily challenges · achievements
 
 [**cubetimer.nl**](https://cubetimer.nl) · [Roadmap](https://github.com/frocky10/cubetimer.nl/issues) · [Werkafspraken](CLAUDE.md)
 
@@ -36,6 +36,13 @@ Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cu
 
 </details>
 
+<details>
+<summary>De achievements</summary>
+
+<img src="docs/screenshot-achievements.png" alt="De achievements" />
+
+</details>
+
 ---
 
 ## Wat is het
@@ -45,8 +52,8 @@ geen cookiebanner die je eerst moet wegklikken: je opent de site en drukt op de
 spatiebalk.
 
 Wil je je tijden bewaren en meenemen naar een ander apparaat, dan kan dat met
-een account. Je komt dan ook op de ranglijsten, verdient XP en kunt elke dag de
-scramble van de dag doen. Wil je dat niet, dan blijft alles gewoon in je browser
+een account. Je komt dan ook op de ranglijsten, verdient XP, verzamelt
+achievements en kunt elke dag de scramble van de dag doen. Wil je dat niet, dan blijft alles gewoon in je browser
 staan en werkt de timer ook zonder internet.
 
 **Zo werkt het timen:**
@@ -125,6 +132,19 @@ terug te zien.
 - [x] Dagopdracht "doe X solves vandaag"
 - [x] Dagopdracht "doe een solve die X% sneller is dan je gebruikelijke tijd"
 
+**Achievements** — [#27](https://github.com/frocky10/cubetimer.nl/issues/27)
+
+- [x] 96 achievements: 21 families in vier niveaus, plus 12 geheime
+- [x] Mijlpalen: solves, dagen, sessies, records, XP
+- [x] Ontdekken: hoeveel events je geprobeerd en opgelost hebt
+- [x] Snelheid: sub-drempels op 3x3, 2x2, 4x4, 5x5 en Pyraminx, single én Ao12
+- [x] Volhouden: reeksen, drukste dag, smart-cube solves
+- [x] Challenges en ranglijst: challenges gehaald, beste positie, scrambles gewonnen
+- [x] Pech: je +2's en je DNF's tellen ook mee
+- [x] Twaalf geheime, van een palindroomtijd tot een PB direct na een DNF
+- [x] Voortgangsbalk naar het volgende niveau en hoe zeldzaam elk niveau is
+- [x] Gelden met terugwerkende kracht: alles wat je ooit timede telt mee
+
 **De site zelf**
 
 - [x] Eigen design system, geen CSS-framework meer
@@ -137,7 +157,6 @@ terug te zien.
 
 **Account uitbouwen**
 
-- [ ] Achievements — [#27](https://github.com/frocky10/cubetimer.nl/issues/27)
 - [ ] Openbaar profiel dat je kunt delen
 - [ ] Landenvlag naast je naam op de ranglijst (het veld staat er al)
 
