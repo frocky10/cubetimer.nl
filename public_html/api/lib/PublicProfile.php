@@ -6,6 +6,8 @@ require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/Xp.php';
 require_once __DIR__ . '/Leaderboard.php';
 require_once __DIR__ . '/Achievements.php';
+require_once __DIR__ . '/Follows.php';
+require_once __DIR__ . '/Tournaments.php';
 
 /**
  * Het openbare profiel van een cuber.
@@ -32,7 +34,7 @@ final class PublicProfile
      * @return array<string,mixed>|null null als de cuber niet bestaat of zijn
      *         profiel niet deelt
      */
-    public static function find(string $username): ?array
+    public static function find(string $username, ?int $viewerId = null): ?array
     {
         $username = trim($username);
         if ($username === '' || mb_strlen($username) > 32) {
@@ -83,6 +85,16 @@ final class PublicProfile
             'events'       => self::records($userId),
             'achievements' => self::achievements($userId),
             'solves'       => self::solveCount($userId),
+            'follows'      => [
+                'followers' => Follows::countFollowers($userId),
+                'following' => Follows::countFollowing($userId),
+                'friends'   => Follows::countFriends($userId),
+            ],
+            'relation'   => Follows::relation($viewerId, $userId),
+            'isSelf'     => $viewerId !== null && $viewerId === $userId,
+            'tournaments' => Database::hasTable('tournaments')
+                ? Tournaments::summary($userId)
+                : ['played' => 0, 'won' => 0, 'podiums' => 0, 'bestPosition' => null, 'events' => []],
         ];
     }
 

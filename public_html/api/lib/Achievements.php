@@ -5,6 +5,7 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/SiteTime.php';
 require_once __DIR__ . '/Xp.php';
+require_once __DIR__ . '/Follows.php';
 
 /**
  * Achievements.
@@ -43,6 +44,8 @@ final class Achievements
         'volhouden'  => 'Volhouden',
         'wedstrijd'  => 'Challenges en ranglijst',
         'pech'       => 'Pech',
+        'toernooi'   => 'Toernooien',
+        'sociaal'    => 'Sociaal',
         'geheim'     => 'Geheim',
     ];
 
@@ -58,25 +61,25 @@ final class Achievements
             /* ---------------------------------------------------- Mijlpalen */
             'solves' => [
                 'category' => 'mijlpalen', 'metric' => 'validSolves',
-                'title' => 'Vlieguren', 'unit' => 'solves', 'format' => 'number',
+                'title' => 'Vlieguren', 'unit' => 'solves', 'unitOne' => 'solve', 'format' => 'number',
                 'description' => 'Aantal solves dat je hebt afgerond.',
                 'tiers' => ['brons' => 100, 'zilver' => 1000, 'goud' => 5000, 'platina' => 25000],
             ],
             'dagen' => [
                 'category' => 'mijlpalen', 'metric' => 'activeDays',
-                'title' => 'Trouwe klant', 'unit' => 'dagen', 'format' => 'number',
+                'title' => 'Trouwe klant', 'unit' => 'dagen', 'unitOne' => 'dag', 'format' => 'number',
                 'description' => 'Aantal dagen waarop je hebt getimed.',
                 'tiers' => ['brons' => 7, 'zilver' => 30, 'goud' => 100, 'platina' => 365],
             ],
             'sessies' => [
                 'category' => 'mijlpalen', 'metric' => 'sessionCount',
-                'title' => 'Opgeruimd', 'unit' => 'sessies', 'format' => 'number',
+                'title' => 'Opgeruimd', 'unit' => 'sessies', 'unitOne' => 'sessie', 'format' => 'number',
                 'description' => 'Aantal sessies dat je hebt aangemaakt.',
                 'tiers' => ['brons' => 3, 'zilver' => 10, 'goud' => 25, 'platina' => 50],
             ],
             'records' => [
                 'category' => 'mijlpalen', 'metric' => 'pbCount',
-                'title' => 'Recordjager', 'unit' => 'records', 'format' => 'number',
+                'title' => 'Recordjager', 'unit' => 'records', 'unitOne' => 'record', 'format' => 'number',
                 'description' => 'Hoe vaak je je eigen record hebt verbroken.',
                 'tiers' => ['brons' => 10, 'zilver' => 50, 'goud' => 200, 'platina' => 500],
             ],
@@ -90,13 +93,13 @@ final class Achievements
             /* ---------------------------------------------------- Ontdekken */
             'events' => [
                 'category' => 'ontdekken', 'metric' => 'eventsTried',
-                'title' => 'Nieuwsgierig', 'unit' => 'events', 'format' => 'number',
+                'title' => 'Nieuwsgierig', 'unit' => 'events', 'unitOne' => 'event', 'format' => 'number',
                 'description' => 'Aantal verschillende events waarop je hebt getimed.',
                 'tiers' => ['brons' => 3, 'zilver' => 6, 'goud' => 10, 'platina' => 17],
             ],
             'alleskunner' => [
                 'category' => 'ontdekken', 'metric' => 'eventsSolved',
-                'title' => 'Alleskunner', 'unit' => 'events', 'format' => 'number',
+                'title' => 'Alleskunner', 'unit' => 'events', 'unitOne' => 'event', 'format' => 'number',
                 'description' => 'Aantal events waarop je een geldige tijd hebt neergezet. Platina betekent: alles opgelost.',
                 'tiers' => ['brons' => 3, 'zilver' => 6, 'goud' => 10, 'platina' => 17],
             ],
@@ -142,19 +145,19 @@ final class Achievements
             /* ---------------------------------------------------- Volhouden */
             'reeks' => [
                 'category' => 'volhouden', 'metric' => 'longestStreak',
-                'title' => 'Elke dag', 'unit' => 'dagen op rij', 'format' => 'number',
+                'title' => 'Elke dag', 'unit' => 'dagen op rij', 'unitOne' => 'dag op rij', 'format' => 'number',
                 'description' => 'Je langste reeks dagen achter elkaar met minstens een solve.',
                 'tiers' => ['brons' => 3, 'zilver' => 7, 'goud' => 30, 'platina' => 100],
             ],
             'marathon' => [
                 'category' => 'volhouden', 'metric' => 'maxSolvesOneDay',
-                'title' => 'Marathon', 'unit' => 'solves op een dag', 'format' => 'number',
+                'title' => 'Marathon', 'unit' => 'solves op een dag', 'unitOne' => 'solve op een dag', 'format' => 'number',
                 'description' => 'Je drukste dag ooit.',
                 'tiers' => ['brons' => 50, 'zilver' => 100, 'goud' => 250, 'platina' => 500],
             ],
             'bluetooth' => [
                 'category' => 'volhouden', 'metric' => 'bluetoothSolves',
-                'title' => 'Verbonden', 'unit' => 'smart-cube solves', 'format' => 'number',
+                'title' => 'Verbonden', 'unit' => 'smart-cube solves', 'unitOne' => 'smart-cube solve', 'format' => 'number',
                 'description' => 'Solves die via een Bluetooth-cube binnenkwamen.',
                 'tiers' => ['brons' => 10, 'zilver' => 100, 'goud' => 1000, 'platina' => 5000],
             ],
@@ -162,7 +165,7 @@ final class Achievements
             /* ---------------------------------------------------- Wedstrijd */
             'challenges' => [
                 'category' => 'wedstrijd', 'metric' => 'challengesCompleted',
-                'title' => 'Dagelijkse kost', 'unit' => 'challenges', 'format' => 'number',
+                'title' => 'Dagelijkse kost', 'unit' => 'challenges', 'unitOne' => 'challenge', 'format' => 'number',
                 'description' => 'Aantal daily challenges dat je hebt gehaald.',
                 'tiers' => ['brons' => 5, 'zilver' => 25, 'goud' => 100, 'platina' => 365],
             ],
@@ -176,6 +179,34 @@ final class Achievements
                 'category' => 'wedstrijd', 'metric' => 'scrambleWins',
                 'title' => 'Scramblekoning', 'unit' => 'keer gewonnen', 'format' => 'number',
                 'description' => 'Hoe vaak je de scramble van de dag hebt gewonnen.',
+                'tiers' => ['brons' => 1, 'zilver' => 5, 'goud' => 25, 'platina' => 100],
+            ],
+
+            /* ---------------------------------------------------- Toernooien */
+            'toernooien' => [
+                'category' => 'toernooi', 'metric' => 'tournamentsPlayed',
+                'title' => 'Wedstrijdbeest', 'unit' => 'toernooien', 'unitOne' => 'toernooi', 'format' => 'number',
+                'description' => 'Aantal toernooien dat je hebt uitgespeeld.',
+                'tiers' => ['brons' => 1, 'zilver' => 10, 'goud' => 50, 'platina' => 200],
+            ],
+            'toernooiwinst' => [
+                'category' => 'toernooi', 'metric' => 'tournamentsWon',
+                'title' => 'Kampioen', 'unit' => 'overwinningen', 'unitOne' => 'overwinning', 'format' => 'number',
+                'description' => 'Hoe vaak je een toernooi hebt gewonnen.',
+                'tiers' => ['brons' => 1, 'zilver' => 5, 'goud' => 25, 'platina' => 100],
+            ],
+            'toernooipodium' => [
+                'category' => 'toernooi', 'metric' => 'tournamentPodiums',
+                'title' => 'Op het podium', 'unit' => 'podiumplekken', 'unitOne' => 'podiumplek', 'format' => 'number',
+                'description' => 'Hoe vaak je bij de beste drie eindigde.',
+                'tiers' => ['brons' => 1, 'zilver' => 10, 'goud' => 50, 'platina' => 200],
+            ],
+
+            /* -------------------------------------------------------- Sociaal */
+            'vrienden' => [
+                'category' => 'sociaal', 'metric' => 'friendCount',
+                'title' => 'Onder de mensen', 'unit' => 'vrienden', 'unitOne' => 'vriend', 'format' => 'number',
+                'description' => 'Cubers die jou volgen terwijl jij hen ook volgt.',
                 'tiers' => ['brons' => 1, 'zilver' => 5, 'goud' => 25, 'platina' => 100],
             ],
 
@@ -247,6 +278,14 @@ final class Achievements
                 'title' => 'Wederopstanding', 'metric' => 'comebackPb',
                 'description' => 'Een persoonlijk record direct na een DNF.',
             ],
+            'wkwinst' => [
+                'title' => 'Wereldkampioen', 'metric' => 'wonAtWorldLevel',
+                'description' => 'Een toernooi op WK-niveau gewonnen.',
+            ],
+            'openwinst' => [
+                'title' => 'Groot veld', 'metric' => 'wonOpenTournament',
+                'description' => 'Een open toernooi van vierenzestig deelnemers gewonnen.',
+            ],
             'vlekkeloos' => [
                 'title' => 'Vlekkeloos', 'metric' => 'flawlessDay',
                 'description' => "Vijfentwintig solves op een dag zonder een enkele DNF.",
@@ -295,6 +334,10 @@ final class Achievements
         $metrics['challengesCompleted'] = (int) ($challenges['aantal'] ?? 0);
 
         $metrics['scrambleWins'] = self::scrambleWins($userId);
+        foreach (self::tournamentMetrics($userId) as $sleutel => $waarde) {
+            $metrics[$sleutel] = $waarde;
+        }
+        $metrics['friendCount'] = Follows::countFriends($userId);
         $metrics['bestBoardRank'] = self::bestBoardRank($userId);
 
         // De records die de snelheidsfamilies nodig hebben.
@@ -303,6 +346,39 @@ final class Achievements
         }
 
         return $metrics;
+    }
+
+    /**
+     * De toernooicijfers. Staan in een aparte tabel, dus een eigen query.
+     *
+     * @return array<string,int|bool>
+     */
+    private static function tournamentMetrics(int $userId): array
+    {
+        if (!Database::hasTable('tournaments')) {
+            return ['tournamentsPlayed' => 0, 'tournamentsWon' => 0, 'tournamentPodiums' => 0,
+                    'wonAtWorldLevel' => false, 'wonOpenTournament' => false];
+        }
+
+        $row = Database::first(
+            "SELECT
+                COUNT(*) AS gespeeld,
+                SUM(CASE WHEN final_position = 1 THEN 1 ELSE 0 END) AS gewonnen,
+                SUM(CASE WHEN final_position <= 3 THEN 1 ELSE 0 END) AS podiums,
+                SUM(CASE WHEN final_position = 1 AND difficulty = 'wk' THEN 1 ELSE 0 END) AS wk,
+                SUM(CASE WHEN final_position = 1 AND difficulty = 'open' THEN 1 ELSE 0 END) AS open_gewonnen
+             FROM tournaments
+             WHERE user_id = ? AND status = 'finished'",
+            [$userId]
+        );
+
+        return [
+            'tournamentsPlayed'  => (int) ($row['gespeeld'] ?? 0),
+            'tournamentsWon'     => (int) ($row['gewonnen'] ?? 0),
+            'tournamentPodiums'  => (int) ($row['podiums'] ?? 0),
+            'wonAtWorldLevel'    => (int) ($row['wk'] ?? 0) > 0,
+            'wonOpenTournament'  => (int) ($row['open_gewonnen'] ?? 0) > 0,
+        ];
     }
 
     /** Hoe vaak deze gebruiker de snelste was op een scramble van de dag. */
@@ -657,7 +733,7 @@ final class Achievements
         return match ($definitie['format']) {
             'time' => 'onder ' . self::formatMs($drempel),
             'rank' => $drempel === 1 ? 'nummer 1' : 'top ' . $drempel,
-            default => number_format($drempel, 0, ',', '.') . ' ' . ($definitie['unit'] ?? ''),
+            default => number_format($drempel, 0, ',', '.') . ' ' . self::unit($definitie, (float) $drempel),
         };
     }
 
@@ -667,8 +743,17 @@ final class Achievements
         return match ($definitie['format']) {
             'time' => self::formatMs((int) $waarde),
             'rank' => '#' . (int) $waarde,
-            default => number_format((float) $waarde, 0, ',', '.') . ' ' . ($definitie['unit'] ?? ''),
+            default => number_format((float) $waarde, 0, ',', '.') . ' ' . self::unit($definitie, (float) $waarde),
         };
+    }
+
+    /** De eenheid, in enkelvoud als het er precies een is. */
+    private static function unit(array $definitie, float $waarde): string
+    {
+        if ((int) $waarde === 1 && isset($definitie['unitOne'])) {
+            return (string) $definitie['unitOne'];
+        }
+        return (string) ($definitie['unit'] ?? '');
     }
 
     private static function formatMs(int $ms): string

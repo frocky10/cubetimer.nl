@@ -12,7 +12,8 @@ require_once __DIR__ . '/../bootstrap.php';
 Http::requireMethod('GET');
 
 $username = (string) ($_GET['u'] ?? '');
-$profiel = PublicProfile::find($username);
+$kijker = Auth::user();
+$profiel = PublicProfile::find($username, $kijker === null ? null : (int) $kijker['id']);
 
 if ($profiel === null) {
     Http::fail('not_found', 'Deze cuber bestaat niet, of deelt zijn profiel niet.', 404);

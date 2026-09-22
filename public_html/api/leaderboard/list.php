@@ -28,10 +28,23 @@ if (!Leaderboard::isValidPeriod($period)) {
     Http::fail('unknown_period', 'Die periode bestaat niet.', 422);
 }
 
-$board = Leaderboard::top($event, $category, $period, $limit, $offset);
+$user = Auth::user();
+
+// Met scope=friends zie je alleen de mensen die je volgt, plus jezelf.
+$scope = (string) ($_GET['scope'] ?? 'all');
+$kring = null;
+if ($scope === 'friends') {
+    if ($user === null) {
+        Http::fail('unauthenticated', 'Log in om de ranglijst van je vrienden te zien.', 401);
+    }
+    $kring = Follows::circleIds((int) $user['id']);
+} else {
+    $scope = 'all';
+}
+
+$board = Leaderboard::top($event, $category, $period, $limit, $offset, $kring);
 
 $me = null;
-$user = Auth::user();
 if ($user !== null) {
     $me = Leaderboard::positionFor((int) $user['id'], $event, $category, $period);
 }
@@ -41,6 +54,7 @@ Http::ok([
     'eventLabel'  => Events::label($event),
     'category'    => $category,
     'period'      => $period,
+    'scope'       => $scope,
     'periodStart' => $board['periodStart'],
     'timezone'    => SiteTime::zoneName(),
     'entries'     => $board['entries'],

@@ -62,6 +62,28 @@ final class Events
     /** Onder deze grens is geen enkele solve geloofwaardig, welk event dan ook. */
     public const ABSOLUTE_FLOOR_MS = 250;
 
+    /**
+     * Hoeveel langzamer een event is dan 3x3, bij benadering en bij gelijk
+     * niveau. Gebruikt om de moeilijkheidsgraden van een toernooi om te rekenen
+     * naar het gekozen event: een bot van 'nationaal niveau' doet 11 seconden
+     * op 3x3 en ongeveer 30 op 4x4.
+     *
+     * @var array<string,float>
+     */
+    private const SPEED_FACTOR = [
+        '222' => 0.32, '333' => 1.0, '444' => 2.75, '555' => 4.7,
+        '666' => 8.6, '777' => 13.0, '333oh' => 1.85, '333bf' => 5.0,
+        'clock' => 0.72, 'minx' => 7.0, 'pyram' => 0.5, 'skewb' => 0.55,
+        'sq1' => 1.25, '444bf' => 18.0, '555bf' => 45.0,
+        'fto' => 1.6, 'master_tetraminx' => 2.2,
+    ];
+
+    /** De omrekenfactor van 3x3 naar dit event. */
+    public static function speedFactor(string $event): float
+    {
+        return self::SPEED_FACTOR[$event] ?? 1.0;
+    }
+
     /** Events waarvoor een tijd niets zegt (aantal zetten, aantal kubussen). */
     private const NON_TIMED = ['333fm', '333mbf'];
 
@@ -125,7 +147,9 @@ final class Events
     /** @return list<string> events die een scramble van de dag kunnen krijgen */
     public static function scrambleEvents(): array
     {
-        return array_keys(self::SCRAMBLE_FORMATS);
+        // PHP maakt van een numerieke array-sleutel als '333' stilletjes een
+        // integer, dus expliciet terug naar string.
+        return array_map('strval', array_keys(self::SCRAMBLE_FORMATS));
     }
 
     /**
@@ -174,6 +198,7 @@ final class Events
     {
         $out = [];
         foreach (self::LABELS as $id => $label) {
+            $id = (string) $id; // numerieke sleutels komen als int terug
             if (self::isRanked($id)) {
                 $out[] = ['id' => $id, 'label' => $label];
             }

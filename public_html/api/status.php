@@ -20,6 +20,8 @@ if (Database::isConfigured()) {
 $leaderboardsReady = $databaseReady && Database::hasTable('user_records');
 $challengesReady = $databaseReady && Database::hasTable('daily_challenges');
 $achievementsReady = $databaseReady && Database::hasTable('user_achievements');
+$tournamentsReady = $databaseReady && Database::hasTable('tournaments');
+$followsReady = $databaseReady && Database::hasTable('user_follows');
 
 $user = Auth::user();
 
@@ -31,6 +33,8 @@ Http::ok([
         'leaderboards' => $leaderboardsReady,
         'challenges'   => $challengesReady,
         'achievements' => $achievementsReady,
+        'tournaments'  => $tournamentsReady,
+        'follows'      => $followsReady,
     ],
     'timezone'      => SiteTime::zoneName(),
     'authenticated' => $user !== null,
