@@ -67,7 +67,10 @@
     const statLongest = document.getElementById('account-stat-longest');
     const recordsHost = document.getElementById('account-records');
     const mainEventSelect = document.getElementById('account-main-event');
+    const countrySelect = document.getElementById('account-country');
     const showOnLeaderboard = document.getElementById('account-show-leaderboard');
+    const profileLink = document.getElementById('account-profile-link');
+    const copyProfileButton = document.getElementById('account-copy-profile');
 
     const SYNC_DEBOUNCE_MS = 2500;
 
@@ -176,8 +179,22 @@
         if (mainEventSelect && !mainEventSelect.options.length) {
             fillMainEvents();
         }
+        if (countrySelect && !countrySelect.options.length) {
+            fillCountries();
+        }
         if (mainEventSelect) mainEventSelect.value = profile.mainEvent.id;
+        if (countrySelect) countrySelect.value = profile.country || '';
         if (showOnLeaderboard) showOnLeaderboard.checked = profile.onLeaderboard;
+
+        // Je eigen profiel is alleen te delen als je meedoet aan de ranglijsten.
+        const url = profileUrl(currentUser.username);
+        if (profileLink) {
+            profileLink.href = url;
+            profileLink.hidden = !profile.onLeaderboard;
+        }
+        if (copyProfileButton) {
+            copyProfileButton.hidden = !profile.onLeaderboard;
+        }
 
         flagNotice.hidden = profile.pendingFlags === 0;
         if (profile.pendingFlags > 0) {
@@ -255,6 +272,27 @@
         });
     }
 
+    /** De deelbare URL van een profiel. */
+    function profileUrl(username) {
+        return new URL('profiel.php?u=' + encodeURIComponent(username), window.location.href).href;
+    }
+
+    function fillCountries() {
+        if (!countrySelect) return;
+
+        const leeg = document.createElement('option');
+        leeg.value = '';
+        leeg.textContent = 'Niet ingesteld';
+        countrySelect.appendChild(leeg);
+
+        UI.countries().forEach(land => {
+            const option = document.createElement('option');
+            option.value = land.code;
+            option.textContent = `${land.name} (${land.code})`;
+            countrySelect.appendChild(option);
+        });
+    }
+
     function fillMainEvents() {
         if (!mainEventSelect) return;
         const events = window.cubeTimerApi.getEventOptions
@@ -283,6 +321,22 @@
 
     mainEventSelect?.addEventListener('change', () => {
         saveProfileSetting({ mainEvent: mainEventSelect.value }, 'Hoofd-event bijgewerkt.');
+    });
+
+    countrySelect?.addEventListener('change', () => {
+        saveProfileSetting({ country: countrySelect.value }, 'Land bijgewerkt.');
+    });
+
+    copyProfileButton?.addEventListener('click', async () => {
+        if (!currentUser) return;
+        const url = profileUrl(currentUser.username);
+        try {
+            await navigator.clipboard.writeText(url);
+            UI.toast('Profiellink gekopieerd.', { type: 'success' });
+        } catch (err) {
+            // Zonder toestemming voor het klembord: de link dan maar tonen.
+            UI.toast(url, { type: 'info', duration: 9000, link: { href: url, label: 'Openen' } });
+        }
     });
 
     showOnLeaderboard?.addEventListener('change', () => {

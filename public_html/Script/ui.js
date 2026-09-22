@@ -214,6 +214,49 @@
     });
 
     /* ---------------------------------------------------------------------
+     * Menu in de topbar
+     *
+     * Op een breed scherm staan de knoppen gewoon naast elkaar en doet deze
+     * code niets. Op een smal scherm staat dezelfde groep in een uitklapmenu;
+     * alleen de plaatsing verschilt, de knoppen zijn dezelfde.
+     * ------------------------------------------------------------------ */
+
+    const menuButton = document.getElementById('topbar-menu');
+    const menuGroup = document.getElementById('topbar-group');
+
+    function closeTopbarMenu() {
+        if (!menuGroup) return;
+        menuGroup.classList.remove('is-open');
+        menuButton?.setAttribute('aria-expanded', 'false');
+    }
+
+    if (menuButton && menuGroup) {
+        menuButton.addEventListener('click', event => {
+            event.stopPropagation();
+            const open = menuGroup.classList.toggle('is-open');
+            menuButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+
+        // Een keuze uit het menu sluit het menu.
+        menuGroup.addEventListener('click', event => {
+            if (event.target.closest('button')) closeTopbarMenu();
+        });
+
+        document.addEventListener('click', event => {
+            if (!menuGroup.contains(event.target) && event.target !== menuButton) {
+                closeTopbarMenu();
+            }
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeTopbarMenu();
+        });
+
+        // Bij het draaien van een telefoon kan het menu ineens irrelevant zijn.
+        window.addEventListener('resize', closeTopbarMenu);
+    }
+
+    /* ---------------------------------------------------------------------
      * API-helper
      * ------------------------------------------------------------------ */
 
@@ -291,6 +334,47 @@
         return (prefix || 'id') + '-' + Date.now().toString(36) + '-' + random;
     }
 
+    /**
+     * De landen voor de keuzelijst. De codes staan hier; de namen komen uit de
+     * browser zelf (Intl.DisplayNames), zodat we geen vertaallijst hoeven bij
+     * te houden. Kent een browser dat niet, dan valt hij terug op de code.
+     */
+    const COUNTRY_CODES = 'AD AE AF AG AL AM AO AR AT AU AZ BA BB BD BE BF BG BH BI BJ BN BO BR BS BT BW BY BZ CA CD CF CG CH CI CL CM CN CO CR CU CV CY CZ DE DJ DK DM DO DZ EC EE EG ER ES ET FI FJ FM FR GA GB GD GE GH GM GN GQ GR GT GW GY HN HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KI KM KN KP KR KW KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MH MK ML MM MN MR MT MU MV MW MX MY MZ NA NE NG NI NL NO NP NR NZ OM PA PE PG PH PK PL PT PW PY QA RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR SS ST SV SY SZ TD TG TH TJ TL TM TN TO TR TT TV TW TZ UA UG US UY UZ VA VC VE VN VU WS YE ZA ZM ZW'.split(' ');
+
+    let countryCache = null;
+
+    function countries() {
+        if (countryCache) return countryCache;
+
+        let namen = null;
+        try {
+            namen = new Intl.DisplayNames(['nl'], { type: 'region' });
+        } catch (err) {
+            namen = null;
+        }
+
+        countryCache = COUNTRY_CODES
+            .map(code => {
+                let naam = code;
+                try {
+                    naam = namen ? (namen.of(code) || code) : code;
+                } catch (err) {
+                    naam = code;
+                }
+                return { code, name: naam };
+            })
+            .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+
+        return countryCache;
+    }
+
+    /** De naam bij een landcode, of de code als we hem niet kennen. */
+    function countryName(code) {
+        if (!code) return '';
+        const gevonden = countries().find(land => land.code === code);
+        return gevonden ? gevonden.name : code;
+    }
+
     /** Leest of schrijft JSON in localStorage zonder te klappen in privémodus. */
     const storage = {
         get(key, fallback) {
@@ -356,6 +440,8 @@
         uniqueId,
         status,
         refreshStatus,
+        countries,
+        countryName,
         storage
     };
 })();

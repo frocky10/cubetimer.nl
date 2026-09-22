@@ -1153,23 +1153,35 @@ if (sessionDeleteBtn) {
     sessionDeleteBtn.addEventListener('click', deleteActiveSession);
 }
 
+/**
+ * Zet het event van de actieve sessie. Ook gebruikt door de challenges, die
+ * je kunnen vragen om over te schakelen naar het event van de scramble van de
+ * dag.
+ */
+function setActiveSessionEvent(eventId) {
+    const session = sessions[activeSessionId];
+    if (!session) return false;
+
+    session.event = eventId;
+    ensureSessionEvent(session);
+    if (cubeSelect) cubeSelect.value = session.event;
+
+    updateCubeDisplay();
+    persistSessions();
+    generateScrambleForActiveEvent();
+
+    window.dispatchEvent(new CustomEvent('cubetimer:event-change', {
+        detail: {
+            eventId: session.event,
+            bluetoothSupported: isBluetoothCubeEventSupported(session.event)
+        }
+    }));
+    return true;
+}
+
 if (cubeSelect) {
     populateCubeSelect();
-    cubeSelect.addEventListener('change', e => {
-        const session = sessions[activeSessionId];
-        if (!session) return;
-        session.event = e.target.value;
-        ensureSessionEvent(session);
-        updateCubeDisplay();
-        persistSessions();
-        generateScrambleForActiveEvent();
-        window.dispatchEvent(new CustomEvent('cubetimer:event-change', {
-            detail: {
-                eventId: session.event,
-                bluetoothSupported: isBluetoothCubeEventSupported(session.event)
-            }
-        }));
-    });
+    cubeSelect.addEventListener('change', e => setActiveSessionEvent(e.target.value));
 }
 
 document.addEventListener('keydown', e => {
@@ -1302,6 +1314,9 @@ window.cubeTimerApi = {
 
     /** Zet de scramble vast (scramble van de dag), of geef null om weer los te laten. */
     setScrambleOverride,
+
+    /** Wisselt het event van de actieve sessie. */
+    setActiveSessionEvent,
 
     /** Laat de laatste solve uit de actieve sessie weer verdwijnen. */
     removeLastSolve: deleteLastSolve,

@@ -333,6 +333,7 @@ textarea,
 }
 
 .topbar {
+    position: relative; /* anker voor het uitklapmenu op smalle schermen */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2949,5 +2950,266 @@ body.is-timing #timer {
 
     .secret-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ==========================================================================
+   13. Landcode, openbaar profiel en het mobiele menu
+   ========================================================================== */
+
+/* --- Landcode ------------------------------------------------------------
+   Bewust de code en geen vlag: emoji-vlaggen worden op Windows als losse
+   letters getoond, en dat is voor het grootste deel van de desktopbezoekers
+   juist lelijker dan dit.
+   ------------------------------------------------------------------------ */
+
+.country-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.85rem;
+    padding: 0.05rem 0.3rem;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    color: var(--text-muted);
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+/* --- Naam op de ranglijst is een link naar het profiel -------------------- */
+
+.board-cuber__link {
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.board-cuber__link:hover {
+    color: var(--accent-text);
+    text-decoration: underline;
+}
+
+/* --- Openbaar profiel ---------------------------------------------------- */
+
+body.profile-page {
+    overflow-y: auto;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.profile-topbar {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    max-width: 58rem;
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-5);
+}
+
+.profile-topbar__brand img {
+    height: 2.5rem;
+    width: auto;
+}
+
+.profile-main {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-width: 58rem;
+    margin: 0 auto;
+    padding: 0 var(--space-5) var(--space-6);
+}
+
+.profile-hero__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+.profile-hero__meta {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.profile-hero__name {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.profile-hero__sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.profile-footer {
+    position: relative;
+    z-index: 1;
+    padding: var(--space-5);
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-subtle);
+}
+
+.profile-footer a {
+    color: var(--accent-text);
+    text-decoration: none;
+}
+
+/* Uitgelichte achievement op het profiel. */
+.badge-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--border-strong);
+    border-radius: var(--radius-md);
+}
+
+.badge-card[data-tier="platina"] { border-left-color: #9ed8ea; }
+.badge-card[data-tier="goud"]    { border-left-color: #e0a21a; }
+.badge-card[data-tier="zilver"]  { border-left-color: #b6c2d2; }
+.badge-card[data-tier="brons"]   { border-left-color: #c4813f; }
+.badge-card[data-tier="geheim"]  { border-left-color: var(--brand-400); }
+
+.badge-card__tier {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+
+.badge-card__title {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+/* --- Menu in de topbar ---------------------------------------------------
+   Op een breed scherm staan de knoppen gewoon naast elkaar. Op een smal
+   scherm passen ze er niet meer bij, en verhuist dezelfde groep naar een
+   uitklapmenu achter de menuknop. Zelfde knoppen, zelfde code: alleen de
+   plaatsing verandert.
+   ------------------------------------------------------------------------ */
+
+.topbar__group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.topbar__menu {
+    display: none;
+}
+
+.btn-icon__label {
+    display: none;
+}
+
+@media (max-width: 860px) {
+    .topbar__menu {
+        display: inline-flex;
+    }
+
+    .topbar__group {
+        position: absolute;
+        top: calc(100% + var(--space-2));
+        right: var(--space-3);
+        z-index: 60;
+        flex-direction: column;
+        align-items: stretch;
+        min-width: 13rem;
+        padding: var(--space-2);
+        background: var(--surface-solid);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        transform: translateY(-6px);
+        pointer-events: none;
+        transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+    }
+
+    .topbar__group.is-open {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+
+    /* In het menu worden het brede rijen met een label erbij. */
+    .topbar__group .btn-icon {
+        width: 100%;
+        height: auto;
+        justify-content: flex-start;
+        gap: var(--space-3);
+        padding: 0.55rem 0.7rem;
+        background: transparent;
+        border-color: transparent;
+    }
+
+    .topbar__group .btn-icon:hover {
+        background: var(--surface-2);
+    }
+
+    .topbar__group .btn-icon__label {
+        display: inline;
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .topbar__group .btn-icon__badge {
+        position: static;
+        margin-left: auto;
+        box-shadow: none;
+    }
+
+    /* Het logo mag nooit platgedrukt worden door de knoppen ernaast. */
+    .topbar__brand {
+        flex-shrink: 0;
+    }
+
+    .topbar__brand img {
+        max-width: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .topbar__brand img {
+        height: 2.1rem;
+    }
+
+    .account-chip {
+        max-width: 8.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .profile-topbar,
+    .profile-main {
+        padding-left: var(--space-3);
+        padding-right: var(--space-3);
+    }
+
+    .profile-hero__name {
+        font-size: 1.3rem;
     }
 }

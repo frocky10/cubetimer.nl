@@ -465,6 +465,39 @@ final class Achievements
         return $nieuw;
     }
 
+    /**
+     * Wat een sleutel als 'solves.goud' voorstelt. Gebruikt op het openbare
+     * profiel, waar we alleen de sleutels uit de database hebben.
+     *
+     * @return array{title:string,tier:string,category:string}|null
+     */
+    public static function describe(string $key): ?array
+    {
+        $punt = strrpos($key, '.');
+        if ($punt === false) {
+            return null;
+        }
+        $familie = substr($key, 0, $punt);
+        $tier = substr($key, $punt + 1);
+
+        if ($familie === 'geheim') {
+            $geheim = self::secrets()[$tier] ?? null;
+            return $geheim === null ? null : [
+                'title' => $geheim['title'], 'tier' => 'geheim', 'category' => 'geheim',
+            ];
+        }
+
+        $definitie = self::families()[$familie] ?? null;
+        if ($definitie === null || !isset($definitie['tiers'][$tier])) {
+            return null;
+        }
+        return [
+            'title'    => $definitie['title'] . ' · ' . ucfirst($tier),
+            'tier'     => $tier,
+            'category' => $definitie['category'],
+        ];
+    }
+
     /** @return array<string,string> sleutel => moment van behalen */
     public static function unlockedKeys(int $userId): array
     {
