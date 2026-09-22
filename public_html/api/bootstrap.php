@@ -19,6 +19,8 @@ require_once __DIR__ . '/lib/Records.php';
 require_once __DIR__ . '/lib/Xp.php';
 require_once __DIR__ . '/lib/Leaderboard.php';
 require_once __DIR__ . '/lib/Challenges.php';
+require_once __DIR__ . '/lib/SolveFacts.php';
+require_once __DIR__ . '/lib/Achievements.php';
 
 $debug = Config::get('debug', false) === true;
 

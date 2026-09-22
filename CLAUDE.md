@@ -28,6 +28,7 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Leaderboards per event, categorie en periode
 - XP, levels, streaks en een rangbadge
 - Daily challenges: scramble van de dag plus twee opdrachten
+- 96 achievements in vier niveaus, plus twaalf geheime
 - Bug-/ideeënknop die een GitHub-issue aanmaakt
 - Donker en licht thema, sessiegrafiek, confetti bij een PR
 
@@ -50,6 +51,7 @@ public_html/                   Precies wat er op de server komt te staan
     account.js                 Inloggen, registreren, synchroniseren, profiel
     leaderboard.js             Ranglijsten
     challenges.js              Daily challenges en de scramble van de dag
+    achievements.js            Achievements
     admin.js                   Beoordeelwachtrij (alleen voor de rol admin)
     scrambleScript.js          Scrambles via cubing.js (ES-module)
     bluetoothCube.js           Smart cubes via Web Bluetooth (ES-module)
@@ -59,13 +61,14 @@ public_html/                   Precies wat er op de server komt te staan
     config.example.php         Sjabloon — kopieer naar ~/cubetimer_config.php
     lib/                       Config, Http, Database, Auth, RateLimiter, GitHubIssues,
                                SiteTime, Events, Averages, Records, Xp,
-                               Leaderboard, Challenges
+                               Leaderboard, Challenges, SolveFacts, Achievements
     auth/                      register, login, logout, me
     sync/                      pull, push
     feedback/                  report
     leaderboard/               list
     profile/                   overview, settings
     challenges/                today, submit, contribute
+    achievements/              list
     admin/                     flags
   Pictures/  Fonts/
 ```
@@ -99,7 +102,8 @@ Er is geen testframework. Wat er wel is, en wat werkt:
 find public_html/api -name '*.php' -exec php -l {} \;
 
 # JavaScript-syntax (de twee ES-modules kunnen hier niet doorheen)
-for f in ui script stats settings feedback account leaderboard challenges admin; do
+for f in ui script stats settings feedback account leaderboard challenges \
+         achievements admin; do
   node --check public_html/Script/$f.js
 done
 
@@ -169,6 +173,7 @@ garandeert. De twee ES-modules laden apart en mogen nergens vroeg op rekenen.
 | `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
 | `window.CubeTimerLeaderboard` | `leaderboard.js` | `open`, `reload` |
 | `window.CubeTimerChallenges` | `challenges.js` | `load`, `stopChallenge` |
+| `window.CubeTimerAchievements` | `achievements.js` | `load`, `announce` |
 
 Gebruik **`CubeTimerUI.ask()` in plaats van `prompt()` of `confirm()`** en
 **`CubeTimerUI.toast()` in plaats van `alert()`**. De browserdialogen passen
@@ -184,7 +189,8 @@ niet bij de rest van de site en blokkeren de timer.
 | `cubetimer:settings-change` | instelling gewijzigd | `settings.js` |
 | `cubetimer:solve` | een solve is opgeslagen, met de solve erbij | `challenges.js` |
 | `cubetimer:synced` | synchronisatie geslaagd, server heeft herberekend | `challenges.js` |
-| `cubetimer:auth-change` | in- of uitgelogd, met de verse status erbij | `admin.js`, `challenges.js`, `leaderboard.js` |
+| `cubetimer:auth-change` | in- of uitgelogd, met de verse status erbij | `admin.js`, `challenges.js`, `leaderboard.js`, `achievements.js` |
+| `cubetimer:achievements-unlocked` | er zijn achievements behaald | `achievements.js` |
 
 ### Waar de data staat
 
@@ -269,6 +275,7 @@ uit `lib/`.
 | `challenges/today.php` | GET | De opdrachten van vandaag met je voortgang |
 | `challenges/submit.php` | POST | Je poging voor de scramble van de dag |
 | `challenges/contribute.php` | POST | Scrambles aanleveren voor de voorraad |
+| `achievements/list.php` | GET | De catalogus, met je eigen stand als je ingelogd bent |
 | `admin/flags.php` | GET/POST | Beoordeelwachtrij (alleen rol `admin`) |
 
 ### Rate limiting
@@ -290,9 +297,13 @@ dat is met de console te verzinnen. Na elke synchronisatie draait
 `sync/push.php` achter elkaar:
 
 1. `Records::rebuild()` — markeert verdachte solves, rekent alle records
-   opnieuw uit en schrijft `user_records` opnieuw
+   opnieuw uit, schrijft `user_records` opnieuw en levert via `SolveFacts` in
+   dezelfde doorloop alles wat de achievements nodig hebben
 2. `Xp::sync()` — kent XP toe voor solven, records en streaks
 3. `Challenges::evaluate()` — werkt de voortgang van de dagopdrachten bij
+4. `Achievements::evaluate()` — ontgrendelt wat er gehaald is. Als laatste,
+   want achievements kijken naar XP en challenges die hierboven net zijn
+   bijgewerkt
 
 Gaat een van die stappen mis, dan is de synchronisatie zelf wel geslaagd: de
 tijden van de gebruiker zijn veilig, alleen de afgeleide cijfers lopen even
@@ -372,6 +383,51 @@ een scramble waarvan we de herkomst niet kennen.
 
 ---
 
+## Achievements
+
+Zesennegentig stuks: eenentwintig families in vier niveaus (brons, zilver,
+goud, platina) plus twaalf geheime. De catalogus staat in
+`lib/Achievements.php`, niet in de database. Een nieuwe achievement toevoegen
+is dus een regel in `families()` of `secrets()` — geen migratie.
+
+**Een familie** hangt aan een cijfer uit `metrics` en heeft per niveau een
+drempel:
+
+```php
+'solves' => [
+    'category' => 'mijlpalen', 'metric' => 'validSolves',
+    'title' => 'Vlieguren', 'unit' => 'solves', 'format' => 'number',
+    'description' => 'Aantal solves dat je hebt afgerond.',
+    'tiers' => ['brons' => 100, 'zilver' => 1000, 'goud' => 5000, 'platina' => 25000],
+],
+```
+
+`direction` is standaard `atLeast` (meer is beter). Zet hem op `atMost` voor
+tijden en ranglijstposities, waar minder beter is. `format` bepaalt hoe een
+drempel getoond wordt: `number`, `time` (ms) of `rank`.
+
+Niveaus zijn **cumulatief**: wie meteen goud haalt krijgt brons en zilver er
+gratis bij. XP per niveau: 50 / 150 / 400 / 1000, en 250 voor een geheime.
+
+**De cijfers** komen uit twee bronnen. `SolveFacts::from()` loopt een keer door
+alle solves en haalt daar alles uit wat een doorloop vraagt (aantallen, +2's,
+DNF's, drukste dag, bijzondere tijden zoals palindromen, reeksen DNF's).
+`Achievements::buildMetrics()` vult dat aan met een handvol queries (sessies,
+XP, challenges, beste ranglijstpositie, persoonlijke records).
+
+Wil je een achievement die iets nieuws meet, voeg het cijfer dan toe aan
+`SolveFacts` (als het per solve is) of aan `buildMetrics` (als het een query
+is), en verwijs ernaar met `metric`.
+
+Achievements gelden **met terugwerkende kracht**: alles wat iemand ooit heeft
+getimed telt mee zodra hij inlogt. Een verse gebruiker met 120 lokale solves
+ontgrendelt er meteen zo'n twintig.
+
+Gemarkeerde solves (zie hierboven) tellen niet mee voor de bijzondere tijden;
+een verzonnen tijd hoort geen achievement op te leveren.
+
+---
+
 ## Synchronisatie
 
 Bewust simpel gehouden:
@@ -426,3 +482,7 @@ elke solve al een eigen `id` heeft.
 - Leaderboards tonen nu de top 100. Paginering zit al in `Leaderboard::top()`
   (`offset`), maar de interface gebruikt hem nog niet.
 - De scramble van de dag is er alleen voor 3x3.
+- `achievements/list.php` doet een volledige `Records::rebuild()` om de
+  voortgang vers te hebben. Dat is dezelfde 2,5 seconde als een synchronisatie
+  bij een heel groot account; bij klachten kan het scherm de laatst bekende
+  cijfers gebruiken in plaats van opnieuw te rekenen.
