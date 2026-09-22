@@ -29,6 +29,7 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - XP, levels, streaks en een rangbadge
 - Daily challenges: scramble van de dag plus twee opdrachten
 - 96 achievements in vier niveaus, plus twaalf geheime
+- Openbare, deelbare profielen op /profiel.php?u=naam
 - Bug-/ideeënknop die een GitHub-issue aanmaakt
 - Donker en licht thema, sessiegrafiek, confetti bij een PR
 
@@ -40,7 +41,9 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 .github/workflows/deploy.yml   FTP-deploy naar DirectAdmin (branch: Release)
 database/                      Genummerde SQL-migraties + uitleg
 public_html/                   Precies wat er op de server komt te staan
-  index.html
+  index.html                   De timer
+  profiel.php                  Openbaar profiel, serverside gerenderd
+  .htaccess                    Rewrite van /u/naam naar profiel.php
   Style/style.css              Eén design system, met tokens bovenaan
   Script/
     ui.js                      Toasts, modals, ask(), api(), opslag  ← laadt eerst
@@ -61,12 +64,13 @@ public_html/                   Precies wat er op de server komt te staan
     config.example.php         Sjabloon — kopieer naar ~/cubetimer_config.php
     lib/                       Config, Http, Database, Auth, RateLimiter, GitHubIssues,
                                SiteTime, Events, Averages, Records, Xp,
-                               Leaderboard, Challenges, SolveFacts, Achievements
+                               Leaderboard, Challenges, SolveFacts, Achievements,
+                               PublicProfile
     auth/                      register, login, logout, me
     sync/                      pull, push
     feedback/                  report
     leaderboard/               list
-    profile/                   overview, settings
+    profile/                   overview, settings, public
     challenges/                today, submit, contribute
     achievements/              list
     admin/                     flags
@@ -140,7 +144,15 @@ uitgewerkt.
 
 Het thema wordt vóór de eerste paint gezet door een klein inline script in de
 `<head>`, dat `cubetimer_theme` uit localStorage leest. Verplaats dat script
-niet naar een bestand; dan flitst de site bij het laden.
+niet naar een bestand; dan flitst de site bij het laden. `profiel.php` heeft
+een eigen kopie van datzelfde script.
+
+**De topbar op een smal scherm**: de knoppen staan in `.topbar__group`. Boven
+860px staat die groep gewoon naast elkaar in de balk; daaronder wordt hij een
+uitklapmenu achter de menuknop. Zelfde knoppen, zelfde code, alleen andere
+plaatsing — er is dus geen tweede set knoppen om bij te werken. Zet je er een
+knop bij, geef hem dan een `<span class="btn-icon__label">` zodat hij in het
+menu een naam heeft.
 
 ### Klassen die je niet zomaar mag hernoemen
 
@@ -272,6 +284,7 @@ uit `lib/`.
 | `leaderboard/list.php` | GET | Ranglijst per event, categorie en periode (openbaar) |
 | `profile/overview.php` | GET | XP, level, rang, streak, records, XP-logboek |
 | `profile/settings.php` | POST | Hoofd-event, land, wel of niet op de ranglijst |
+| `profile/public.php` | GET | Het openbare profiel van een cuber (zonder login) |
 | `challenges/today.php` | GET | De opdrachten van vandaag met je voortgang |
 | `challenges/submit.php` | POST | Je poging voor de scramble van de dag |
 | `challenges/contribute.php` | POST | Scrambles aanleveren voor de voorraad |
@@ -383,6 +396,40 @@ een scramble waarvan we de herkomst niet kennen.
 
 ---
 
+## Openbare profielen
+
+`/profiel.php?u=naam` is een **serverside gerenderde** pagina, geen JavaScript
+dat een leeg scherm vult. Reden: een gedeelde link moet in WhatsApp, Discord en
+Google meteen laten zien om wie het gaat, en dat werkt alleen als de titel en
+de omschrijving al in de HTML staan. De og-tags worden per cuber ingevuld.
+
+`.htaccess` in `public_html` maakt er `/u/naam` van. Staat mod_rewrite uit, dan
+blijft `/profiel.php?u=naam` gewoon werken; de site verwijst overal naar die
+lange vorm, de korte is alleen een extraatje.
+
+`lib/PublicProfile.php` levert de gegevens, en wordt door twee dingen gebruikt:
+de pagina zelf en `api/profile/public.php` (voor als de frontend hem ooit nodig
+heeft). Daar staat dus de enige plek waar bepaald wordt wat openbaar is.
+
+**Privacy**: een profiel is alleen zichtbaar als de cuber meedoet aan de
+ranglijsten. Zet hij die schakelaar uit, dan geeft zowel de pagina als de API
+een 404 en verdwijnt hij ook van de ranglijsten. Er staat nooit een
+e-mailadres op een profiel.
+
+## Landen
+
+De landcode staat als tekstbadge naast de naam, niet als vlag. Emoji-vlaggen
+worden op Windows als losse letters getoond, en dat is voor het grootste deel
+van de desktopbezoekers lelijker dan de code zelf. Wil je alsnog echte vlaggen,
+dan moeten het meegeleverde SVG-bestanden worden.
+
+De codes staan in `ui.js` (`COUNTRY_CODES`, 195 stuks). De **namen** komen uit
+de browser via `Intl.DisplayNames`, dus er is geen vertaallijst om bij te
+houden. `UI.countries()` geeft de gesorteerde lijst, `UI.countryName(code)` een
+losse naam.
+
+---
+
 ## Achievements
 
 Zesennegentig stuks: eenentwintig families in vier niveaus (brons, zilver,
@@ -481,7 +528,16 @@ elke solve al een eigen `id` heeft.
   alleen de staart herberekenen met een `records_computed_through`-markering.
 - Leaderboards tonen nu de top 100. Paginering zit al in `Leaderboard::top()`
   (`offset`), maar de interface gebruikt hem nog niet.
-- De scramble van de dag is er alleen voor 3x3.
+- De scramble van de dag is er voor 3x3 plus een roulerend event
+  (`Challenges::ROTATING_EVENTS`, acht stuks, dus een cyclus van acht dagen).
+  Megaminx, Square-1 en Clock doen niet mee: hun notatie is te eigenzinnig om
+  een aangeleverde scramble betrouwbaar te controleren. Zie
+  `Events::SCRAMBLE_FORMATS`.
+- Loopt de voorraad voor het roulerende event leeg, dan is er die dag geen
+  tweede scramble van de dag. Dat is bewust; liever geen opdracht dan een
+  scramble waarvan we de herkomst niet kennen.
+- Het profiel toont hooguit twaalf uitgelichte achievements, het zeldzaamst
+  eerst (`PublicProfile::HIGHLIGHT_COUNT`).
 - `achievements/list.php` doet een volledige `Records::rebuild()` om de
   voortgang vers te hebben. Dat is dezelfde 2,5 seconde als een synchronisatie
   bij een heel groot account; bij klachten kan het scherm de laatst bekende

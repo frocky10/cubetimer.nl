@@ -108,12 +108,23 @@
             badgeValue.textContent = entry.level;
             badge.appendChild(badgeValue);
 
-            const naam = document.createElement('span');
-            naam.className = 'board-cuber__name';
+            // De naam is een link naar het openbare profiel.
+            const naam = document.createElement('a');
+            naam.className = 'board-cuber__link';
+            naam.href = 'profiel.php?u=' + encodeURIComponent(entry.user);
             naam.textContent = entry.user;
 
             wrap.appendChild(badge);
             wrap.appendChild(naam);
+
+            if (entry.country) {
+                const land = document.createElement('span');
+                land.className = 'country-tag';
+                land.textContent = entry.country;
+                land.title = UI.countryName(entry.country);
+                wrap.appendChild(land);
+            }
+
             cuber.appendChild(wrap);
 
             const tijd = document.createElement('td');

@@ -1,0 +1,10 @@
+# Nette profiel-URL's: /u/naam komt uit bij profiel.php?u=naam.
+# Werkt hij niet (bijvoorbeeld omdat mod_rewrite uitstaat), dan blijft
+# /profiel.php?u=naam gewoon werken.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^u/([A-Za-z0-9_.-]{3,32})/?$ profiel.php?u=$1 [L,QSA]
+</IfModule>
+
+# Geen directorylisting.
+Options -Indexes
