@@ -17,11 +17,20 @@ if (Database::isConfigured()) {
     $databaseReady = Database::hasTable('users');
 }
 
+$leaderboardsReady = $databaseReady && Database::hasTable('user_records');
+$challengesReady = $databaseReady && Database::hasTable('daily_challenges');
+
+$user = Auth::user();
+
 Http::ok([
     'features' => [
-        'accounts' => $databaseReady,
-        'sync'     => $databaseReady,
-        'feedback' => GitHubIssues::isEnabled(),
+        'accounts'     => $databaseReady,
+        'sync'         => $databaseReady,
+        'feedback'     => GitHubIssues::isEnabled(),
+        'leaderboards' => $leaderboardsReady,
+        'challenges'   => $challengesReady,
     ],
-    'authenticated' => Auth::user() !== null,
+    'timezone'      => SiteTime::zoneName(),
+    'authenticated' => $user !== null,
+    'admin'         => $user !== null && ($user['role'] ?? 'user') === 'admin',
 ]);

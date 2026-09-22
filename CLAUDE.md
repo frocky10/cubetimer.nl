@@ -22,9 +22,12 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Officiële WCA-scrambles via [cubing.js](https://cubing.net) voor 19 events
 - Sessies met een eigen event, lopende Ao5 en Ao12 per solve
 - +2, DNF en verwijderen per solve (klik op een rij, of `2` / `D` / `⌫`)
-- Statistieken per sessie, per dag en per week
+- Statistieken per sessie, per dag en per week (Mo3, Ao5, Ao12, Ao50, Ao100)
 - Smart cubes via Web Bluetooth (GAN en QiYi/X-Man) met 3D-weergave
 - Accounts met synchronisatie van je tijden naar de server
+- Leaderboards per event, categorie en periode
+- XP, levels, streaks en een rangbadge
+- Daily challenges: scramble van de dag plus twee opdrachten
 - Bug-/ideeënknop die een GitHub-issue aanmaakt
 - Donker en licht thema, sessiegrafiek, confetti bij een PR
 
@@ -44,17 +47,26 @@ public_html/                   Precies wat er op de server komt te staan
     stats.js                   Statistieken sessie / vandaag / deze week
     settings.js                Koppelt de instellingen-modal aan script.js
     feedback.js                Bug-/ideeënknop
-    account.js                 Inloggen, registreren, synchroniseren
+    account.js                 Inloggen, registreren, synchroniseren, profiel
+    leaderboard.js             Ranglijsten
+    challenges.js              Daily challenges en de scramble van de dag
+    admin.js                   Beoordeelwachtrij (alleen voor de rol admin)
     scrambleScript.js          Scrambles via cubing.js (ES-module)
     bluetoothCube.js           Smart cubes via Web Bluetooth (ES-module)
   api/                         PHP-backend
     bootstrap.php              Laadt de libs, zet de foutafhandeling
     status.php                 Welke onderdelen zijn beschikbaar?
     config.example.php         Sjabloon — kopieer naar ~/cubetimer_config.php
-    lib/                       Config, Http, Database, Auth, RateLimiter, GitHubIssues
+    lib/                       Config, Http, Database, Auth, RateLimiter, GitHubIssues,
+                               SiteTime, Events, Averages, Records, Xp,
+                               Leaderboard, Challenges
     auth/                      register, login, logout, me
     sync/                      pull, push
     feedback/                  report
+    leaderboard/               list
+    profile/                   overview, settings
+    challenges/                today, submit, contribute
+    admin/                     flags
   Pictures/  Fonts/
 ```
 
@@ -72,7 +84,10 @@ public_html/                   Precies wat er op de server komt te staan
    XP en levels #28, achievements #27, rank #26, tutorials #21).
 5. **Elke database-wijziging is een nieuw genummerd bestand** in `database/`.
    Zie `database/README.md`. Nooit een al geïmporteerd bestand aanpassen.
-6. **Geen geheimen in git.** Wachtwoorden en tokens horen uitsluitend in
+6. **Werk de checklist in `README.md` bij** zodra er iets af is of bij komt.
+   Die lijst verwijst naar de issuenummers en is de snelste manier om te zien
+   waar het project staat.
+7. **Geen geheimen in git.** Wachtwoorden en tokens horen uitsluitend in
    `~/cubetimer_config.php` op de server.
 
 ### Testen voor je iets oplevert
@@ -84,7 +99,7 @@ Er is geen testframework. Wat er wel is, en wat werkt:
 find public_html/api -name '*.php' -exec php -l {} \;
 
 # JavaScript-syntax (de twee ES-modules kunnen hier niet doorheen)
-for f in ui script stats settings feedback account; do
+for f in ui script stats settings feedback account leaderboard challenges admin; do
   node --check public_html/Script/$f.js
 done
 
@@ -149,8 +164,11 @@ garandeert. De twee ES-modules laden apart en mogen nergens vroeg op rekenen.
 
 | Object | Van wie | Waarvoor |
 |---|---|---|
-| `window.CubeTimerUI` | `ui.js` | `toast`, `ask`, `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `status`, `formatTime`, `uniqueId`, `storage` |
-| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getState`, en de Bluetooth-haken |
+| `window.CubeTimerUI` | `ui.js` | `toast`, `ask`, `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
+| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `getState`, en de Bluetooth-haken |
+| `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
+| `window.CubeTimerLeaderboard` | `leaderboard.js` | `open`, `reload` |
+| `window.CubeTimerChallenges` | `challenges.js` | `load`, `stopChallenge` |
 
 Gebruik **`CubeTimerUI.ask()` in plaats van `prompt()` of `confirm()`** en
 **`CubeTimerUI.toast()` in plaats van `alert()`**. De browserdialogen passen
@@ -164,6 +182,9 @@ niet bij de rest van de site en blokkeren de timer.
 | `cubetimer:event-change` | ander cube/event gekozen | `stats.js`, `bluetoothCube.js` |
 | `cubetimer:scramble-change` | nieuwe scramble klaar | `bluetoothCube.js` |
 | `cubetimer:settings-change` | instelling gewijzigd | `settings.js` |
+| `cubetimer:solve` | een solve is opgeslagen, met de solve erbij | `challenges.js` |
+| `cubetimer:synced` | synchronisatie geslaagd, server heeft herberekend | `challenges.js` |
+| `cubetimer:auth-change` | in- of uitgelogd, met de verse status erbij | `admin.js`, `challenges.js`, `leaderboard.js` |
 
 ### Waar de data staat
 
@@ -240,8 +261,15 @@ uit `lib/`.
 | `auth/logout.php` | POST | Sessie beëindigen |
 | `auth/me.php` | GET | Huidige gebruiker, of `user: null` |
 | `sync/pull.php` | GET | Alle sessies en solves ophalen |
-| `sync/push.php` | POST | Volledige staat opslaan (vervangt) |
+| `sync/push.php` | POST | Volledige staat opslaan (vervangt) en alles herberekenen |
 | `feedback/report.php` | POST | Melding als GitHub-issue |
+| `leaderboard/list.php` | GET | Ranglijst per event, categorie en periode (openbaar) |
+| `profile/overview.php` | GET | XP, level, rang, streak, records, XP-logboek |
+| `profile/settings.php` | POST | Hoofd-event, land, wel of niet op de ranglijst |
+| `challenges/today.php` | GET | De opdrachten van vandaag met je voortgang |
+| `challenges/submit.php` | POST | Je poging voor de scramble van de dag |
+| `challenges/contribute.php` | POST | Scrambles aanleveren voor de voorraad |
+| `admin/flags.php` | GET/POST | Beoordeelwachtrij (alleen rol `admin`) |
 
 ### Rate limiting
 
@@ -249,6 +277,98 @@ uit `lib/`.
 de bug-knop ook werkt op een installatie zonder database. Huidige limieten
 (per IP): registreren 5/uur, inloggen 15 per kwartier per IP en 8 per kwartier
 per account, meldingen 5/uur. Zonder schrijfbare map wordt er niet gelimiteerd.
+
+---
+
+## Records, ranglijsten en XP
+
+### De server rekent, de browser niet
+
+Alles wat op een ranglijst kan komen wordt **serverside** uitgerekend uit de
+opgeslagen solves. De browser stuurt nooit een gemiddelde of een XP-bedrag mee;
+dat is met de console te verzinnen. Na elke synchronisatie draait
+`sync/push.php` achter elkaar:
+
+1. `Records::rebuild()` — markeert verdachte solves, rekent alle records
+   opnieuw uit en schrijft `user_records` opnieuw
+2. `Xp::sync()` — kent XP toe voor solven, records en streaks
+3. `Challenges::evaluate()` — werkt de voortgang van de dagopdrachten bij
+
+Gaat een van die stappen mis, dan is de synchronisatie zelf wel geslaagd: de
+tijden van de gebruiker zijn veilig, alleen de afgeleide cijfers lopen even
+achter en worden bij de volgende synchronisatie bijgewerkt.
+
+`Averages` doet het rekenwerk met twee monotone wachtrijen voor het schuivende
+minimum en maximum. Daardoor kost een Ao100 evenveel als een Ao5. Achttienduizend
+solves herberekenen duurt ongeveer 2,5 seconde, inclusief opslaan.
+
+### Periodes
+
+Dag- en weekgrenzen voor ranglijsten en challenges lopen in de **tijdzone van de
+site** (`site_timezone` in de config, standaard Europe/Amsterdam), zodat iedereen
+op dezelfde dag concurreert. De statistieken in de sidebar rekenen wel met de
+lokale tijd van de bezoeker. Rond middernacht kan dat dus een uurtje verschillen;
+dat is een bewuste keuze en staat zo in `lib/SiteTime.php`.
+
+### Onmogelijke tijden
+
+De timer draait in de browser, dus iedereen kan met de console een tijd van een
+halve seconde insturen. Volledig dichtzetten kan niet zonder de timer naar de
+server te verhuizen. Wat er wel gebeurt, in `Records::detectFlags()`:
+
+| Reden | Wanneer |
+|---|---|
+| `impossible` | onder de 250 ms |
+| `below_world_record` | sneller dan het wereldrecord voor dat event |
+| `too_fast_for_user` | minder dan de helft van het eigen record tot dan toe, na minstens 25 solves |
+| `burst` | meer dan 20 solves binnen een minuut |
+
+Een gemarkeerde solve komt in `solve_flags` met status `pending` en telt
+**niet** mee voor records en ranglijsten. De gebruiker ziet zijn tijd zelf
+gewoon in zijn sessie staan. Jij beoordeelt ze in Instellingen → Beheer; dat
+tabblad verschijnt alleen voor een account met de rol `admin`:
+
+```sql
+UPDATE users SET role = 'admin' WHERE username = 'jouwnaam';
+```
+
+Bij het afstellen van de drempels geldt: **liever een cheater door de vingers
+zien dan een echte cuber onterecht markeren.** De vorige versie vergeleek met de
+mediaan en markeerde 24 gewone tijden op 1222 solves; de vergelijking met het
+eigen record markeert er nul.
+
+### XP en levels
+
+| Waarvoor | Hoeveel |
+|---|---|
+| Per geldige solve | 2 XP, maximaal 300 per dag |
+| Persoonlijk record | 12 tot 40 XP, afhankelijk van de categorie |
+| Dag op rij getimed | 10 XP per dag in de reeks, tot 10 dagen |
+| Daily challenge | 40 tot 80 XP |
+
+Level L vraagt `50 * L * (L - 1)` XP in totaal. Tiers: Brons (1-9), Zilver
+(10-19), Goud (20-34), Platina (35-49), Diamant (50+). De tier bepaalt de kleur
+van de rangbadge; het getal erin is je positie op de all-time ranglijst van je
+hoofd-event — een hard nummer tot en met plek 999, daaronder een percentiel.
+
+### Daily challenges
+
+Drie per dag, aangemaakt zodra de eerste bezoeker die dag om de challenges
+vraagt. Welke aantallen en percentages het worden hangt af van de datum
+(`crc32`), dus voor iedereen hetzelfde en elke dag anders.
+
+De **scramble van de dag** is een probleem apart: officiële WCA-scrambles komen
+van cubing.js, dat alleen in de browser draait. Ingelogde bezoekers leveren
+daarom scrambles aan in `scramble_pool` (`challenges/contribute.php`, op de
+achtergrond, na elke vijfde 3x3-scramble). De server kiest er per dag
+willekeurig een uit, en alleen uit scrambles die er minstens 24 uur in staan.
+Zo kan niemand een makkelijke scramble insturen en die zelf krijgen.
+`Challenges::looksLikeScramble()` weigert alles wat geen 16 tot 25 geldige
+zetten is zonder herhaald vlak.
+
+Loopt de voorraad leeg, dan is er die dag simpelweg geen scramble van de dag;
+de twee andere opdrachten staan er wel. Dat is bewust: liever geen opdracht dan
+een scramble waarvan we de herkomst niet kennen.
 
 ---
 
@@ -298,5 +418,11 @@ elke solve al een eigen `id` heeft.
   `(user_id, event, solved_at)`, die daar al voor ligt.
 - `bluetoothCube.js` is nog niet nagelopen op stijl of structuur; het werkt en
   is met rust gelaten bij de restyling.
-- De tijdweergave is `mm:ss:mmm`. Veel cubers verwachten `11.53`. Bewust niet
-  aangepast — dat is een eigen beslissing waard.
+- De tijdweergave blijft `mm:ss:mmm`. Dat is besloten; niet meer voorstellen om
+  er `11.53` van te maken.
+- De herberekening na een synchronisatie draait over álle solves. Bij 18.000
+  solves duurt dat 2,5 seconde. Wordt dat een probleem, dan is de volgende stap
+  alleen de staart herberekenen met een `records_computed_through`-markering.
+- Leaderboards tonen nu de top 100. Paginering zit al in `Leaderboard::top()`
+  (`offset`), maar de interface gebruikt hem nog niet.
+- De scramble van de dag is er alleen voor 3x3.

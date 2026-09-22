@@ -400,7 +400,28 @@ function populateCubeSelect() {
     });
 }
 
+/**
+ * Zolang dit gevuld is, blijft die scramble staan in plaats van dat er een
+ * nieuwe wordt gegenereerd. Gebruikt door de scramble van de dag: iedereen
+ * moet dezelfde krijgen.
+ */
+let scrambleOverride = null;
+
+function setScrambleOverride(scramble) {
+    scrambleOverride = scramble || null;
+    generateScrambleForActiveEvent();
+}
+
 function generateScrambleForActiveEvent() {
+    if (scrambleOverride) {
+        if (scrambleDisplay) {
+            scrambleDisplay.classList.remove('is-loading');
+            scrambleDisplay.textContent = scrambleOverride;
+        }
+        window.currentScramble = scrambleOverride;
+        return;
+    }
+
     const event = getActiveSessionEvent();
     if (typeof window.generateScramble === 'function') {
         window.generateScramble(event);
@@ -660,6 +681,14 @@ function saveTime(ms, penalty = null, metadata = {}) {
     times.push(entry);
     renderTimes();
     persistSessions();
+
+    window.dispatchEvent(new CustomEvent('cubetimer:solve', {
+        detail: {
+            solve: { ...entry },
+            event: getActiveSessionEvent(),
+            index: times.length - 1
+        }
+    }));
 }
 
 function startTimer() {
@@ -1226,6 +1255,7 @@ window.cubeTimerApi = {
     averageOf,
     getEffectiveTime,
     getEventLabel,
+    getEventOptions: () => EVENT_OPTIONS.map(option => ({ ...option })),
     getActiveSessionEvent,
     getActiveSessionId: () => activeSessionId,
 
@@ -1269,6 +1299,12 @@ window.cubeTimerApi = {
     getSetting,
     updateSetting,
     getAllSettings: () => ({ ...settings }),
+
+    /** Zet de scramble vast (scramble van de dag), of geef null om weer los te laten. */
+    setScrambleOverride,
+
+    /** Laat de laatste solve uit de actieve sessie weer verdwijnen. */
+    removeLastSolve: deleteLastSolve,
 
     getState() {
         return {

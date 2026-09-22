@@ -72,6 +72,16 @@ return [
     ],
 
     /* ---------------------------------------------------------------------
+     * Tijdzone van de site.
+     *
+     * Bepaalt wanneer een dag en een week beginnen voor de ranglijsten en de
+     * daily challenges. Iedereen concurreert daardoor op dezelfde dag, waar
+     * ter wereld hij ook zit. De statistieken in de sidebar rekenen wel met de
+     * lokale tijd van de bezoeker zelf.
+     * ------------------------------------------------------------------ */
+    'site_timezone' => 'Europe/Amsterdam',
+
+    /* ---------------------------------------------------------------------
      * Opslagmap voor rate limiting en logbestanden.
      * Moet schrijfbaar zijn voor PHP en BUITEN public_html staan.
      * Laat leeg om de systeem-tempmap te gebruiken.
