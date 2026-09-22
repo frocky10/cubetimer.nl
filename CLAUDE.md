@@ -72,7 +72,10 @@ public_html/                   Precies wat er op de server komt te staan
    XP en levels #28, achievements #27, rank #26, tutorials #21).
 5. **Elke database-wijziging is een nieuw genummerd bestand** in `database/`.
    Zie `database/README.md`. Nooit een al geïmporteerd bestand aanpassen.
-6. **Geen geheimen in git.** Wachtwoorden en tokens horen uitsluitend in
+6. **Werk de checklist in `README.md` bij** zodra er iets af is of bij komt.
+   Die lijst verwijst naar de issuenummers en is de snelste manier om te zien
+   waar het project staat.
+7. **Geen geheimen in git.** Wachtwoorden en tokens horen uitsluitend in
    `~/cubetimer_config.php` op de server.
 
 ### Testen voor je iets oplevert
