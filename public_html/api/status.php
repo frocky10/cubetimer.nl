@@ -19,6 +19,7 @@ if (Database::isConfigured()) {
 
 $leaderboardsReady = $databaseReady && Database::hasTable('user_records');
 $challengesReady = $databaseReady && Database::hasTable('daily_challenges');
+$achievementsReady = $databaseReady && Database::hasTable('user_achievements');
 
 $user = Auth::user();
 
@@ -29,6 +30,7 @@ Http::ok([
         'feedback'     => GitHubIssues::isEnabled(),
         'leaderboards' => $leaderboardsReady,
         'challenges'   => $challengesReady,
+        'achievements' => $achievementsReady,
     ],
     'timezone'      => SiteTime::zoneName(),
     'authenticated' => $user !== null,

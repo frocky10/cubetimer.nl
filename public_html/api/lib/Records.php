@@ -6,6 +6,7 @@ require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/Averages.php';
 require_once __DIR__ . '/SiteTime.php';
+require_once __DIR__ . '/SolveFacts.php';
 
 /**
  * Rekent de records van een gebruiker opnieuw uit en markeert solves die er te
@@ -143,6 +144,8 @@ final class Records
             'improvements' => $improvements,
             'activeDays'   => array_keys($activeDays),
             'solvesPerDay' => $solvesPerDay,
+            // Alles wat de achievements nodig hebben, uit dezelfde doorloop.
+            'facts'        => SolveFacts::from($solves, $blocked),
         ];
     }
 

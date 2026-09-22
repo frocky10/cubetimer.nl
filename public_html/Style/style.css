@@ -2703,3 +2703,251 @@ body.is-timing #timer {
         padding: var(--space-2) var(--space-3);
     }
 }
+
+/* ==========================================================================
+   12. Achievements
+   ========================================================================== */
+
+.achievement-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.achievement-summary__meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* De categoriekiezer heeft meer knoppen dan er op een regel passen. */
+.segmented--wrap {
+    flex-wrap: wrap;
+    border-radius: var(--radius-lg);
+}
+
+/* Zonder dit rekt de laatste knop van een afgebroken regel zich uit over de
+   hele breedte. */
+.segmented--wrap .segmented__item {
+    flex: 0 1 auto;
+}
+
+.achievement-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.achievement-group__name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+
+.achievement-card {
+    display: flex;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.achievement-card.is-complete {
+    border-color: rgba(var(--success-rgb), 0.35);
+    background: rgba(var(--success-rgb), 0.06);
+}
+
+.achievement-card__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.achievement-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.achievement-card__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.achievement-card__value {
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--accent-text);
+}
+
+.achievement-card__description {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Rij van vier niveaus. Behaalde niveaus krijgen de kleur van hun tier. */
+.tier-row {
+    display: flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+    align-items: flex-start;
+}
+
+.tier-pip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    width: 2.6rem;
+    height: 2.6rem;
+    flex-shrink: 0;
+    color: #14202e;
+    background: var(--surface-3);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    position: relative;
+}
+
+.tier-pip--locked {
+    opacity: 0.4;
+}
+
+.tier-pip--locked .tier-pip__mark {
+    color: var(--text-subtle);
+}
+
+.tier-pip[data-tier="brons"]   { background: var(--tier-brons); }
+.tier-pip[data-tier="zilver"]  { background: var(--tier-zilver); }
+.tier-pip[data-tier="goud"]    { background: var(--tier-goud); }
+.tier-pip[data-tier="platina"] { background: var(--tier-platina); }
+
+.tier-pip--locked[data-tier] {
+    background: var(--surface-3);
+}
+
+.tier-pip__mark {
+    font-size: 0.85rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.tier-pip__label {
+    font-size: 0.45rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.achievement-next {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.achievement-next__head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-size: 0.74rem;
+    color: var(--text-subtle);
+}
+
+.achievement-next__track {
+    height: 0.35rem;
+    background: var(--surface-3);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.achievement-next__fill {
+    height: 100%;
+    background: var(--gradient-brand);
+    border-radius: var(--radius-pill);
+    transition: width var(--dur-slow) var(--ease-out);
+}
+
+.achievement-done {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--success);
+}
+
+/* Geheime achievements */
+.secret-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: var(--space-2);
+}
+
+.secret-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    background: rgba(var(--brand-rgb), 0.08);
+    border: 1px solid rgba(var(--brand-rgb), 0.28);
+    border-radius: var(--radius-md);
+}
+
+.secret-card__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.secret-card__title::before {
+    content: '★';
+    color: var(--brand-400);
+}
+
+.secret-card__description {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+.secret-locked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    font-size: 0.82rem;
+    color: var(--text-subtle);
+    background: var(--surface-2);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-md);
+}
+
+/* Zeldzaamheid, als klein label bij een behaald niveau. */
+.rarity {
+    font-size: 0.68rem;
+    color: var(--text-subtle);
+}
+
+@media (max-width: 600px) {
+    .achievement-card {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    .tier-row {
+        justify-content: space-between;
+    }
+
+    .secret-grid {
+        grid-template-columns: 1fr;
+    }
+}

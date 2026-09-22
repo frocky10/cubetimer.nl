@@ -60,6 +60,11 @@ $recenteXp = Database::all(
     [$userId]
 );
 
+$achievements = Database::first(
+    'SELECT COUNT(*) AS aantal FROM user_achievements WHERE user_id = ?',
+    [$userId]
+);
+
 $openMarkeringen = Database::first(
     "SELECT COUNT(*) AS aantal FROM solve_flags WHERE user_id = ? AND status = 'pending'",
     [$userId]
@@ -90,4 +95,9 @@ Http::ok([
         'at'     => str_replace(' ', 'T', (string) $row['created_at']) . 'Z',
     ], $recenteXp),
     'pendingFlags' => (int) ($openMarkeringen['aantal'] ?? 0),
+    'achievements' => [
+        'unlocked' => (int) ($achievements['aantal'] ?? 0),
+        'total'    => count(Achievements::families()) * count(Achievements::TIERS)
+                      + count(Achievements::secrets()),
+    ],
 ]);
