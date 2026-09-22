@@ -30,6 +30,8 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Daily challenges: scramble van de dag plus twee opdrachten
 - 96 achievements in vier niveaus, plus twaalf geheime
 - Openbare, deelbare profielen op /profiel.php?u=naam
+- Volgen en vrienden, met een eigen vriendenranglijst
+- Toernooimodus: een simulatie van een WCA-competitie tegen bots
 - Bug-/ideeënknop die een GitHub-issue aanmaakt
 - Donker en licht thema, sessiegrafiek, confetti bij een PR
 
@@ -55,6 +57,7 @@ public_html/                   Precies wat er op de server komt te staan
     leaderboard.js             Ranglijsten
     challenges.js              Daily challenges en de scramble van de dag
     achievements.js            Achievements
+    tournament.js              Toernooimodus
     admin.js                   Beoordeelwachtrij (alleen voor de rol admin)
     scrambleScript.js          Scrambles via cubing.js (ES-module)
     bluetoothCube.js           Smart cubes via Web Bluetooth (ES-module)
@@ -65,7 +68,7 @@ public_html/                   Precies wat er op de server komt te staan
     lib/                       Config, Http, Database, Auth, RateLimiter, GitHubIssues,
                                SiteTime, Events, Averages, Records, Xp,
                                Leaderboard, Challenges, SolveFacts, Achievements,
-                               PublicProfile
+                               PublicProfile, Follows, Tournaments, TournamentField
     auth/                      register, login, logout, me
     sync/                      pull, push
     feedback/                  report
@@ -73,6 +76,8 @@ public_html/                   Precies wat er op de server komt te staan
     profile/                   overview, settings, public
     challenges/                today, submit, contribute
     achievements/              list
+    follows/                   toggle, list
+    tournament/                state, start, solve, abandon
     admin/                     flags
   Pictures/  Fonts/
 ```
@@ -107,7 +112,7 @@ find public_html/api -name '*.php' -exec php -l {} \;
 
 # JavaScript-syntax (de twee ES-modules kunnen hier niet doorheen)
 for f in ui script stats settings feedback account leaderboard challenges \
-         achievements admin; do
+         achievements tournament admin; do
   node --check public_html/Script/$f.js
 done
 
@@ -181,11 +186,12 @@ garandeert. De twee ES-modules laden apart en mogen nergens vroeg op rekenen.
 | Object | Van wie | Waarvoor |
 |---|---|---|
 | `window.CubeTimerUI` | `ui.js` | `toast`, `ask`, `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
-| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `getState`, en de Bluetooth-haken |
+| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture`, `getState`, en de Bluetooth-haken |
 | `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
 | `window.CubeTimerLeaderboard` | `leaderboard.js` | `open`, `reload` |
 | `window.CubeTimerChallenges` | `challenges.js` | `load`, `stopChallenge` |
 | `window.CubeTimerAchievements` | `achievements.js` | `load`, `announce` |
+| `window.CubeTimerTournament` | `tournament.js` | `load`, `stopCapture` |
 
 Gebruik **`CubeTimerUI.ask()` in plaats van `prompt()` of `confirm()`** en
 **`CubeTimerUI.toast()` in plaats van `alert()`**. De browserdialogen passen
@@ -289,6 +295,12 @@ uit `lib/`.
 | `challenges/submit.php` | POST | Je poging voor de scramble van de dag |
 | `challenges/contribute.php` | POST | Scrambles aanleveren voor de voorraad |
 | `achievements/list.php` | GET | De catalogus, met je eigen stand als je ingelogd bent |
+| `follows/toggle.php` | POST | Iemand volgen of ontvolgen |
+| `follows/list.php` | GET | Wie je volgt, wie jou volgt, wie je vrienden zijn |
+| `tournament/state.php` | GET | Lopend toernooi, keuzes, historie en samenvatting |
+| `tournament/start.php` | POST | Een toernooi beginnen |
+| `tournament/solve.php` | POST | Een solve in het lopende toernooi |
+| `tournament/abandon.php` | POST | Stoppen met het lopende toernooi |
 | `admin/flags.php` | GET/POST | Beoordeelwachtrij (alleen rol `admin`) |
 
 ### Rate limiting
@@ -393,6 +405,64 @@ zetten is zonder herhaald vlak.
 Loopt de voorraad leeg, dan is er die dag simpelweg geen scramble van de dag;
 de twee andere opdrachten staan er wel. Dat is bewust: liever geen opdracht dan
 een scramble waarvan we de herkomst niet kennen.
+
+---
+
+## Toernooimodus
+
+Een simulatie van een WCA-competitie: drie rondes (kwalificatie, halve finale,
+finale) van vijf solves, gerangschikt op Ao5 met je beste single als tiebreak.
+De kwalificatie heeft een cutoff (haal je die niet in twee solves, dan stopt je
+ronde daar), en elke solve boven de tijdslimiet is een DNF. Na elke ronde valt
+het veld terug tot de besten.
+
+**Los van je sessies.** Zolang er een ronde loopt stuurt
+`cubeTimerApi.setSolveCapture()` je afgeronde solves naar het toernooi in
+plaats van naar je gewone tijden. De solves komen in `tournament_solves`, de
+records in `tournament_records`, met een eigen blok op je profiel. Raak die
+haak niet kwijt: zonder capture lopen toernooitijden dwars door je
+oefengemiddelden heen.
+
+**Moeilijkheidsgraden** staan in `Tournaments::DIFFICULTIES`. `reference` is het
+gemiddelde waar het veld omheen gebouwd wordt, in milliseconden op 3x3;
+`Events::speedFactor()` rekent dat om naar het gekozen event. `spread` bepaalt
+hoe ver het veld uit elkaar ligt. Bij `opmaat` is de referentie je eigen Ao12.
+
+| Niveau | Snelste | Midden | Langzaamste |
+|---|---|---|---|
+| Beginner | 29 s | 45 s | 69 s |
+| Clubniveau | 14 s | 20 s | 29 s |
+| Nationaal | 8 s | 11 s | 15 s |
+| WK-niveau | 5,4 s | 6,5 s | 7,8 s |
+| Open toernooi | 5,6 s | 16 s | 45 s |
+
+De omrekening van percentiel naar tijd is **vermenigvuldigend**
+(`exp((percentiel - 0.5) * 2 * spread)`), niet optellend. Met een lineaire
+schaal sloeg het open toernooi door naar negatieve tijden; de eerste versie gaf
+een bot van 0,73 seconden.
+
+**De tegenstanders** zijn verzonnen cubers uit `TournamentField::ROSTER`, met
+een vast percentiel zodat dezelfde naam op elk niveau even sterk is ten
+opzichte van de rest. Daarnaast komt tot een kwart van het veld uit echte
+gebruikers van de site. Hun tijden worden **niet** overgenomen: alleen hun
+niveau (hun Ao12, of anders hun single) wordt gebruikt om tijden mee te
+simuleren. Ze hebben dus niet echt meegedaan, en dat staat ook zo in de
+interface met een `sim`-label. Wie zichzelf van de ranglijsten haalt, komt
+nergens in een deelnemersveld terecht.
+
+De tijden van je tegenstanders worden pas berekend als jij je ronde af hebt, in
+`Tournaments::scoreRound()`. Vooruitkijken kan dus niet.
+
+## Volgen en vrienden
+
+Volgen is eenzijdig en vraagt geen toestemming. Volgen jullie elkaar allebei,
+dan zijn jullie vrienden — dat is geen aparte status in de database maar een
+wederzijds paar rijen in `user_follows`. Er zijn dus geen verzoeken om goed te
+keuren.
+
+Je kunt alleen iemand volgen die meedoet aan de ranglijsten. De ranglijst heeft
+een `scope`: `all` of `friends`, waarbij `friends` beperkt tot
+`Follows::circleIds()` (iedereen die je volgt, plus jezelf).
 
 ---
 
@@ -538,6 +608,11 @@ elke solve al een eigen `id` heeft.
   scramble waarvan we de herkomst niet kennen.
 - Het profiel toont hooguit twaalf uitgelichte achievements, het zeldzaamst
   eerst (`PublicProfile::HIGHLIGHT_COUNT`).
+- Een toernooi kent drie vaste rondes. Wil je er meer, dan moeten
+  `Tournaments::ROUND_NAMES` en `ADVANCING` mee.
+- Je kunt maar een toernooi tegelijk hebben lopen.
+- Je volgt hooguit 500 mensen (`Follows::MAX_FOLLOWING`), zodat de
+  vriendenranglijst een enkele query blijft.
 - `achievements/list.php` doet een volledige `Records::rebuild()` om de
   voortgang vers te hebben. Dat is dezelfde 2,5 seconde als een synchronisatie
   bij een heel groot account; bij klachten kan het scherm de laatst bekende

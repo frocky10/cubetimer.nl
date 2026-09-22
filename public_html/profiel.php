@@ -15,7 +15,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/api/bootstrap.php';
 
 $gevraagd = (string) ($_GET['u'] ?? '');
-$profiel = $gevraagd === '' ? null : PublicProfile::find($gevraagd);
+$kijker = Auth::user();
+$profiel = $gevraagd === '' ? null : PublicProfile::find($gevraagd, $kijker === null ? null : (int) $kijker['id']);
 
 if ($profiel === null) {
     http_response_code(404);
@@ -159,8 +160,30 @@ $CATEGORIE_LABELS = [
                             op <?= e($profiel['mainEvent']['label']) ?> met <?= e(tijd($profiel['rank']['valueMs'])) ?>
                         </p>
                         <?php endif; ?>
+                        <p class="profile-hero__sub" id="follow-counts">
+                            <strong><?= (int) $profiel['follows']['followers'] ?></strong>
+                            <?= $profiel['follows']['followers'] === 1 ? 'volger' : 'volgers' ?> ·
+                            <strong><?= (int) $profiel['follows']['following'] ?></strong> volgend ·
+                            <strong><?= (int) $profiel['follows']['friends'] ?></strong>
+                            <?= $profiel['follows']['friends'] === 1 ? 'vriend' : 'vrienden' ?>
+                            <?php if ($profiel['relation']['friends']): ?>
+                                · <span class="country-tag">vrienden</span>
+                            <?php elseif ($profiel['relation']['followsYou']): ?>
+                                · <span class="country-tag">volgt jou</span>
+                            <?php endif; ?>
+                        </p>
                     </div>
-                    <button class="btn" type="button" id="copy-link">Link kopiëren</button>
+                    <div class="profile-hero__actions">
+                        <?php if ($kijker !== null && !$profiel['isSelf']): ?>
+                        <button class="btn <?= $profiel['relation']['following'] ? '' : 'btn--primary' ?>"
+                                type="button" id="follow-button"
+                                data-username="<?= e($profiel['username']) ?>"
+                                data-following="<?= $profiel['relation']['following'] ? '1' : '0' ?>">
+                            <?= $profiel['relation']['following'] ? 'Ontvolgen' : 'Volgen' ?>
+                        </button>
+                        <?php endif; ?>
+                        <button class="btn" type="button" id="copy-link">Link kopiëren</button>
+                    </div>
                 </div>
 
                 <div class="xp-bar">
@@ -221,6 +244,55 @@ $CATEGORIE_LABELS = [
             </div>
         </section>
 
+        <!-- Toernooien: aparte cijfers, want die tijden komen onder heel andere
+             omstandigheden tot stand dan gewone oefensolves. -->
+        <?php if ($profiel['tournaments']['played'] > 0): ?>
+        <section class="panel">
+            <div class="panel__head"><h2 class="panel__title">Toernooien</h2></div>
+            <div class="panel__body">
+                <div class="stat-grid">
+                    <div class="stat">
+                        <span class="stat__label">Gespeeld</span>
+                        <span class="stat__value"><?= (int) $profiel['tournaments']['played'] ?></span>
+                    </div>
+                    <div class="stat stat--success">
+                        <span class="stat__label">Gewonnen</span>
+                        <span class="stat__value"><?= (int) $profiel['tournaments']['won'] ?></span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat__label">Podiums</span>
+                        <span class="stat__value"><?= (int) $profiel['tournaments']['podiums'] ?></span>
+                    </div>
+                    <div class="stat stat--accent">
+                        <span class="stat__label">Beste plek</span>
+                        <span class="stat__value"><?= $profiel['tournaments']['bestPosition'] === null
+                            ? '--' : (int) $profiel['tournaments']['bestPosition'] . 'e' ?></span>
+                    </div>
+                </div>
+
+                <?php if ($profiel['tournaments']['events']): ?>
+                <div class="records-table">
+                    <?php foreach ($profiel['tournaments']['events'] as $event): ?>
+                    <div class="records-event">
+                        <span class="records-event__name"><?= e($event['label']) ?></span>
+                        <div class="records-event__grid">
+                            <?php foreach (['single' => 'Beste', 'ao5' => 'Ao5'] as $categorie => $label): ?>
+                                <?php if (!isset($event['records'][$categorie])) { continue; } ?>
+                                <div class="records-cell<?= $categorie === 'single' ? ' records-cell--best' : '' ?>">
+                                    <span class="records-cell__label"><?= e($label) ?></span>
+                                    <span class="records-cell__value"><?= e(tijd($event['records'][$categorie])) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <p class="field__hint">Toernooitijden staan los van de records hierboven.</p>
+                <?php endif; ?>
+            </div>
+        </section>
+        <?php endif; ?>
+
         <!-- Uitgelichte achievements -->
         <section class="panel">
             <div class="panel__head"><h2 class="panel__title">Achievements</h2></div>
@@ -249,6 +321,32 @@ $CATEGORIE_LABELS = [
     <div class="toast-host" id="toast-host" role="status" aria-live="polite"></div>
 
     <script>
+        document.getElementById('follow-button')?.addEventListener('click', async function () {
+            var knop = this;
+            var volgen = knop.dataset.following !== '1';
+            knop.disabled = true;
+            try {
+                var response = await fetch('api/follows/toggle.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ username: knop.dataset.username, follow: volgen })
+                });
+                var data = await response.json();
+                if (!data.ok) throw new Error(data.message || 'Dat is niet gelukt.');
+
+                knop.dataset.following = data.relation.following ? '1' : '0';
+                knop.textContent = data.relation.following ? 'Ontvolgen' : 'Volgen';
+                knop.classList.toggle('btn--primary', !data.relation.following);
+                // De pagina hoeft niet opnieuw geladen; alleen het aantal klopt niet meer.
+                window.location.reload();
+            } catch (err) {
+                knop.textContent = err.message;
+            } finally {
+                knop.disabled = false;
+            }
+        });
+
         document.getElementById('copy-link')?.addEventListener('click', async function () {
             var knop = this;
             try {

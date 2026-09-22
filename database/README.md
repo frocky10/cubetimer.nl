@@ -28,6 +28,7 @@ database/<nummer>_<wat_het_doet>.sql
 | 003    | `003_records_xp_en_leaderboards.sql` | `user_records`, `solve_flags`, `xp_events`, plus streakvelden op `user_profiles` |
 | 004    | `004_daily_challenges.sql`  | `scramble_pool`, `daily_challenges`, `challenge_entries` |
 | 005    | `005_achievements.sql`      | `user_achievements` — wat iemand behaald heeft en wanneer |
+| 006    | `006_toernooien_en_volgen.sql` | `user_follows`, plus de zes toernooitabellen |
 
 ## Eenmalige setup in DirectAdmin
 
@@ -40,12 +41,12 @@ database/<nummer>_<wat_het_doet>.sql
    zijn. Staat er nog `latin1`, pas dat dan aan in phpMyAdmin → *Operations*.
 3. **Migraties importeren** — phpMyAdmin → kies de database → tabblad
    *Importeren* → `001_initial_schema.sql` kiezen → *Start*. Daarna hetzelfde
-   voor `002` tot en met `005`, in die volgorde.
+   voor `002` tot en met `006`, in die volgorde.
 4. **Controleren** — draai in phpMyAdmin → *SQL*:
    ```sql
    SELECT * FROM schema_migrations ORDER BY version;
    ```
-   Je hoort nu rijen `001` tot en met `005` te zien.
+   Je hoort nu rijen `001` tot en met `006` te zien.
 5. **Configuratie invullen** — kopieer `public_html/api/config.example.php` naar
    `~/cubetimer_config.php` (dus één map **boven** `public_html`) en vul je
    database- en GitHub-gegevens in. Zie de sectie *Configuratie* hieronder.
@@ -89,8 +90,19 @@ users ──1:1── user_profiles          (xp, level, streak, land, hoofd-eve
   ├──1:n── xp_events                 (logboek van alle toegekende XP)
   ├──1:n── challenge_entries ──n:1── daily_challenges ──n:1── scramble_pool
   ├──1:n── user_achievements         (behaalde achievements)
+  ├──n:n── user_follows              (wie volgt wie; wederzijds = vrienden)
+  ├──1:n── tournament_records        (records uit toernooien, apart gehouden)
+  ├──1:n── tournaments ──1:n── tournament_rounds
+  │                    ├──1:n── tournament_competitors
+  │                    ├──1:n── tournament_results
+  │                    └──1:n── tournament_solves
   └──1:n── timer_sessions ──1:n── solves
 ```
+
+`tournament_records` staat bewust los van `user_records`. Een toernooitijd komt
+onder heel andere omstandigheden tot stand dan een oefensolve; ze horen niet
+door dezelfde gemiddelden te lopen, maar wel ergens zichtbaar te zijn. Op het
+profiel krijgen ze een eigen blok.
 
 De achievements zelf staan **niet** in de database maar in
 `public_html/api/lib/Achievements.php`. Het zijn er zesennegentig, de drempel
