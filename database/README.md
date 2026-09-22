@@ -1,0 +1,93 @@
+# Database
+
+Alle wijzigingen aan de MySQL-database staan hier als genummerde SQL-bestanden.
+Je importeert ze **op volgorde**, en elk bestand hoef je maar één keer te draaien.
+
+## Conventie
+
+```
+database/<nummer>_<wat_het_doet>.sql
+```
+
+* Het nummer is driecijferig en loopt op: `001`, `002`, `003`, …
+* De bestandsnaam zegt wat de migratie aanpast.
+* Bovenin elk bestand staat een blok commentaar met precies wat er verandert.
+* Elke migratie eindigt met een `INSERT` in `schema_migrations`, zodat je in de
+  database kunt zien welke versies al gedraaid hebben.
+* Migraties zijn **additief**: een al geïmporteerd bestand wordt nooit aangepast.
+  Moet er iets anders? Dan komt er een nieuw nummer bij.
+* Alle migraties zijn zo geschreven dat ze veilig opnieuw te draaien zijn
+  (`CREATE TABLE IF NOT EXISTS`, `ON DUPLICATE KEY UPDATE`).
+
+## Overzicht
+
+| Nummer | Bestand                     | Wat het doet |
+|--------|-----------------------------|--------------|
+| 001    | `001_initial_schema.sql`    | Migratietabel, `users`, `user_profiles`, `user_sessions`, `password_resets`, `timer_sessions`, `solves` |
+| 002    | `002_feedback_reports.sql`  | `feedback_reports` — logboek van meldingen uit de bug-knop |
+
+## Eenmalige setup in DirectAdmin
+
+1. **Database aanmaken** — DirectAdmin → *MySQL Management* → *Create new Database*.
+   * Database naam: bijv. `cubetimer`
+   * Maak meteen een database-gebruiker aan met een sterk wachtwoord.
+   * DirectAdmin zet er automatisch je accountnaam voor: je krijgt iets als
+     `gebruiker_cubetimer` en `gebruiker_cubeuser`. Noteer de **volledige** namen.
+2. **Collation controleren** — de database moet `utf8mb4` / `utf8mb4_unicode_ci`
+   zijn. Staat er nog `latin1`, pas dat dan aan in phpMyAdmin → *Operations*.
+3. **Migraties importeren** — phpMyAdmin → kies de database → tabblad
+   *Importeren* → `001_initial_schema.sql` kiezen → *Start*. Daarna hetzelfde
+   voor `002_feedback_reports.sql`.
+4. **Controleren** — draai in phpMyAdmin → *SQL*:
+   ```sql
+   SELECT * FROM schema_migrations ORDER BY version;
+   ```
+   Je hoort nu rijen `001` en `002` te zien.
+5. **Configuratie invullen** — kopieer `public_html/api/config.example.php` naar
+   `~/cubetimer_config.php` (dus één map **boven** `public_html`) en vul je
+   database- en GitHub-gegevens in. Zie de sectie *Configuratie* hieronder.
+
+## Configuratie
+
+De API leest zijn geheimen uit een PHP-bestand dat **buiten de webroot** staat,
+zodat niemand het via de browser kan opvragen en het nooit in git belandt.
+
+De API zoekt op deze plekken, in deze volgorde:
+
+1. `CUBETIMER_CONFIG` (environment-variabele met een pad)
+2. `<home>/cubetimer_config.php` — de aanbevolen plek
+3. `<map boven public_html>/cubetimer_config.php`
+4. `public_html/api/config.php` — alleen als noodgreep; staat in `.gitignore`
+   en wordt door `api/.htaccess` afgeschermd
+
+Zet het bestand neer via DirectAdmin → *File Manager*, één niveau boven
+`public_html`. De FTP-deploy raakt die map niet aan, dus je config blijft staan
+bij elke nieuwe release.
+
+## Een nieuwe migratie toevoegen
+
+1. Nieuw bestand `database/00X_korte_omschrijving.sql`.
+2. Bovenin een commentaarblok met wat het aanpast en waarom.
+3. Onderin de `INSERT` in `schema_migrations` met hetzelfde nummer.
+4. Regel toevoegen aan de tabel *Overzicht* hierboven.
+5. Gebruik `ALTER TABLE` voor wijzigingen aan bestaande tabellen — nooit
+   `DROP` + `CREATE`, want dan verlies je data die al live staat.
+
+## Datamodel in het kort
+
+```
+users ──1:1── user_profiles          (xp, level, land, hoofd-event)
+  │
+  ├──1:n── user_sessions             (actieve logins; cookie-token, gehasht)
+  ├──1:n── password_resets
+  ├──1:n── feedback_reports          (meldingen uit de bug-knop)
+  └──1:n── timer_sessions ──1:n── solves
+```
+
+`solves` draagt zowel `timer_session_id` als een eigen `event` en `solved_at`.
+Die duplicatie is bewust: de daily/weekly averages draaien op de index
+`(user_id, event, solved_at)` en hoeven daardoor niet te joinen.
+
+`client_id` op `timer_sessions` en `solves` is het id dat de browser zelf
+genereert. Daarmee is lokale localStorage-data en serverdata aan elkaar te
+koppelen, ook als iemand eerst uitgelogd heeft getimed.
