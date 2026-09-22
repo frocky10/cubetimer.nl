@@ -5,7 +5,7 @@
 **Een rustige, snelle speedcubing-timer voor in je browser.**
 
 Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cubes
-· ranglijsten · daily challenges · achievements
+· ranglijsten · daily challenges · achievements · profielen
 
 [**cubetimer.nl**](https://cubetimer.nl) · [Roadmap](https://github.com/frocky10/cubetimer.nl/issues) · [Werkafspraken](CLAUDE.md)
 
@@ -40,6 +40,13 @@ Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cu
 <summary>De achievements</summary>
 
 <img src="docs/screenshot-achievements.png" alt="De achievements" />
+
+</details>
+
+<details>
+<summary>Een openbaar profiel</summary>
+
+<img src="docs/screenshot-profiel.png" alt="Een openbaar profiel" />
 
 </details>
 
@@ -129,6 +136,7 @@ terug te zien.
 **Daily challenges** — [#29](https://github.com/frocky10/cubetimer.nl/issues/29)
 
 - [x] Scramble van de dag: iedereen dezelfde scramble, één poging, eigen dagranglijst
+- [x] Elke dag 3x3 plus een roulerend event, in een cyclus van acht dagen
 - [x] Dagopdracht "doe X solves vandaag"
 - [x] Dagopdracht "doe een solve die X% sneller is dan je gebruikelijke tijd"
 
@@ -145,6 +153,14 @@ terug te zien.
 - [x] Voortgangsbalk naar het volgende niveau en hoe zeldzaam elk niveau is
 - [x] Gelden met terugwerkende kracht: alles wat je ooit timede telt mee
 
+**Profielen**
+
+- [x] Openbaar profiel op `/profiel.php?u=naam`, ook bereikbaar via `/u/naam`
+- [x] Deelbaar: de link laat in WhatsApp en Discord meteen zien om wie het gaat
+- [x] Te openen door op een naam in de ranglijst te klikken
+- [x] Landcode naast je naam op de ranglijst en op je profiel
+- [x] Uit te zetten: geen ranglijst betekent ook geen profiel
+
 **De site zelf**
 
 - [x] Eigen design system, geen CSS-framework meer
@@ -157,8 +173,7 @@ terug te zien.
 
 **Account uitbouwen**
 
-- [ ] Openbaar profiel dat je kunt delen
-- [ ] Landenvlag naast je naam op de ranglijst (het veld staat er al)
+- [ ] Volgen wie je interessant vindt, met een eigen ranglijstje
 
 **Nieuwe manieren om te oefenen**
 
@@ -174,7 +189,8 @@ terug te zien.
 - [ ] Wachtwoord vergeten (de tabel staat er al, de e-mailflow nog niet)
 - [ ] E-mailadres bevestigen bij registratie
 - [ ] Paginering op de ranglijsten (de server kan het al, de interface nog niet)
-- [ ] Scramble van de dag ook voor andere events dan 3x3
+- [ ] Scramble van de dag ook voor Megaminx, Square-1 en Clock (lastige notatie)
+- [ ] Echte vlaggen in plaats van landcodes (vraagt meegeleverde SVG-bestanden)
 - [ ] `bluetoothCube.js` opschonen; is bij de restyling met rust gelaten
 - [x] ~~Tijden tonen als `11.53`~~ — besloten: blijft `00:11:530`
 

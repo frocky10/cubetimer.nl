@@ -204,23 +204,34 @@
                 </div>
 
                 <div class="topbar__actions">
+                    <div class="topbar__group" id="topbar-group">
                     <button id="leaderboard-open" class="btn-icon" type="button" title="Ranglijsten" aria-label="Ranglijsten" hidden>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0Z" /><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" /></svg>
+                        <span class="btn-icon__label">Ranglijsten</span>
                     </button>
 
                     <button id="achievements-open" class="btn-icon btn-icon--badged" type="button" title="Achievements" aria-label="Achievements" hidden>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6" /><path d="M8.5 14.5 7 22l5-2.5 5 2.5-1.5-7.5" /></svg>
+                        <span class="btn-icon__label">Achievements</span>
                         <span class="btn-icon__badge" id="achievements-badge" hidden>0</span>
                     </button>
 
                     <button id="challenges-open" class="btn-icon btn-icon--badged" type="button" title="Daily challenges" aria-label="Daily challenges" hidden>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.2" /></svg>
+                        <span class="btn-icon__label">Challenges</span>
                         <span class="btn-icon__badge" id="challenges-badge" hidden>0</span>
                     </button>
 
                     <button id="feedback-open" class="btn-icon" type="button" title="Bug of idee melden" aria-label="Bug of idee melden">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6a4 4 0 0 1 8 0" /><rect x="6" y="6" width="12" height="13" rx="6" /><path d="M3 12h3M18 12h3M4.5 6.5 7 8M19.5 6.5 17 8M4.5 18.5 7 17M19.5 18.5 17 17" /></svg>
+                        <span class="btn-icon__label">Iets melden</span>
                     </button>
+
+                    <button id="settings-open" class="btn-icon" type="button" title="Instellingen" aria-label="Instellingen">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></svg>
+                        <span class="btn-icon__label">Instellingen</span>
+                    </button>
+                    </div>
 
                     <button id="account-open" class="account-chip" type="button" aria-label="Account" hidden>
                         <span class="rank-badge rank-badge--sm" id="account-badge" data-tier="brons" hidden>
@@ -231,8 +242,9 @@
                         <span class="account-chip__sync" id="account-sync" aria-hidden="true"></span>
                     </button>
 
-                    <button id="settings-open" class="btn-icon" type="button" title="Instellingen" aria-label="Instellingen">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></svg>
+                    <button id="topbar-menu" class="btn-icon topbar__menu" type="button"
+                            aria-label="Menu" aria-expanded="false" aria-controls="topbar-group" title="Menu">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
                     </button>
 
                     <div class="toggle" id="theme-toggle" role="button" tabindex="0" aria-label="Wissel tussen licht en donker thema">
@@ -732,8 +744,18 @@
 
                 <div class="setting-row">
                     <div class="setting-row__text">
+                        <span class="setting-row__label">Land</span>
+                        <span class="setting-row__hint">Komt als code naast je naam op de ranglijst.</span>
+                    </div>
+                    <div class="setting-row__control">
+                        <select id="account-country" class="select"></select>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-row__text">
                         <span class="setting-row__label">Meedoen aan ranglijsten</span>
-                        <span class="setting-row__hint">Uit = je tijden blijven van jou en verschijnen nergens.</span>
+                        <span class="setting-row__hint">Uit = je tijden en je profiel zijn voor niemand zichtbaar.</span>
                     </div>
                     <div class="setting-row__control">
                         <label class="switch">
@@ -748,6 +770,8 @@
                 <p class="notice notice--warning" id="account-flag-notice" hidden></p>
 
                 <div class="time-modal__actions">
+                    <a class="btn" id="account-profile-link" href="#" target="_blank" rel="noopener">Mijn profiel</a>
+                    <button class="btn" type="button" id="account-copy-profile">Profiellink kopiëren</button>
                     <button class="btn" type="button" id="account-sync-now">Nu synchroniseren</button>
                     <button class="btn btn--danger" type="button" id="account-logout">Uitloggen</button>
                 </div>

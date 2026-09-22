@@ -15,12 +15,14 @@ $user = Auth::requireUser();
 $userId = (int) $user['id'];
 
 $profiel = Database::first(
-    'SELECT main_event, xp, level, current_streak, longest_streak, last_active_date, show_on_leaderboard
+    'SELECT main_event, country_code, xp, level, current_streak, longest_streak,
+            last_active_date, show_on_leaderboard
      FROM user_profiles WHERE user_id = ?',
     [$userId]
 );
-$profiel ??= ['main_event' => '333', 'xp' => 0, 'level' => 1, 'current_streak' => 0,
-              'longest_streak' => 0, 'last_active_date' => null, 'show_on_leaderboard' => 1];
+$profiel ??= ['main_event' => '333', 'country_code' => null, 'xp' => 0, 'level' => 1,
+              'current_streak' => 0, 'longest_streak' => 0, 'last_active_date' => null,
+              'show_on_leaderboard' => 1];
 
 $xp = (int) $profiel['xp'];
 $level = (int) $profiel['level'];
@@ -86,6 +88,7 @@ Http::ok([
     ],
     'rank'      => $rank,
     'mainEvent' => ['id' => $mainEvent, 'label' => Events::label($mainEvent)],
+    'country'   => $profiel['country_code'],
     'onLeaderboard' => (int) $profiel['show_on_leaderboard'] === 1,
     'events'    => array_values($perEvent),
     'recentXp'  => array_map(static fn ($row) => [

@@ -34,8 +34,6 @@
     const bannerHint = document.getElementById('challenge-banner-hint');
     const bannerCancel = document.getElementById('challenge-banner-cancel');
 
-    const CHALLENGE_EVENT = '333';
-
     let data = null;
     let ingelogd = false;
     let actieveChallenge = null;   // de challenge waarvoor de timer klaarstaat
@@ -51,6 +49,7 @@
         try {
             data = await UI.api('challenges/today.php');
             ingelogd = data.authenticated === true;
+            voorraadEvents = Object.keys(data.poolSizes || {});
             render();
         } catch (err) {
             list.innerHTML = '';
@@ -253,17 +252,35 @@
      * Challengemodus: de scramble van de dag timen
      * ================================================================== */
 
-    function startChallenge(challenge) {
+    async function startChallenge(challenge) {
+        // De scramble hoort bij een bepaald event; staat je sessie op iets
+        // anders, dan is het aanbod om te wisselen logischer dan een waarschuwing.
+        if (api.getActiveSessionEvent() !== challenge.event) {
+            const wisselen = await UI.ask({
+                title: 'Naar ' + challenge.eventLabel + ' wisselen?',
+                message: `De scramble van de dag is voor ${challenge.eventLabel}, `
+                       + `maar je sessie staat op ${api.getEventLabel(api.getActiveSessionEvent())}. `
+                       + 'Zal ik je sessie omzetten?',
+                confirmLabel: 'Omzetten',
+                cancelLabel: 'Laat maar zo'
+            });
+            if (wisselen) {
+                api.setActiveSessionEvent(challenge.event);
+            }
+        }
+
         actieveChallenge = challenge;
 
         api.setScrambleOverride(challenge.scramble);
         banner.hidden = false;
-        bannerHint.textContent = api.getActiveSessionEvent() === CHALLENGE_EVENT
+        bannerHint.textContent = api.getActiveSessionEvent() === challenge.event
             ? 'Je hebt een poging. Je volgende solve telt.'
-            : 'Let op: je sessie staat niet op 3x3. De scramble is er wel een voor 3x3.';
+            : `Let op: je sessie staat op ${api.getEventLabel(api.getActiveSessionEvent())}, `
+              + `de scramble is er een voor ${challenge.eventLabel}.`;
 
         UI.closeModal(modal);
-        UI.toast('De scramble van de dag staat klaar. Je volgende solve telt.', { type: 'info' });
+        UI.toast(`Scramble van de dag voor ${challenge.eventLabel} staat klaar. Je volgende solve telt.`,
+            { type: 'info' });
     }
 
     function stopChallenge(melding) {
@@ -311,24 +328,33 @@
      * sturen wat je zelf morgen krijgt.
      * ================================================================== */
 
-    const voorraad = [];
-    let voorraadTimer = null;
+    // Per event een klein stapeltje, dat we in een keer opsturen.
+    const voorraad = {};
+    const voorraadTimers = {};
+
+    // Alleen events waarvoor de server een scramble van de dag kan maken.
+    let voorraadEvents = [];
 
     window.addEventListener('cubetimer:scramble-change', event => {
         if (!ingelogd) return;
-        if (event.detail.eventType !== CHALLENGE_EVENT) return;
         if (actieveChallenge) return;
 
+        const eventId = event.detail.eventType;
+        if (!voorraadEvents.includes(eventId)) return;
+
         const scramble = (event.detail.scramble || '').trim();
-        if (!scramble || voorraad.includes(scramble)) return;
+        if (!scramble) return;
 
-        voorraad.push(scramble);
-        if (voorraad.length < 5) return;
+        voorraad[eventId] = voorraad[eventId] || [];
+        if (voorraad[eventId].includes(scramble)) return;
 
-        window.clearTimeout(voorraadTimer);
-        voorraadTimer = window.setTimeout(() => {
-            const zending = voorraad.splice(0, voorraad.length);
-            UI.api('challenges/contribute.php', { body: { scrambles: zending } })
+        voorraad[eventId].push(scramble);
+        if (voorraad[eventId].length < 5) return;
+
+        window.clearTimeout(voorraadTimers[eventId]);
+        voorraadTimers[eventId] = window.setTimeout(() => {
+            const zending = voorraad[eventId].splice(0, voorraad[eventId].length);
+            UI.api('challenges/contribute.php', { body: { event: eventId, scrambles: zending } })
                 .catch(() => { /* achtergrondwerk; hier hoeft niemand iets van te merken */ });
         }, 2000);
     });

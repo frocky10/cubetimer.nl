@@ -31,7 +31,18 @@ require_once __DIR__ . '/Xp.php';
  */
 final class Challenges
 {
+    /** 3x3 staat er elke dag; daarnaast rouleert er een tweede event. */
     public const SCRAMBLE_EVENT = '333';
+
+    /**
+     * De events die als tweede scramble van de dag langskomen, in deze
+     * volgorde. Het event van vandaag hangt af van de datum, dus voor iedereen
+     * hetzelfde en netjes om de beurt.
+     *
+     * Alleen events waarvan we een aangeleverde scramble kunnen controleren
+     * staan erbij; zie Events::SCRAMBLE_FORMATS.
+     */
+    public const ROTATING_EVENTS = ['222', '444', 'pyram', '555', 'skewb', '333oh', '666', '777'];
 
     /** Hoe lang een aangeleverde scramble in de voorraad moet rijpen. */
     private const POOL_MATURITY_HOURS = 24;
@@ -110,18 +121,37 @@ final class Challenges
             'date'       => $date,
             'timezone'   => SiteTime::zoneName(),
             'challenges' => $challenges,
-            'poolSize'   => self::poolSize(),
+            'poolSizes'  => self::poolSizes(),
+            'rotatingEvent' => self::rotatingEventFor($date),
         ];
+    }
+
+    /**
+     * Welk event er vandaag naast 3x3 aan de beurt is. Bepaald door het aantal
+     * dagen sinds 1970, dus elke dag de volgende uit de rij en voor iedereen
+     * gelijk.
+     */
+    public static function rotatingEventFor(string $date): string
+    {
+        $dagen = (int) floor(strtotime($date . ' 00:00:00 UTC') / 86400);
+        $index = $dagen % count(self::ROTATING_EVENTS);
+        return self::ROTATING_EVENTS[$index];
     }
 
     /** Maakt de opdrachten voor een dag aan als ze er nog niet zijn. */
     public static function ensureForDate(string $date): void
     {
         $bestaand = Database::all(
-            'SELECT type FROM daily_challenges WHERE challenge_date = ?',
+            'SELECT type, event FROM daily_challenges WHERE challenge_date = ?',
             [$date]
         );
         $aanwezig = array_column($bestaand, 'type');
+        $scrambleEvents = [];
+        foreach ($bestaand as $rij) {
+            if ($rij['type'] === 'scramble_of_the_day') {
+                $scrambleEvents[] = (string) $rij['event'];
+            }
+        }
 
         // De keuzes hangen af van de datum: iedereen dezelfde opdracht, elke
         // dag een andere, en vooraf niet interessant om te weten.
@@ -131,24 +161,46 @@ final class Challenges
             $target = self::SOLVE_COUNT_TARGETS[$zaad % count(self::SOLVE_COUNT_TARGETS)];
             self::insert($date, 'solve_count', '', 'Blijf oefenen',
                 sprintf('Doe vandaag %d solves. Elk event telt mee.', $target),
-                ['target' => $target], self::XP_SOLVE_COUNT, 2);
+                ['target' => $target], self::XP_SOLVE_COUNT, 3);
         }
 
         if (!in_array('beat_average', $aanwezig, true)) {
             $percent = self::BEAT_AVERAGE_PERCENTS[intdiv($zaad, 7) % count(self::BEAT_AVERAGE_PERCENTS)];
             self::insert($date, 'beat_average', '', 'Sneller dan jezelf',
                 sprintf('Doe een solve die minstens %d%% sneller is dan je gebruikelijke tijd.', $percent),
-                ['percent' => $percent], self::XP_BEAT_AVERAGE, 3);
+                ['percent' => $percent], self::XP_BEAT_AVERAGE, 4);
         }
 
-        if (!in_array('scramble_of_the_day', $aanwezig, true)) {
-            $scramble = self::pickScramble($date);
-            if ($scramble !== null) {
-                self::insert($date, 'scramble_of_the_day', self::SCRAMBLE_EVENT, 'Scramble van de dag',
-                    'Iedereen krijgt dezelfde scramble en heeft een poging. Hoe snel ben jij?',
-                    ['scramble' => $scramble['scramble'], 'pool_id' => $scramble['id']],
-                    self::XP_SCRAMBLE, 1);
+        // 3x3 staat er altijd, plus het event dat vandaag aan de beurt is.
+        $gewenst = [self::SCRAMBLE_EVENT, self::rotatingEventFor($date)];
+        $volgorde = 1;
+
+        foreach (array_unique($gewenst) as $event) {
+            if (in_array($event, $scrambleEvents, true)) {
+                $volgorde++;
+                continue;
             }
+
+            $scramble = self::pickScramble($date, $event);
+            if ($scramble === null) {
+                // Geen scramble in de voorraad voor dit event: dan is er
+                // vandaag geen scramble van de dag voor dit event. Liever geen
+                // opdracht dan een scramble waarvan we de herkomst niet kennen.
+                $volgorde++;
+                continue;
+            }
+
+            self::insert(
+                $date,
+                'scramble_of_the_day',
+                $event,
+                'Scramble van de dag · ' . Events::label($event),
+                'Iedereen krijgt dezelfde scramble en heeft een poging. Hoe snel ben jij?',
+                ['scramble' => $scramble['scramble'], 'pool_id' => $scramble['id']],
+                self::XP_SCRAMBLE,
+                $volgorde
+            );
+            $volgorde++;
         }
     }
 
@@ -172,14 +224,14 @@ final class Challenges
     }
 
     /** @return array{id:int,scramble:string}|null */
-    private static function pickScramble(string $date): ?array
+    private static function pickScramble(string $date, string $event): ?array
     {
         $row = Database::first(
             'SELECT id, scramble FROM scramble_pool
              WHERE event = ? AND used_on IS NULL
                AND created_at < (UTC_TIMESTAMP() - INTERVAL ? HOUR)
              ORDER BY RAND() LIMIT 1',
-            [self::SCRAMBLE_EVENT, self::POOL_MATURITY_HOURS]
+            [$event, self::POOL_MATURITY_HOURS]
         );
 
         if ($row === null) {
@@ -195,19 +247,22 @@ final class Challenges
      *
      * @return array{ok:bool, message:string}
      */
-    public static function contributeScramble(?int $userId, string $scramble): array
+    public static function contributeScramble(?int $userId, string $event, string $scramble): array
     {
         $scramble = trim(preg_replace('/\s+/', ' ', $scramble) ?? '');
 
-        if (!self::looksLikeScramble($scramble)) {
-            return ['ok' => false, 'message' => 'Dat ziet er niet uit als een geldige 3x3-scramble.'];
+        if (!Events::hasScrambleFormat($event)) {
+            return ['ok' => false, 'message' => 'Voor dit event houden we geen scramblevoorraad bij.'];
+        }
+        if (!Events::validateScramble($event, $scramble)) {
+            return ['ok' => false, 'message' => 'Dat ziet er niet uit als een geldige scramble voor dit event.'];
         }
 
         try {
             Database::run(
                 'INSERT INTO scramble_pool (event, scramble, scramble_hash, submitted_by)
                  VALUES (?, ?, ?, ?)',
-                [self::SCRAMBLE_EVENT, $scramble, hash('sha256', $scramble), $userId]
+                [$event, $scramble, hash('sha256', $event . '|' . $scramble), $userId]
             );
         } catch (PDOException $e) {
             if (str_contains($e->getMessage(), 'Duplicate entry')) {
@@ -221,42 +276,26 @@ final class Challenges
     }
 
     /**
-     * Een geldige 3x3-scramble: 16 tot 25 zetten uit de standaardnotatie.
-     * Dit vangt onzin en handmatig geknutselde reeksen af, geen kwaadwillende
-     * die een geldige maar makkelijke scramble instuurt; daarvoor is de
-     * wachttijd van een dag en de willekeurige keuze uit de voorraad.
+     * Hoeveel ongebruikte scrambles er per event klaarliggen. De frontend
+     * gebruikt dit om te weten waar hij nog scrambles voor moet aanleveren.
+     *
+     * @return array<string,int>
      */
-    public static function looksLikeScramble(string $scramble): bool
+    public static function poolSizes(): array
     {
-        if ($scramble === '' || mb_strlen($scramble) > 200) {
-            return false;
-        }
-        $zetten = explode(' ', $scramble);
-        $aantal = count($zetten);
-        if ($aantal < 16 || $aantal > 25) {
-            return false;
-        }
-        foreach ($zetten as $zet) {
-            if (preg_match("/^[UDLRFB][2']?$/", $zet) !== 1) {
-                return false;
-            }
-        }
-        // Twee keer hetzelfde vlak achter elkaar hoort niet in een echte scramble.
-        for ($i = 1; $i < $aantal; $i++) {
-            if ($zetten[$i][0] === $zetten[$i - 1][0]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static function poolSize(): int
-    {
-        $row = Database::first(
-            'SELECT COUNT(*) AS aantal FROM scramble_pool WHERE event = ? AND used_on IS NULL',
-            [self::SCRAMBLE_EVENT]
+        $rows = Database::all(
+            'SELECT event, COUNT(*) AS aantal FROM scramble_pool
+             WHERE used_on IS NULL GROUP BY event'
         );
-        return (int) ($row['aantal'] ?? 0);
+
+        $out = [];
+        foreach (Events::scrambleEvents() as $event) {
+            $out[$event] = 0;
+        }
+        foreach ($rows as $row) {
+            $out[(string) $row['event']] = (int) $row['aantal'];
+        }
+        return $out;
     }
 
     private static function participantCount(int $challengeId): int
@@ -444,7 +483,7 @@ final class Challenges
         if ($penalty !== 'dnf' && $timeMs !== null) {
             $effectief = $penalty === 'plus2' ? $timeMs + 2000 : $timeMs;
 
-            if ($effectief < Events::floorMs(self::SCRAMBLE_EVENT)) {
+            if ($effectief < Events::floorMs((string) $challenge['event'])) {
                 return [
                     'ok' => false,
                     'message' => 'Die tijd is sneller dan het wereldrecord. Er is niets opgeslagen.',
