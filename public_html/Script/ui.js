@@ -323,6 +323,16 @@
      * gedeeld, zodat niet elk script een eigen verzoek doet.
      */
     let statusPromise = null;
+
+    /**
+     * Haalt de status opnieuw op. Nodig na in- of uitloggen: of je beheerder
+     * bent staat erin, en dat verandert met wie er ingelogd is.
+     */
+    function refreshStatus() {
+        statusPromise = null;
+        return status();
+    }
+
     function status() {
         if (statusPromise === null) {
             statusPromise = api('status.php').catch(() => ({
@@ -345,6 +355,7 @@
         formatTime,
         uniqueId,
         status,
+        refreshStatus,
         storage
     };
 })();

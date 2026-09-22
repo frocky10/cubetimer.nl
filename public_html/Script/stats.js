@@ -30,9 +30,16 @@
         best: document.getElementById('stat-best'),
         worst: document.getElementById('stat-worst'),
         mean: document.getElementById('stat-mean'),
-        median: document.getElementById('stat-median'),
+        median: document.getElementById('stat-median')
+    };
+
+    // De gemiddelden staan in een eigen lijstje onder de tegels.
+    const averages = {
+        mo3: document.getElementById('stat-mo3'),
         ao5: document.getElementById('stat-ao5'),
-        ao12: document.getElementById('stat-ao12')
+        ao12: document.getElementById('stat-ao12'),
+        ao50: document.getElementById('stat-ao50'),
+        ao100: document.getElementById('stat-ao100')
     };
 
     if (!scopeContainer || !output.best) return;
@@ -118,6 +125,24 @@
         return best;
     }
 
+    /**
+     * Het beste Mo3: het gemiddelde van drie, zonder wegstrepen. Een enkele
+     * DNF maakt het blok al ongeldig. Gebruikt bij 6x6 en 7x7.
+     */
+    function bestMeanOfThree(entries) {
+        const api = window.cubeTimerApi;
+        if (!api || entries.length < 3) return null;
+
+        let best = null;
+        for (let start = 0; start + 3 <= entries.length; start += 1) {
+            const values = entries.slice(start, start + 3).map(entry => api.getEffectiveTime(entry));
+            if (values.some(value => value === null)) continue;
+            const mean = (values[0] + values[1] + values[2]) / 3;
+            if (best === null || mean < best) best = mean;
+        }
+        return best;
+    }
+
     function median(values) {
         if (!values.length) return null;
         const sorted = values.slice().sort((a, b) => a - b);
@@ -141,8 +166,11 @@
             worst: valid.length ? Math.max(...valid) : null,
             mean: valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : null,
             median: median(valid),
+            mo3: bestMeanOfThree(entries),
             ao5: bestRollingAverage(entries, 5),
-            ao12: bestRollingAverage(entries, 12)
+            ao12: bestRollingAverage(entries, 12),
+            ao50: bestRollingAverage(entries, 50),
+            ao100: bestRollingAverage(entries, 100)
         };
     }
 
@@ -150,11 +178,11 @@
      * Weergave
      * ------------------------------------------------------------------ */
 
-    function show(element, value) {
+    function show(element, value, mutedClass) {
         if (!element) return;
         const hasValue = typeof value === 'number' && Number.isFinite(value);
         element.textContent = hasValue ? UI.formatTime(Math.round(value)) : '--';
-        element.classList.toggle('stat__value--muted', !hasValue);
+        element.classList.toggle(mutedClass || 'stat__value--muted', !hasValue);
     }
 
     function describeCount(stats) {
@@ -181,8 +209,10 @@
         show(output.worst, stats.worst);
         show(output.mean, stats.mean);
         show(output.median, stats.median);
-        show(output.ao5, stats.ao5);
-        show(output.ao12, stats.ao12);
+
+        Object.keys(averages).forEach(key => {
+            show(averages[key], stats[key], 'average-list__value--muted');
+        });
     }
 
     /* ---------------------------------------------------------------------
