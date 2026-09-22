@@ -25,6 +25,8 @@ database/<nummer>_<wat_het_doet>.sql
 |--------|-----------------------------|--------------|
 | 001    | `001_initial_schema.sql`    | Migratietabel, `users`, `user_profiles`, `user_sessions`, `password_resets`, `timer_sessions`, `solves` |
 | 002    | `002_feedback_reports.sql`  | `feedback_reports` — logboek van meldingen uit de bug-knop |
+| 003    | `003_records_xp_en_leaderboards.sql` | `user_records`, `solve_flags`, `xp_events`, plus streakvelden op `user_profiles` |
+| 004    | `004_daily_challenges.sql`  | `scramble_pool`, `daily_challenges`, `challenge_entries` |
 
 ## Eenmalige setup in DirectAdmin
 
@@ -37,12 +39,12 @@ database/<nummer>_<wat_het_doet>.sql
    zijn. Staat er nog `latin1`, pas dat dan aan in phpMyAdmin → *Operations*.
 3. **Migraties importeren** — phpMyAdmin → kies de database → tabblad
    *Importeren* → `001_initial_schema.sql` kiezen → *Start*. Daarna hetzelfde
-   voor `002_feedback_reports.sql`.
+   voor `002`, `003` en `004`, in die volgorde.
 4. **Controleren** — draai in phpMyAdmin → *SQL*:
    ```sql
    SELECT * FROM schema_migrations ORDER BY version;
    ```
-   Je hoort nu rijen `001` en `002` te zien.
+   Je hoort nu rijen `001` tot en met `004` te zien.
 5. **Configuratie invullen** — kopieer `public_html/api/config.example.php` naar
    `~/cubetimer_config.php` (dus één map **boven** `public_html`) en vul je
    database- en GitHub-gegevens in. Zie de sectie *Configuratie* hieronder.
@@ -76,13 +78,28 @@ bij elke nieuwe release.
 ## Datamodel in het kort
 
 ```
-users ──1:1── user_profiles          (xp, level, land, hoofd-event)
+users ──1:1── user_profiles          (xp, level, streak, land, hoofd-event)
   │
   ├──1:n── user_sessions             (actieve logins; cookie-token, gehasht)
   ├──1:n── password_resets
   ├──1:n── feedback_reports          (meldingen uit de bug-knop)
+  ├──1:n── user_records              (beste per event/categorie/periode)
+  ├──1:n── solve_flags               (tijden die nagekeken moeten worden)
+  ├──1:n── xp_events                 (logboek van alle toegekende XP)
+  ├──1:n── challenge_entries ──n:1── daily_challenges ──n:1── scramble_pool
   └──1:n── timer_sessions ──1:n── solves
 ```
+
+`user_records` wordt volledig door de server berekend uit `solves`, na elke
+synchronisatie. De browser levert nooit een gemiddelde aan; dat zou met de
+console te vervalsen zijn. De leaderboards lezen rechtstreeks uit deze tabel.
+
+`solve_flags` staat bewust los van `solves`, want die tabel wordt bij elke
+synchronisatie volledig vervangen. Een markering moet dat overleven.
+
+`xp_events` heeft een unieke sleutel op `(user_id, type, reference)`. Dat is wat
+voorkomt dat dezelfde solve of hetzelfde record bij een volgende synchronisatie
+opnieuw XP oplevert.
 
 `solves` draagt zowel `timer_session_id` als een eigen `event` en `solved_at`.
 Die duplicatie is bewust: de daily/weekly averages draaien op de index

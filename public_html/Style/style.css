@@ -2111,3 +2111,595 @@ body.is-timing #timer {
         display: none;
     }
 }
+
+/* ==========================================================================
+   11. Ranglijsten, XP en challenges
+   ========================================================================== */
+
+/* --- Rangbadge -----------------------------------------------------------
+   De kleur komt van je XP-level, het getal erin van je plek op de ranglijst
+   van je hoofd-event. In de top 999 een hard nummer, daaronder een percentiel.
+   ------------------------------------------------------------------------ */
+
+:root {
+    --tier-brons:   linear-gradient(150deg, #e8a76a 0%, #b4682c 100%);
+    --tier-zilver:  linear-gradient(150deg, #e8eef7 0%, #97a6bb 100%);
+    --tier-goud:    linear-gradient(150deg, #ffe08a 0%, #e0a21a 100%);
+    --tier-platina: linear-gradient(150deg, #d8f4ff 0%, #74b6cf 100%);
+    --tier-diamant: linear-gradient(150deg, #a5f3ff 0%, #6b7bff 100%);
+}
+
+.rank-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    width: 3.1rem;
+    height: 3.1rem;
+    flex-shrink: 0;
+    color: #14202e;
+    background: var(--tier-brons);
+    /* Wapenschildvorm: herkenbaar als rang, ook heel klein. */
+    clip-path: polygon(50% 0%, 100% 18%, 100% 68%, 50% 100%, 0% 68%, 0% 18%);
+    box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.6);
+}
+
+.rank-badge[data-tier="zilver"]  { background: var(--tier-zilver); }
+.rank-badge[data-tier="goud"]    { background: var(--tier-goud); }
+.rank-badge[data-tier="platina"] { background: var(--tier-platina); }
+.rank-badge[data-tier="diamant"] { background: var(--tier-diamant); }
+
+.rank-badge__value {
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
+.rank-badge__level {
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.rank-badge--sm {
+    width: 1.9rem;
+    height: 1.9rem;
+}
+
+.rank-badge--sm .rank-badge__value {
+    font-size: 0.58rem;
+}
+
+.rank-badge--sm .rank-badge__level {
+    display: none;
+}
+
+/* --- XP-balk ------------------------------------------------------------- */
+
+.xp-bar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.xp-bar__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.xp-bar__track {
+    height: 0.6rem;
+    background: var(--surface-3);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.xp-bar__fill {
+    height: 100%;
+    background: var(--gradient-brand);
+    border-radius: var(--radius-pill);
+    transition: width var(--dur-slow) var(--ease-out);
+}
+
+.xp-log {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 11rem;
+    overflow-y: auto;
+}
+
+.xp-log__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.8rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.xp-log__amount {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--success);
+    flex-shrink: 0;
+}
+
+.xp-log__detail {
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --- Knop met telbadge (openstaande challenges) -------------------------- */
+
+.btn-icon--badged {
+    position: relative;
+    overflow: visible;
+}
+
+.btn-icon__badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 1.05rem;
+    height: 1.05rem;
+    padding: 0 0.25rem;
+    font-size: 0.6rem;
+    font-weight: 800;
+    line-height: 1.05rem;
+    text-align: center;
+    color: #04121f;
+    background: var(--gradient-brand);
+    border-radius: var(--radius-pill);
+    box-shadow: 0 0 0 2px var(--bg);
+}
+
+/* --- Lijst met gemiddelden in de sidebar --------------------------------- */
+
+.average-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.average-list__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: 0.4rem var(--space-3);
+    background: var(--surface-2);
+}
+
+.average-list__label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+
+.average-list__value {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.average-list__value--muted {
+    color: var(--text-subtle);
+    font-weight: 500;
+}
+
+/* --- Recordtabel in het accountscherm ------------------------------------ */
+
+.records-table {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.records-event {
+    border-bottom: 1px solid var(--border);
+}
+
+.records-event:last-child {
+    border-bottom: none;
+}
+
+.records-event__name {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    background: var(--surface-2);
+}
+
+.records-event__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: 1px;
+    background: var(--border);
+}
+
+.records-cell {
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-1);
+}
+
+.records-cell__label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+}
+
+.records-cell__value {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.records-cell--best .records-cell__value {
+    color: var(--success);
+}
+
+/* --- Ranglijstmodal ------------------------------------------------------ */
+
+.modal--board .time-modal__dialog {
+    max-width: 44rem;
+}
+
+.board-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(9rem, 1fr));
+    gap: var(--space-3);
+}
+
+/* De periodekeuze krijgt een eigen regel; op een smalle modal passen drie
+   knoppen anders niet naast de twee keuzelijsten. */
+.board-filters__period {
+    grid-column: 1 / -1;
+}
+
+.board-filters .segmented {
+    width: 100%;
+}
+
+.board-me {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: rgba(var(--brand-rgb), 0.1);
+    border: 1px solid rgba(var(--brand-rgb), 0.28);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+}
+
+.board-me__text strong {
+    color: var(--accent-text);
+}
+
+.board-wrap {
+    max-height: 26rem;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.board-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.board-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: var(--space-2) var(--space-3);
+    text-align: left;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-subtle);
+    background: var(--surface-solid);
+    border-bottom: 1px solid var(--border);
+}
+
+.board-table tbody td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.board-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.board-table tbody tr.is-me {
+    background: rgba(var(--brand-rgb), 0.12);
+}
+
+.board-table .board-position {
+    width: 3.5rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--text-subtle);
+}
+
+.board-table tr:nth-child(1) .board-position { color: #ffcb3d; }
+.board-table tr:nth-child(2) .board-position { color: #c9d4e3; }
+.board-table tr:nth-child(3) .board-position { color: #e8a76a; }
+
+.board-cuber {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.board-cuber__name {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.board-cuber__level {
+    font-size: 0.7rem;
+    color: var(--text-subtle);
+}
+
+.board-table .board-time {
+    width: 7rem;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.board-table .board-time--dnf {
+    color: var(--danger);
+}
+
+.time-modal__footer {
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* --- Challenges ---------------------------------------------------------- */
+
+.challenge-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.challenge-card.is-done {
+    border-color: rgba(var(--success-rgb), 0.4);
+    background: rgba(var(--success-rgb), 0.07);
+}
+
+.challenge-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.challenge-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.challenge-card__description {
+    font-size: 0.83rem;
+    color: var(--text-muted);
+}
+
+.challenge-card__xp {
+    flex-shrink: 0;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #04121f;
+    background: var(--gradient-brand);
+    border-radius: var(--radius-pill);
+}
+
+.challenge-card.is-done .challenge-card__xp {
+    background: var(--gradient-success);
+}
+
+.challenge-progress {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.challenge-progress__head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.challenge-progress__track {
+    height: 0.45rem;
+    background: var(--surface-3);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.challenge-progress__fill {
+    height: 100%;
+    background: var(--gradient-brand);
+    border-radius: var(--radius-pill);
+    transition: width var(--dur-slow) var(--ease-out);
+}
+
+.challenge-card.is-done .challenge-progress__fill {
+    background: var(--gradient-success);
+}
+
+.challenge-scramble {
+    padding: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    text-align: center;
+    word-break: break-word;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.challenge-scramble--hidden {
+    color: var(--text-subtle);
+    font-family: var(--font-ui);
+    font-style: italic;
+}
+
+.challenge-result {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    font-size: 0.9rem;
+}
+
+.challenge-result__time {
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--success);
+}
+
+/* Balk boven de timer terwijl de scramble van de dag loopt. */
+.challenge-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    font-size: 0.85rem;
+    background: rgba(var(--warning-rgb), 0.12);
+    border: 1px solid rgba(var(--warning-rgb), 0.35);
+    border-radius: var(--radius-pill);
+}
+
+.challenge-banner__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--warning);
+    box-shadow: 0 0 10px var(--warning);
+    animation: sync-pulse 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.challenge-banner__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.challenge-banner__text span {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+/* --- Beoordeelwachtrij voor de beheerder --------------------------------- */
+
+.flag-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 22rem;
+    overflow-y: auto;
+}
+
+.flag-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--warning);
+    border-radius: var(--radius-md);
+}
+
+.flag-card__body {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.flag-card__title {
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.flag-card__detail {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.flag-card__actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .board-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .board-wrap {
+        max-height: 20rem;
+    }
+
+    .challenge-banner {
+        font-size: 0.78rem;
+        padding: var(--space-2) var(--space-3);
+    }
+}

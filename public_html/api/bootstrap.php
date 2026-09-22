@@ -12,6 +12,13 @@ require_once __DIR__ . '/lib/Database.php';
 require_once __DIR__ . '/lib/Auth.php';
 require_once __DIR__ . '/lib/RateLimiter.php';
 require_once __DIR__ . '/lib/GitHubIssues.php';
+require_once __DIR__ . '/lib/SiteTime.php';
+require_once __DIR__ . '/lib/Events.php';
+require_once __DIR__ . '/lib/Averages.php';
+require_once __DIR__ . '/lib/Records.php';
+require_once __DIR__ . '/lib/Xp.php';
+require_once __DIR__ . '/lib/Leaderboard.php';
+require_once __DIR__ . '/lib/Challenges.php';
 
 $debug = Config::get('debug', false) === true;
 

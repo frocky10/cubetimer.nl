@@ -38,6 +38,9 @@
     <script src="Script/stats.js" defer></script>
     <script src="Script/settings.js" defer></script>
     <script src="Script/feedback.js" defer></script>
+    <script src="Script/leaderboard.js" defer></script>
+    <script src="Script/challenges.js" defer></script>
+    <script src="Script/admin.js" defer></script>
     <script src="Script/account.js" defer></script>
     <script type="module" src="Script/scrambleScript.js"></script>
     <script type="module" src="Script/bluetoothCube.js"></script>
@@ -159,15 +162,30 @@
                                 <span class="stat__label">Mediaan</span>
                                 <span class="stat__value" id="stat-median">--</span>
                             </div>
-                            <div class="stat">
-                                <span class="stat__label">Beste Ao5</span>
-                                <span class="stat__value" id="stat-ao5">--</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat__label">Beste Ao12</span>
-                                <span class="stat__value" id="stat-ao12">--</span>
-                            </div>
                         </div>
+
+                        <ul class="average-list" aria-label="Beste gemiddelden">
+                            <li class="average-list__row">
+                                <span class="average-list__label">Mo3</span>
+                                <span class="average-list__value" id="stat-mo3">--</span>
+                            </li>
+                            <li class="average-list__row">
+                                <span class="average-list__label">Ao5</span>
+                                <span class="average-list__value" id="stat-ao5">--</span>
+                            </li>
+                            <li class="average-list__row">
+                                <span class="average-list__label">Ao12</span>
+                                <span class="average-list__value" id="stat-ao12">--</span>
+                            </li>
+                            <li class="average-list__row">
+                                <span class="average-list__label">Ao50</span>
+                                <span class="average-list__value" id="stat-ao50">--</span>
+                            </li>
+                            <li class="average-list__row">
+                                <span class="average-list__label">Ao100</span>
+                                <span class="average-list__value" id="stat-ao100">--</span>
+                            </li>
+                        </ul>
 
                         <p class="field__hint" id="stats-footnote">Vandaag en Deze week tellen alle sessies van dit event mee.</p>
                     </div>
@@ -185,11 +203,23 @@
                 </div>
 
                 <div class="topbar__actions">
+                    <button id="leaderboard-open" class="btn-icon" type="button" title="Ranglijsten" aria-label="Ranglijsten" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0Z" /><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" /></svg>
+                    </button>
+
+                    <button id="challenges-open" class="btn-icon btn-icon--badged" type="button" title="Daily challenges" aria-label="Daily challenges" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1.2" /></svg>
+                        <span class="btn-icon__badge" id="challenges-badge" hidden>0</span>
+                    </button>
+
                     <button id="feedback-open" class="btn-icon" type="button" title="Bug of idee melden" aria-label="Bug of idee melden">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6a4 4 0 0 1 8 0" /><rect x="6" y="6" width="12" height="13" rx="6" /><path d="M3 12h3M18 12h3M4.5 6.5 7 8M19.5 6.5 17 8M4.5 18.5 7 17M19.5 18.5 17 17" /></svg>
                     </button>
 
                     <button id="account-open" class="account-chip" type="button" aria-label="Account" hidden>
+                        <span class="rank-badge rank-badge--sm" id="account-badge" data-tier="brons" hidden>
+                            <span class="rank-badge__value" id="account-badge-value">--</span>
+                        </span>
                         <span class="account-chip__avatar" id="account-avatar">?</span>
                         <span class="account-chip__name" id="account-name">Inloggen</span>
                         <span class="account-chip__sync" id="account-sync" aria-hidden="true"></span>
@@ -208,6 +238,15 @@
             </header>
 
             <div class="stage">
+                <div class="challenge-banner" id="challenge-banner" hidden>
+                    <span class="challenge-banner__dot" aria-hidden="true"></span>
+                    <span class="challenge-banner__text">
+                        <strong>Scramble van de dag</strong>
+                        <span id="challenge-banner-hint">Je hebt een poging. Je volgende solve telt.</span>
+                    </span>
+                    <button class="btn btn--sm" type="button" id="challenge-banner-cancel">Stoppen</button>
+                </div>
+
                 <div class="stage__timer-row">
                     <div id="ready-lights">
                         <div class="ready-light" id="light1"></div>
@@ -296,6 +335,7 @@
                     <button class="settings-nav__item active" type="button" data-settings-tab="general" aria-pressed="true">Algemeen</button>
                     <button class="settings-nav__item" type="button" data-settings-tab="timer" aria-pressed="false">Timer</button>
                     <button class="settings-nav__item" type="button" data-settings-tab="smart-cube" aria-pressed="false">Smart Cube</button>
+                    <button class="settings-nav__item" type="button" data-settings-tab="admin" aria-pressed="false" id="settings-tab-admin" hidden>Beheer</button>
                 </nav>
 
                 <div class="settings-content">
@@ -393,6 +433,26 @@
                                     <span class="visually-hidden">Bevestigen bij verwijderen</span>
                                 </label>
                             </div>
+                        </div>
+                    </section>
+
+                    <!-- Beheer: alleen zichtbaar voor een account met de rol admin -->
+                    <section class="settings-section" data-settings-panel="admin" hidden>
+                        <p class="settings-section__eyebrow">Beheer</p>
+                        <h3 class="settings-section__title">Gemarkeerde tijden</h3>
+                        <p class="field__hint">
+                            Tijden die niet lijken te kloppen wachten hier op jouw oordeel. Zolang ze hier staan tellen
+                            ze niet mee voor records en ranglijsten; de gebruiker ziet zijn tijd zelf gewoon staan.
+                        </p>
+
+                        <div class="segmented" id="admin-flag-status" role="tablist" aria-label="Status">
+                            <button class="segmented__item is-active" type="button" data-flag-status="pending" role="tab" aria-selected="true">Wachtrij</button>
+                            <button class="segmented__item" type="button" data-flag-status="approved" role="tab" aria-selected="false">Goedgekeurd</button>
+                            <button class="segmented__item" type="button" data-flag-status="rejected" role="tab" aria-selected="false">Afgekeurd</button>
+                        </div>
+
+                        <div id="admin-flag-list" class="flag-list">
+                            <p class="table-empty">Laden…</p>
                         </div>
                     </section>
 
@@ -597,11 +657,26 @@
             <!-- Ingelogd -->
             <div class="modal__body" id="account-user" hidden>
                 <div class="account-summary">
-                    <div class="account-summary__avatar" id="account-summary-avatar">?</div>
+                    <span class="rank-badge" id="account-summary-badge" data-tier="brons">
+                        <span class="rank-badge__value" id="account-summary-rank">--</span>
+                        <span class="rank-badge__level" id="account-summary-level">Lv. 1</span>
+                    </span>
                     <div class="account-summary__meta">
                         <span class="account-summary__name" id="account-summary-name">--</span>
                         <span class="account-summary__sub" id="account-summary-email">--</span>
+                        <span class="account-summary__sub" id="account-summary-rankline">Nog geen positie</span>
                     </div>
+                </div>
+
+                <div class="xp-bar">
+                    <div class="xp-bar__head">
+                        <span id="xp-level-label">Level 1 · Brons</span>
+                        <span id="xp-progress-label">0 / 100 XP</span>
+                    </div>
+                    <div class="xp-bar__track">
+                        <div class="xp-bar__fill" id="xp-bar-fill" style="width: 0%"></div>
+                    </div>
+                    <p class="field__hint" id="xp-total-label">0 XP verdiend</p>
                 </div>
 
                 <div class="stat-grid">
@@ -613,9 +688,54 @@
                         <span class="stat__label">Solves</span>
                         <span class="stat__value" id="account-stat-solves">0</span>
                     </div>
+                    <div class="stat stat--accent">
+                        <span class="stat__label">Reeks (dagen)</span>
+                        <span class="stat__value" id="account-stat-streak">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat__label">Langste (dagen)</span>
+                        <span class="stat__value" id="account-stat-longest">0</span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <span class="field__label">Records per event</span>
+                    <div class="records-table" id="account-records">
+                        <p class="table-empty">Nog geen records. Synchroniseer eerst je tijden.</p>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <span class="field__label">Laatste XP</span>
+                    <ul class="xp-log" id="account-xp-log"></ul>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-row__text">
+                        <span class="setting-row__label">Hoofd-event</span>
+                        <span class="setting-row__hint">Bepaalt welke ranglijst je badge laat zien.</span>
+                    </div>
+                    <div class="setting-row__control">
+                        <select id="account-main-event" class="select"></select>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-row__text">
+                        <span class="setting-row__label">Meedoen aan ranglijsten</span>
+                        <span class="setting-row__hint">Uit = je tijden blijven van jou en verschijnen nergens.</span>
+                    </div>
+                    <div class="setting-row__control">
+                        <label class="switch">
+                            <input type="checkbox" id="account-show-leaderboard" checked />
+                            <span class="switch__track"></span>
+                            <span class="visually-hidden">Meedoen aan ranglijsten</span>
+                        </label>
+                    </div>
                 </div>
 
                 <p class="notice" id="account-sync-status">Je tijden worden automatisch opgeslagen.</p>
+                <p class="notice notice--warning" id="account-flag-notice" hidden></p>
 
                 <div class="time-modal__actions">
                     <button class="btn" type="button" id="account-sync-now">Nu synchroniseren</button>
@@ -629,6 +749,100 @@
                     De accountfunctie is op deze server nog niet ingesteld. Je tijden worden voorlopig alleen in deze
                     browser bewaard.
                 </p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ====================================================================
+         Modal: ranglijsten
+         ==================================================================== -->
+    <div id="leaderboard-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-leaderboard aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Ranglijsten</p>
+                <h2 class="modal__title" id="leaderboard-title">Wie is de snelste?</h2>
+                <p class="modal__subtitle" id="leaderboard-subtitle">Dagen en weken lopen in de tijdzone van de site.</p>
+            </div>
+
+            <div class="board-filters">
+                <div class="field">
+                    <label class="field__label" for="leaderboard-event">Event</label>
+                    <select id="leaderboard-event" class="select"></select>
+                </div>
+                <div class="field">
+                    <label class="field__label" for="leaderboard-category">Categorie</label>
+                    <select id="leaderboard-category" class="select">
+                        <option value="single">Beste single</option>
+                        <option value="ao5">Beste Ao5</option>
+                        <option value="ao12">Beste Ao12</option>
+                        <option value="ao50">Beste Ao50</option>
+                        <option value="ao100">Beste Ao100</option>
+                        <option value="mo3">Beste Mo3</option>
+                    </select>
+                </div>
+                <div class="field board-filters__period">
+                    <span class="field__label">Periode</span>
+                    <div class="segmented" id="leaderboard-period" role="tablist" aria-label="Periode">
+                        <button class="segmented__item is-active" type="button" data-board-period="all" role="tab" aria-selected="true">Aller tijden</button>
+                        <button class="segmented__item" type="button" data-board-period="week" role="tab" aria-selected="false">Deze week</button>
+                        <button class="segmented__item" type="button" data-board-period="day" role="tab" aria-selected="false">Vandaag</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-me" id="leaderboard-me" hidden>
+                <span class="rank-badge rank-badge--sm" id="leaderboard-me-badge" data-tier="brons">
+                    <span class="rank-badge__value" id="leaderboard-me-rank">--</span>
+                </span>
+                <span class="board-me__text" id="leaderboard-me-text">--</span>
+            </div>
+
+            <div class="board-wrap">
+                <table class="board-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Cuber</th>
+                            <th scope="col">Tijd</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+                <p class="table-empty" id="leaderboard-empty" hidden>Hier staat nog niemand. Wees de eerste.</p>
+            </div>
+
+            <div class="time-modal__footer">
+                <span class="field__hint" id="leaderboard-count"></span>
+                <button class="btn" type="button" data-close-leaderboard>Sluiten</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: daily challenges
+         ==================================================================== -->
+    <div id="challenges-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="challenges-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-challenges aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Daily challenges</p>
+                <h2 class="modal__title" id="challenges-title">Opdrachten van vandaag</h2>
+                <p class="modal__subtitle" id="challenges-date">--</p>
+            </div>
+
+            <div class="modal__body" id="challenges-list">
+                <p class="table-empty">Laden…</p>
+            </div>
+
+            <p class="notice" id="challenges-guest" hidden>
+                Log in om mee te doen en XP te verdienen. Je kunt de opdrachten ook zo al proberen — ze tellen dan
+                alleen niet mee.
+            </p>
+
+            <div class="time-modal__footer">
+                <button class="btn" type="button" data-close-challenges>Sluiten</button>
             </div>
         </div>
     </div>

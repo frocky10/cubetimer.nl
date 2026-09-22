@@ -5,6 +5,7 @@
 **Een rustige, snelle speedcubing-timer voor in je browser.**
 
 Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cubes
+· ranglijsten · daily challenges
 
 [**cubetimer.nl**](https://cubetimer.nl) · [Roadmap](https://github.com/frocky10/cubetimer.nl/issues) · [Werkafspraken](CLAUDE.md)
 
@@ -21,6 +22,20 @@ Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cu
 
 </details>
 
+<details>
+<summary>De ranglijsten</summary>
+
+<img src="docs/screenshot-ranglijst.png" alt="De ranglijsten" />
+
+</details>
+
+<details>
+<summary>De daily challenges</summary>
+
+<img src="docs/screenshot-challenges.png" alt="De daily challenges" />
+
+</details>
+
 ---
 
 ## Wat is het
@@ -30,8 +45,9 @@ geen cookiebanner die je eerst moet wegklikken: je opent de site en drukt op de
 spatiebalk.
 
 Wil je je tijden bewaren en meenemen naar een ander apparaat, dan kan dat met
-een account. Wil je dat niet, dan blijft alles gewoon in je browser staan en
-werkt de timer ook zonder internet.
+een account. Je komt dan ook op de ranglijsten, verdient XP en kunt elke dag de
+scramble van de dag doen. Wil je dat niet, dan blijft alles gewoon in je browser
+staan en werkt de timer ook zonder internet.
 
 **Zo werkt het timen:**
 
@@ -74,7 +90,9 @@ terug te zien.
 - [x] Sessiegrafiek van je verloop
 - [x] Confetti bij een nieuw sessierecord
 - [x] Statistieken per sessie, per dag en per week — [#8](https://github.com/frocky10/cubetimer.nl/issues/8)
-- [x] Beste, slechtste, gemiddelde, mediaan en het beste Ao5/Ao12 per periode
+- [x] Beste, slechtste, gemiddelde en mediaan per periode
+- [x] Beste Mo3, Ao5, Ao12, Ao50 en Ao100 — [#22](https://github.com/frocky10/cubetimer.nl/issues/22)
+- [x] Je records per event bewaard op je account, inclusief je slechtste tijd
 
 **Smart cubes** — [#11](https://github.com/frocky10/cubetimer.nl/issues/11)
 
@@ -90,6 +108,23 @@ terug te zien.
 - [x] Samenvoegen van lokale tijden en servertijden bij het inloggen
 - [x] Blijft werken zonder internet; localStorage is altijd de werkkopie
 
+**Ranglijsten en voortgang**
+
+- [x] Leaderboards per event, voor single, Mo3, Ao5, Ao12, Ao50 en Ao100 — [#13](https://github.com/frocky10/cubetimer.nl/issues/13)
+- [x] Te bekijken over alle tijd, deze week of vandaag
+- [x] XP voor solven, persoonlijke records en dagen op rij — [#28](https://github.com/frocky10/cubetimer.nl/issues/28)
+- [x] Levels met tiers: Brons, Zilver, Goud, Platina, Diamant
+- [x] Rangbadge met je positie, in de kleur van je level — [#26](https://github.com/frocky10/cubetimer.nl/issues/26)
+- [x] Streak: hoeveel dagen achter elkaar je getimed hebt
+- [x] Zelf te kiezen of je meedoet aan de ranglijsten
+- [x] Controle op onmogelijke tijden, met een beoordeelscherm voor de beheerder
+
+**Daily challenges** — [#29](https://github.com/frocky10/cubetimer.nl/issues/29)
+
+- [x] Scramble van de dag: iedereen dezelfde scramble, één poging, eigen dagranglijst
+- [x] Dagopdracht "doe X solves vandaag"
+- [x] Dagopdracht "doe een solve die X% sneller is dan je gebruikelijke tijd"
+
 **De site zelf**
 
 - [x] Eigen design system, geen CSS-framework meer
@@ -102,12 +137,9 @@ terug te zien.
 
 **Account uitbouwen**
 
-- [ ] Leaderboards — [#13](https://github.com/frocky10/cubetimer.nl/issues/13)
-- [ ] Hogere averages (Ao50, Ao100) en best/worst ook op je account — [#22](https://github.com/frocky10/cubetimer.nl/issues/22)
-- [ ] XP en levels — [#28](https://github.com/frocky10/cubetimer.nl/issues/28)
-- [ ] Een rank op je account — [#26](https://github.com/frocky10/cubetimer.nl/issues/26)
 - [ ] Achievements — [#27](https://github.com/frocky10/cubetimer.nl/issues/27)
-- [ ] Daily challenges voor extra XP — [#29](https://github.com/frocky10/cubetimer.nl/issues/29)
+- [ ] Openbaar profiel dat je kunt delen
+- [ ] Landenvlag naast je naam op de ranglijst (het veld staat er al)
 
 **Nieuwe manieren om te oefenen**
 
@@ -122,9 +154,10 @@ terug te zien.
 - [ ] Eigen scramble-script in plaats van de CDN — [#36](https://github.com/frocky10/cubetimer.nl/issues/36)
 - [ ] Wachtwoord vergeten (de tabel staat er al, de e-mailflow nog niet)
 - [ ] E-mailadres bevestigen bij registratie
-- [ ] Statistieken serverside berekenen zodra iemand duizenden solves heeft
+- [ ] Paginering op de ranglijsten (de server kan het al, de interface nog niet)
+- [ ] Scramble van de dag ook voor andere events dan 3x3
 - [ ] `bluetoothCube.js` opschonen; is bij de restyling met rust gelaten
-- [ ] Overwegen: tijden tonen als `11.53` in plaats van `00:11:530`
+- [x] ~~Tijden tonen als `11.53`~~ — besloten: blijft `00:11:530`
 
 **Beheer**
 

@@ -43,14 +43,35 @@
 
     const summaryName = document.getElementById('account-summary-name');
     const summaryEmail = document.getElementById('account-summary-email');
-    const summaryAvatar = document.getElementById('account-summary-avatar');
     const statSessions = document.getElementById('account-stat-sessions');
     const statSolves = document.getElementById('account-stat-solves');
     const syncStatus = document.getElementById('account-sync-status');
+    const flagNotice = document.getElementById('account-flag-notice');
+
+    const chipBadge = document.getElementById('account-badge');
+    const chipBadgeValue = document.getElementById('account-badge-value');
+
+    const summaryBadge = document.getElementById('account-summary-badge');
+    const summaryRank = document.getElementById('account-summary-rank');
+    const summaryLevel = document.getElementById('account-summary-level');
+    const summaryRankLine = document.getElementById('account-summary-rankline');
+
+    const xpLevelLabel = document.getElementById('xp-level-label');
+    const xpProgressLabel = document.getElementById('xp-progress-label');
+    const xpTotalLabel = document.getElementById('xp-total-label');
+    const xpFill = document.getElementById('xp-bar-fill');
+    const xpLog = document.getElementById('account-xp-log');
+
+    const statStreak = document.getElementById('account-stat-streak');
+    const statLongest = document.getElementById('account-stat-longest');
+    const recordsHost = document.getElementById('account-records');
+    const mainEventSelect = document.getElementById('account-main-event');
+    const showOnLeaderboard = document.getElementById('account-show-leaderboard');
 
     const SYNC_DEBOUNCE_MS = 2500;
 
     let currentUser = null;
+    let profile = null;
     let accountsAvailable = false;
     let syncTimer = null;
     let syncing = false;
@@ -76,6 +97,16 @@
         chipName.textContent = loggedIn ? currentUser.displayName || currentUser.username : 'Inloggen';
         chipAvatar.textContent = loggedIn ? initials(currentUser.username) : '↪';
 
+        // Zodra we een positie kennen, komt de rangbadge in de plaats van de
+        // initiaal; die zegt meer.
+        const heeftRang = loggedIn && profile && profile.rank;
+        chipBadge.hidden = !heeftRang;
+        chipAvatar.hidden = Boolean(heeftRang);
+        if (heeftRang) {
+            chipBadge.dataset.tier = profile.xp.tier.slug;
+            chipBadgeValue.textContent = profile.rank.label;
+        }
+
         guestPanel.hidden = loggedIn || !accountsAvailable;
         userPanel.hidden = !loggedIn;
         unavailablePanel.hidden = accountsAvailable;
@@ -88,10 +119,175 @@
         if (loggedIn) {
             summaryName.textContent = currentUser.displayName || currentUser.username;
             summaryEmail.textContent = currentUser.email || '';
-            summaryAvatar.textContent = initials(currentUser.username);
             renderCounts();
         }
     }
+
+    /* ---------------------------------------------------------------------
+     * Profiel: XP, level, rang, streak en records
+     * ------------------------------------------------------------------ */
+
+    const CATEGORY_LABELS = {
+        single: 'Beste', worst_single: 'Slechtste', mo3: 'Mo3',
+        ao5: 'Ao5', ao12: 'Ao12', ao50: 'Ao50', ao100: 'Ao100'
+    };
+    const CATEGORY_ORDER = ['single', 'mo3', 'ao5', 'ao12', 'ao50', 'ao100', 'worst_single'];
+
+    async function loadProfile() {
+        if (!currentUser) return;
+        try {
+            profile = await UI.api('profile/overview.php');
+            renderProfile();
+            renderAccount();
+        } catch (err) {
+            // Niet erg: het accountscherm werkt ook zonder deze cijfers.
+            console.warn('[cubetimer] profiel laden mislukt', err);
+        }
+    }
+
+    function renderProfile() {
+        if (!profile) return;
+
+        const tier = profile.xp.tier;
+
+        summaryBadge.dataset.tier = tier.slug;
+        summaryRank.textContent = profile.rank ? profile.rank.label : '--';
+        summaryLevel.textContent = 'Lv. ' + profile.xp.level;
+        summaryRankLine.textContent = profile.rank
+            ? `${profile.rank.label} van ${profile.rank.total} op ${profile.mainEvent.label} · ${UI.formatTime(profile.rank.valueMs)}`
+            : `Nog geen positie op ${profile.mainEvent.label}. Synchroniseer een paar solves.`;
+
+        xpLevelLabel.textContent = `Level ${profile.xp.level} · ${tier.name}`;
+        xpProgressLabel.textContent = `${profile.xp.inLevel} / ${profile.xp.neededForNext} XP`;
+        xpTotalLabel.textContent = `${profile.xp.total.toLocaleString('nl-NL')} XP verdiend`;
+        xpFill.style.width = Math.min(100, Math.round(profile.xp.inLevel / profile.xp.neededForNext * 100)) + '%';
+
+        statStreak.textContent = String(profile.streak.current);
+        statLongest.textContent = String(profile.streak.longest);
+
+        renderRecords();
+        renderXpLog();
+
+        if (mainEventSelect && !mainEventSelect.options.length) {
+            fillMainEvents();
+        }
+        if (mainEventSelect) mainEventSelect.value = profile.mainEvent.id;
+        if (showOnLeaderboard) showOnLeaderboard.checked = profile.onLeaderboard;
+
+        flagNotice.hidden = profile.pendingFlags === 0;
+        if (profile.pendingFlags > 0) {
+            flagNotice.textContent = profile.pendingFlags === 1
+                ? 'Een van je tijden wordt nog nagekeken en telt zolang niet mee voor de ranglijsten.'
+                : `${profile.pendingFlags} van je tijden worden nog nagekeken en tellen zolang niet mee voor de ranglijsten.`;
+        }
+    }
+
+    function renderRecords() {
+        recordsHost.innerHTML = '';
+
+        if (!profile.events.length) {
+            const leeg = document.createElement('p');
+            leeg.className = 'table-empty';
+            leeg.textContent = 'Nog geen records. Synchroniseer eerst je tijden.';
+            recordsHost.appendChild(leeg);
+            return;
+        }
+
+        profile.events.forEach(event => {
+            const blok = document.createElement('div');
+            blok.className = 'records-event';
+
+            const naam = document.createElement('span');
+            naam.className = 'records-event__name';
+            naam.textContent = event.label;
+            blok.appendChild(naam);
+
+            const grid = document.createElement('div');
+            grid.className = 'records-event__grid';
+
+            CATEGORY_ORDER.forEach(category => {
+                const record = event.records[category];
+                if (!record) return;
+
+                const cel = document.createElement('div');
+                cel.className = 'records-cell' + (category === 'single' ? ' records-cell--best' : '');
+
+                const label = document.createElement('span');
+                label.className = 'records-cell__label';
+                label.textContent = CATEGORY_LABELS[category] || category;
+
+                const waarde = document.createElement('span');
+                waarde.className = 'records-cell__value';
+                waarde.textContent = UI.formatTime(record.valueMs);
+
+                cel.appendChild(label);
+                cel.appendChild(waarde);
+                grid.appendChild(cel);
+            });
+
+            blok.appendChild(grid);
+            recordsHost.appendChild(blok);
+        });
+    }
+
+    function renderXpLog() {
+        xpLog.innerHTML = '';
+        profile.recentXp.forEach(entry => {
+            const rij = document.createElement('li');
+            rij.className = 'xp-log__row';
+
+            const detail = document.createElement('span');
+            detail.className = 'xp-log__detail';
+            detail.textContent = entry.detail || entry.type;
+
+            const bedrag = document.createElement('span');
+            bedrag.className = 'xp-log__amount';
+            bedrag.textContent = '+' + entry.amount;
+
+            rij.appendChild(detail);
+            rij.appendChild(bedrag);
+            xpLog.appendChild(rij);
+        });
+    }
+
+    function fillMainEvents() {
+        if (!mainEventSelect) return;
+        const events = window.cubeTimerApi.getEventOptions
+            ? window.cubeTimerApi.getEventOptions()
+            : [{ id: '333', label: '3x3x3' }];
+
+        mainEventSelect.innerHTML = '';
+        events.forEach(event => {
+            const option = document.createElement('option');
+            option.value = event.id;
+            option.textContent = event.label;
+            mainEventSelect.appendChild(option);
+        });
+    }
+
+    async function saveProfileSetting(body, melding) {
+        try {
+            await UI.api('profile/settings.php', { body });
+            await loadProfile();
+            window.CubeTimerLeaderboard?.reload?.();
+            if (melding) UI.toast(melding, { type: 'success' });
+        } catch (err) {
+            UI.toast(err.message || 'Opslaan is niet gelukt.', { type: 'error' });
+        }
+    }
+
+    mainEventSelect?.addEventListener('change', () => {
+        saveProfileSetting({ mainEvent: mainEventSelect.value }, 'Hoofd-event bijgewerkt.');
+    });
+
+    showOnLeaderboard?.addEventListener('change', () => {
+        saveProfileSetting(
+            { showOnLeaderboard: showOnLeaderboard.checked },
+            showOnLeaderboard.checked
+                ? 'Je doet weer mee aan de ranglijsten.'
+                : 'Je staat niet meer in de ranglijsten.'
+        );
+    });
 
     function renderCounts() {
         const sessions = api.getSessions();
@@ -208,6 +404,10 @@
             setSyncState('synced', 'Je tijden staan op de server, bijgewerkt om ' +
                 new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) + '.');
             renderCounts();
+
+            // De server heeft net records, XP en challenges herberekend.
+            await loadProfile();
+            window.dispatchEvent(new CustomEvent('cubetimer:synced'));
         } catch (err) {
             if (err.status === 401) {
                 // Sessie verlopen: terug naar uitgelogd, zonder data te verliezen.
@@ -247,6 +447,7 @@
 
             const solves = api.getSessions().reduce((total, session) => total + session.times.length, 0);
             UI.toast(`Welkom terug! ${solves} solves gesynchroniseerd.`, { type: 'success' });
+            await loadProfile();
         } catch (err) {
             setSyncState('error', 'Synchroniseren is niet gelukt: ' + err.message);
             UI.toast('Synchroniseren is niet gelukt. Je tijden staan nog in deze browser.', { type: 'error' });
@@ -276,6 +477,23 @@
      * Inloggen, registreren, uitloggen
      * ================================================================== */
 
+    /**
+     * Laat de rest van de app weten dat er iemand anders (of niemand) is
+     * ingelogd. De statuscache wordt daarbij ververst, want daar staat onder
+     * meer in of je beheerder bent.
+     */
+    async function announceAuthChange() {
+        let status = null;
+        try {
+            status = await UI.refreshStatus();
+        } catch (err) {
+            status = null;
+        }
+        window.dispatchEvent(new CustomEvent('cubetimer:auth-change', {
+            detail: { user: currentUser, status }
+        }));
+    }
+
     async function submitAuth(form, errorField, button, request) {
         errorField.textContent = '';
         const originalLabel = button.textContent;
@@ -288,6 +506,7 @@
             renderAccount();
             UI.closeModal(modal);
             form.reset();
+            await announceAuthChange();
             await syncAfterLogin();
         } catch (err) {
             if (err.code === 'database_unavailable') {
@@ -350,9 +569,11 @@
         }
 
         currentUser = null;
+        profile = null;
         setSyncState('idle', '');
         renderAccount();
         UI.closeModal(modal);
+        await announceAuthChange();
         UI.toast('Je bent uitgelogd.', { type: 'info' });
     });
 
@@ -361,6 +582,12 @@
      * ================================================================== */
 
     setAuthTab('login');
+
+    window.CubeTimerAccount = {
+        currentUsername: () => (currentUser ? currentUser.username : null),
+        getProfile: () => profile,
+        reloadProfile: loadProfile
+    };
 
     UI.status().then(async status => {
         accountsAvailable = status.features?.accounts === true;

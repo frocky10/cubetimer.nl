@@ -174,8 +174,36 @@ try {
     throw $e;
 }
 
+/* -------------------------------------------------------------------------
+ * Records, XP en challenges bijwerken
+ *
+ * De server rekent dit zelf uit op basis van de zojuist opgeslagen solves. De
+ * browser stuurt dus nooit een gemiddelde of een XP-bedrag mee; dat zou met de
+ * console te vervalsen zijn.
+ *
+ * Gaat hier iets mis, dan is de synchronisatie zelf wel geslaagd. De tijden
+ * van de gebruiker zijn veilig; alleen de afgeleide cijfers lopen dan even
+ * achter en worden bij de volgende synchronisatie alsnog bijgewerkt.
+ * ---------------------------------------------------------------------- */
+$afgeleid = null;
+try {
+    $herberekening = Records::rebuild($userId);
+    $totalen = Xp::sync($userId, $herberekening);
+    Challenges::evaluate($userId);
+
+    $afgeleid = [
+        'records' => $herberekening['records'],
+        'flagged' => $herberekening['flagged'],
+        'xp'      => $totalen['xp'],
+        'level'   => $totalen['level'],
+    ];
+} catch (Throwable $e) {
+    error_log('[cubetimer] herberekenen na synchronisatie mislukt: ' . $e->getMessage());
+}
+
 Http::ok([
     'sessions'  => count($sessions),
     'solves'    => $storedSolves,
     'syncedAt'  => gmdate('c'),
+    'derived'   => $afgeleid,
 ]);
