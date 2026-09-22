@@ -20,6 +20,7 @@
     const eventSelect = document.getElementById('leaderboard-event');
     const categorySelect = document.getElementById('leaderboard-category');
     const periodButtons = Array.from(document.querySelectorAll('[data-board-period]'));
+    const scopeButtons = Array.from(document.querySelectorAll('[data-board-scope]'));
     const body = document.getElementById('leaderboard-body');
     const empty = document.getElementById('leaderboard-empty');
     const countLabel = document.getElementById('leaderboard-count');
@@ -33,7 +34,7 @@
     const STATE_KEY = 'cubetimer_board_state';
 
     let state = Object.assign(
-        { event: '333', category: 'single', period: 'all' },
+        { event: '333', category: 'single', period: 'all', scope: 'all' },
         UI.storage.get(STATE_KEY, {})
     );
     let eventsLoaded = false;
@@ -72,6 +73,11 @@
         if (categorySelect) categorySelect.value = state.category;
         periodButtons.forEach(button => {
             const isActive = button.dataset.boardPeriod === state.period;
+            button.classList.toggle('is-active', isActive);
+            button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        });
+        scopeButtons.forEach(button => {
+            const isActive = button.dataset.boardScope === state.scope;
             button.classList.toggle('is-active', isActive);
             button.setAttribute('aria-selected', isActive ? 'true' : 'false');
         });
@@ -138,6 +144,11 @@
         });
 
         empty.hidden = data.entries.length > 0;
+        if (!data.entries.length && data.scope === 'friends') {
+            empty.textContent = 'Je volgt nog niemand. Klik op een naam in de ranglijst om iemand te volgen.';
+        } else if (!data.entries.length) {
+            empty.textContent = 'Hier staat nog niemand. Wees de eerste.';
+        }
         countLabel.textContent = data.total === 1
             ? '1 cuber op deze ranglijst'
             : `${data.total} cubers op deze ranglijst`;
@@ -172,6 +183,7 @@
             event: state.event,
             category: state.category,
             period: state.period,
+            scope: state.scope,
             limit: '100'
         });
 
@@ -197,7 +209,9 @@
             if (aanvraag !== laatsteAanvraag) return;
             countLabel.textContent = '';
             empty.hidden = false;
-            empty.textContent = err.message || 'De ranglijst kon niet geladen worden.';
+            empty.textContent = state.scope === 'friends' && err.status === 401
+                ? 'Log in om de ranglijst van de mensen die je volgt te zien.'
+                : (err.message || 'De ranglijst kon niet geladen worden.');
         }
     }
 
@@ -218,6 +232,14 @@
     periodButtons.forEach(button => {
         button.addEventListener('click', () => {
             state.period = button.dataset.boardPeriod;
+            syncControls();
+            load();
+        });
+    });
+
+    scopeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            state.scope = button.dataset.boardScope;
             syncControls();
             load();
         });

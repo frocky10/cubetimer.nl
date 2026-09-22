@@ -667,6 +667,17 @@ function registerDNF() {
     generateScrambleForActiveEvent();
 }
 
+/**
+ * Zolang dit gevuld is, gaan afgeronde solves hierheen in plaats van naar de
+ * actieve sessie. Gebruikt door de toernooimodus: die staat helemaal los van
+ * je sessies en houdt zijn eigen tijden bij.
+ */
+let solveCapture = null;
+
+function setSolveCapture(handler) {
+    solveCapture = typeof handler === 'function' ? handler : null;
+}
+
 function saveTime(ms, penalty = null, metadata = {}) {
     const timestamp = new Date().toISOString();
     const scramble = (window.currentScramble || scrambleDisplay?.textContent || '').trim();
@@ -678,6 +689,12 @@ function saveTime(ms, penalty = null, metadata = {}) {
         scramble,
         source: metadata.source || 'manual'
     };
+    if (solveCapture) {
+        // Toernooisolves komen niet bij je gewone tijden terecht.
+        solveCapture(entry);
+        return;
+    }
+
     times.push(entry);
     renderTimes();
     persistSessions();
@@ -1317,6 +1334,9 @@ window.cubeTimerApi = {
 
     /** Wisselt het event van de actieve sessie. */
     setActiveSessionEvent,
+
+    /** Stuurt afgeronde solves naar een andere plek dan de sessie (toernooimodus). */
+    setSolveCapture,
 
     /** Laat de laatste solve uit de actieve sessie weer verdwijnen. */
     removeLastSolve: deleteLastSolve,

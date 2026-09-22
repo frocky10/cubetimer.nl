@@ -49,11 +49,14 @@ final class Leaderboard
      *
      * @return array{entries:list<array<string,mixed>>, total:int, periodStart:?string}
      */
-    public static function top(string $event, string $category, string $period, int $limit = 50, int $offset = 0): array
+    public static function top(string $event, string $category, string $period, int $limit = 50, int $offset = 0, ?array $onlyUserIds = null): array
     {
         $limit = max(1, min($limit, self::MAX_LIMIT));
         $offset = max(0, min($offset, 10000));
         $periodStart = self::periodStart($period);
+
+        // Beperking tot een groep (de mensen die je volgt), of geen beperking.
+        [$beperking, $extraParams] = self::restriction($onlyUserIds);
 
         // Bewust in de query geplakt: MySQL accepteert geen parameter op LIMIT
         // als prepared statement. Het zijn hierboven al begrensde getallen.
@@ -64,10 +67,10 @@ final class Leaderboard
              JOIN users u ON u.id = r.user_id
              JOIN user_profiles p ON p.user_id = r.user_id
              WHERE r.event = ? AND r.category = ? AND r.period = ? AND r.period_start <=> ?
-               AND u.is_active = 1 AND p.show_on_leaderboard = 1
+               AND u.is_active = 1 AND p.show_on_leaderboard = 1' . $beperking . '
              ORDER BY r.value_ms ASC, r.achieved_at ASC
              LIMIT ' . $limit . ' OFFSET ' . $offset,
-            [$event, $category, $period, $periodStart]
+            array_merge([$event, $category, $period, $periodStart], $extraParams)
         );
 
         $entries = [];
@@ -87,23 +90,44 @@ final class Leaderboard
 
         return [
             'entries'     => $entries,
-            'total'       => self::total($event, $category, $period),
+            'total'       => self::total($event, $category, $period, $onlyUserIds),
             'periodStart' => $periodStart,
         ];
     }
 
-    public static function total(string $event, string $category, string $period): int
+    public static function total(string $event, string $category, string $period, ?array $onlyUserIds = null): int
     {
+        [$beperking, $extraParams] = self::restriction($onlyUserIds);
+
         $row = Database::first(
             'SELECT COUNT(*) AS aantal
              FROM user_records r
              JOIN users u ON u.id = r.user_id
              JOIN user_profiles p ON p.user_id = r.user_id
              WHERE r.event = ? AND r.category = ? AND r.period = ? AND r.period_start <=> ?
-               AND u.is_active = 1 AND p.show_on_leaderboard = 1',
-            [$event, $category, $period, self::periodStart($period)]
+               AND u.is_active = 1 AND p.show_on_leaderboard = 1' . $beperking,
+            array_merge([$event, $category, $period, self::periodStart($period)], $extraParams)
         );
         return (int) ($row['aantal'] ?? 0);
+    }
+
+    /**
+     * Bouwt een extra WHERE-stuk om de ranglijst tot een groep te beperken.
+     *
+     * @param list<int>|null $userIds
+     * @return array{0:string,1:list<int>}
+     */
+    private static function restriction(?array $userIds): array
+    {
+        if ($userIds === null) {
+            return ['', []];
+        }
+        if ($userIds === []) {
+            return [' AND 1 = 0', []]; // lege groep: geen resultaten
+        }
+        $ids = array_values(array_map('intval', $userIds));
+        $plaatshouders = implode(',', array_fill(0, count($ids), '?'));
+        return [' AND r.user_id IN (' . $plaatshouders . ')', $ids];
     }
 
     /**

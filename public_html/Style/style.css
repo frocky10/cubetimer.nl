@@ -3213,3 +3213,221 @@ body.profile-page {
         font-size: 1.3rem;
     }
 }
+
+/* ==========================================================================
+   14. Toernooien
+   ========================================================================== */
+
+.tournament-start,
+.tournament-active {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+/* --- Moeilijkheidsgraden -------------------------------------------------- */
+
+.difficulty-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: var(--space-2);
+}
+
+.difficulty-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    text-align: left;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease),
+                border-color var(--dur-fast) var(--ease),
+                transform var(--dur-fast) var(--ease);
+}
+
+.difficulty-card:hover:not(:disabled) {
+    background: var(--surface-3);
+    border-color: var(--brand-500);
+}
+
+.difficulty-card:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.difficulty-card:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.difficulty-card__name {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.difficulty-card__description {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.difficulty-card__meta {
+    margin-top: var(--space-1);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+}
+
+/* --- Lopend toernooi ------------------------------------------------------ */
+
+.tournament-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.tournament-header__title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.tournament-header__sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.tournament-round__name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-text);
+}
+
+/* De vijf pogingen van een ronde. */
+.attempt-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--space-2);
+}
+
+.attempt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--space-3) var(--space-1);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.attempt.is-done {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
+}
+
+.attempt.is-next {
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 1px var(--brand-500);
+}
+
+.attempt__number {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--text-subtle);
+}
+
+.attempt__value {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Einduitslag ---------------------------------------------------------- */
+
+.tournament-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-4);
+    text-align: center;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.tournament-result__position {
+    font-family: var(--font-timer);
+    font-size: 3.5rem;
+    line-height: 1;
+    background: var(--gradient-brand);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+}
+
+.tournament-result__text {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Wie doorgaat naar de volgende ronde krijgt een groen randje. */
+.board-table tbody tr.is-advanced td:first-child {
+    box-shadow: inset 3px 0 0 var(--success);
+}
+
+/* De toernooibalk boven de timer is oranje; de challengebalk blijft geel. */
+.challenge-banner--tournament {
+    background: rgba(var(--brand-rgb), 0.12);
+    border-color: rgba(var(--brand-rgb), 0.35);
+}
+
+.challenge-banner--tournament .challenge-banner__dot {
+    background: var(--brand-400);
+    box-shadow: 0 0 10px var(--brand-400);
+}
+
+/* --- Knoppen op het profiel ----------------------------------------------- */
+
+.profile-hero__actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+    .attempt-row {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: var(--space-1);
+    }
+
+    .attempt {
+        padding: var(--space-2) 2px;
+    }
+
+    .attempt__value {
+        font-size: 0.68rem;
+    }
+
+    .difficulty-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tournament-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-2);
+    }
+}

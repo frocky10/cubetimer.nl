@@ -41,6 +41,7 @@
     <script src="Script/leaderboard.js" defer></script>
     <script src="Script/challenges.js" defer></script>
     <script src="Script/achievements.js" defer></script>
+    <script src="Script/tournament.js" defer></script>
     <script src="Script/admin.js" defer></script>
     <script src="Script/account.js" defer></script>
     <script type="module" src="Script/scrambleScript.js"></script>
@@ -210,6 +211,12 @@
                         <span class="btn-icon__label">Ranglijsten</span>
                     </button>
 
+                    <button id="tournament-open" class="btn-icon btn-icon--badged" type="button" title="Toernooi" aria-label="Toernooi" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16" /><path d="M6 20V9h4v11M14 20V4h4v16" /></svg>
+                        <span class="btn-icon__label">Toernooi</span>
+                        <span class="btn-icon__badge" id="tournament-badge" hidden>!</span>
+                    </button>
+
                     <button id="achievements-open" class="btn-icon btn-icon--badged" type="button" title="Achievements" aria-label="Achievements" hidden>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6" /><path d="M8.5 14.5 7 22l5-2.5 5 2.5-1.5-7.5" /></svg>
                         <span class="btn-icon__label">Achievements</span>
@@ -256,6 +263,15 @@
             </header>
 
             <div class="stage">
+                <div class="challenge-banner challenge-banner--tournament" id="tournament-banner" hidden>
+                    <span class="challenge-banner__dot" aria-hidden="true"></span>
+                    <span class="challenge-banner__text">
+                        <strong id="tournament-banner-title">Toernooi</strong>
+                        <span id="tournament-banner-hint">Je volgende solve telt.</span>
+                    </span>
+                    <button class="btn btn--sm" type="button" id="tournament-banner-open">Stand</button>
+                </div>
+
                 <div class="challenge-banner" id="challenge-banner" hidden>
                     <span class="challenge-banner__dot" aria-hidden="true"></span>
                     <span class="challenge-banner__text">
@@ -816,6 +832,14 @@
                         <option value="mo3">Beste Mo3</option>
                     </select>
                 </div>
+                <div class="field">
+                    <span class="field__label">Wie</span>
+                    <div class="segmented" id="leaderboard-scope" role="tablist" aria-label="Wie">
+                        <button class="segmented__item is-active" type="button" data-board-scope="all" role="tab" aria-selected="true">Iedereen</button>
+                        <button class="segmented__item" type="button" data-board-scope="friends" role="tab" aria-selected="false">Wie ik volg</button>
+                    </div>
+                </div>
+
                 <div class="field board-filters__period">
                     <span class="field__label">Periode</span>
                     <div class="segmented" id="leaderboard-period" role="tablist" aria-label="Periode">
@@ -854,6 +878,34 @@
         </div>
     </div>
 
+
+
+    <!-- ====================================================================
+         Modal: toernooimodus
+         ==================================================================== -->
+    <div id="tournament-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="tournament-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-tournament aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Toernooi</p>
+                <h2 class="modal__title" id="tournament-title">Doe mee aan een competitie</h2>
+                <p class="modal__subtitle" id="tournament-subtitle">Vijf solves per ronde, cutoff en tijdslimiet, net als op een echte comp.</p>
+            </div>
+
+            <div class="modal__body" id="tournament-body">
+                <p class="table-empty">Laden…</p>
+            </div>
+
+            <p class="notice" id="tournament-guest" hidden>
+                Log in om aan een toernooi mee te doen. Je toernooitijden blijven los van je gewone sessies.
+            </p>
+
+            <div class="time-modal__footer">
+                <span class="field__hint" id="tournament-footnote"></span>
+                <button class="btn" type="button" data-close-tournament>Sluiten</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ====================================================================
          Modal: achievements

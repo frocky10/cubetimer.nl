@@ -21,6 +21,9 @@ require_once __DIR__ . '/lib/Leaderboard.php';
 require_once __DIR__ . '/lib/Challenges.php';
 require_once __DIR__ . '/lib/SolveFacts.php';
 require_once __DIR__ . '/lib/Achievements.php';
+require_once __DIR__ . '/lib/Follows.php';
+require_once __DIR__ . '/lib/TournamentField.php';
+require_once __DIR__ . '/lib/Tournaments.php';
 require_once __DIR__ . '/lib/PublicProfile.php';
 
 $debug = Config::get('debug', false) === true;

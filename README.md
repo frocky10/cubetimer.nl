@@ -5,7 +5,7 @@
 **Een rustige, snelle speedcubing-timer voor in je browser.**
 
 Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cubes
-· ranglijsten · daily challenges · achievements · profielen
+· ranglijsten · toernooien · achievements · profielen
 
 [**cubetimer.nl**](https://cubetimer.nl) · [Roadmap](https://github.com/frocky10/cubetimer.nl/issues) · [Werkafspraken](CLAUDE.md)
 
@@ -50,6 +50,13 @@ Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cu
 
 </details>
 
+<details>
+<summary>De toernooimodus</summary>
+
+<img src="docs/screenshot-toernooi.png" alt="De uitslag van een toernooi" />
+
+</details>
+
 ---
 
 ## Wat is het
@@ -60,7 +67,8 @@ spatiebalk.
 
 Wil je je tijden bewaren en meenemen naar een ander apparaat, dan kan dat met
 een account. Je komt dan ook op de ranglijsten, verdient XP, verzamelt
-achievements en kunt elke dag de scramble van de dag doen. Wil je dat niet, dan blijft alles gewoon in je browser
+achievements, doet elke dag de scramble van de dag en kunt het in de
+toernooimodus opnemen tegen een heel deelnemersveld. Wil je dat niet, dan blijft alles gewoon in je browser
 staan en werkt de timer ook zonder internet.
 
 **Zo werkt het timen:**
@@ -142,16 +150,34 @@ terug te zien.
 
 **Achievements** — [#27](https://github.com/frocky10/cubetimer.nl/issues/27)
 
-- [x] 96 achievements: 21 families in vier niveaus, plus 12 geheime
+- [x] 114 achievements: 25 families in vier niveaus, plus 14 geheime
 - [x] Mijlpalen: solves, dagen, sessies, records, XP
 - [x] Ontdekken: hoeveel events je geprobeerd en opgelost hebt
 - [x] Snelheid: sub-drempels op 3x3, 2x2, 4x4, 5x5 en Pyraminx, single én Ao12
 - [x] Volhouden: reeksen, drukste dag, smart-cube solves
 - [x] Challenges en ranglijst: challenges gehaald, beste positie, scrambles gewonnen
 - [x] Pech: je +2's en je DNF's tellen ook mee
+- [x] Toernooien en vrienden hebben hun eigen achievements
 - [x] Twaalf geheime, van een palindroomtijd tot een PB direct na een DNF
 - [x] Voortgangsbalk naar het volgende niveau en hoe zeldzaam elk niveau is
 - [x] Gelden met terugwerkende kracht: alles wat je ooit timede telt mee
+
+**Toernooien** — [#12](https://github.com/frocky10/cubetimer.nl/issues/12)
+
+- [x] Drie rondes: kwalificatie, halve finale, finale, met vijf solves per ronde
+- [x] Cutoff en tijdslimiet, net als op een echte competitie
+- [x] Zes moeilijkheidsgraden, van beginner tot WK-niveau
+- [x] Open toernooi met 64 deelnemers, van beginner tot wereldtop door elkaar
+- [x] "Op jouw niveau": het veld beweegt zich rond je eigen gemiddelde
+- [x] Veertig verzonnen tegenstanders met een eigen niveau en dagvorm
+- [x] Aangevuld met echte cubers van de site, gesimuleerd op hun eigen niveau
+- [x] Staat los van je sessies; toernooitijden krijgen een eigen blok op je profiel
+
+**Volgen en vrienden**
+
+- [x] Iemand volgen vanaf zijn profiel, zonder toestemming te vragen
+- [x] Volgen jullie elkaar allebei, dan zijn jullie vrienden
+- [x] Ranglijst met alleen de mensen die je volgt
 
 **Profielen**
 
@@ -173,12 +199,10 @@ terug te zien.
 
 **Account uitbouwen**
 
-- [ ] Volgen wie je interessant vindt, met een eigen ranglijstje
+- [ ] Tournament mode v2: kiezen uit echte historische competities — [#14](https://github.com/frocky10/cubetimer.nl/issues/14)
 
 **Nieuwe manieren om te oefenen**
 
-- [ ] Tournament mode: eigen schema met rondes en cutoffs — [#12](https://github.com/frocky10/cubetimer.nl/issues/12)
-- [ ] Tournament mode v2: kiezen uit echte historische competities — [#14](https://github.com/frocky10/cubetimer.nl/issues/14)
 - [ ] Training tools — [#30](https://github.com/frocky10/cubetimer.nl/issues/30)
 - [ ] Special gamemodes — [#31](https://github.com/frocky10/cubetimer.nl/issues/31)
 - [ ] Tutorialpagina's — [#21](https://github.com/frocky10/cubetimer.nl/issues/21)
