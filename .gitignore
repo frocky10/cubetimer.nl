@@ -1,0 +1,16 @@
+# Geheimen: de configuratie hoort buiten de webroot te staan en nooit in git.
+cubetimer_config.php
+public_html/api/config.php
+
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Logs en tijdelijke bestanden
+*.log
+node_modules/

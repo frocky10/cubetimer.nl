@@ -1,159 +1,417 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
-    <head>
+<html lang="nl" data-theme="dark">
+<head>
     <meta charset="UTF-8" />
-    <meta name="google-adsense-account" content="ca-pub-9889350952616788">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="CubeTimer keeps your cubing practice relaxed and fun with a simple timer, inspection mode, scrambles, and easy session tracking." />
-    <meta name="keywords" content="timer, cubetimer, rubiks cube timer, online timer, webtimer, speedcube, cubeing, wca, wcatimer, speedcubetimer, cube record, stopwatch">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <meta name="description" content="CubeTimer keeps your cubing practice relaxed and fun with a simple timer, inspection mode, scrambles, smart cube support and easy session tracking." />
+    <meta name="keywords" content="timer, cubetimer, rubiks cube timer, online timer, webtimer, speedcube, cubeing, wca, wcatimer, speedcubetimer, cube record, stopwatch" />
+    <meta name="google-adsense-account" content="ca-pub-9889350952616788" />
     <title>CubeTimer</title>
-    <link rel="icon" type="image/png" href="Pictures\CubeTimerFavicon_V2.png" />
-    <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <link rel="icon" type="image/png" href="Pictures/CubeTimerFavicon_V2.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="Style/style.css" />
+
+    <!-- Thema meteen zetten, vóór de eerste paint, anders flitst de site kort in
+         het verkeerde thema. Bewust inline en synchroon. -->
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+            } catch (err) {
+                /* localStorage geblokkeerd: dan blijft het donkere standaardthema staan. */
+            }
+        })();
+    </script>
+
+    <script src="Script/ui.js" defer></script>
     <script src="Script/script.js" defer></script>
-    <script type="module" src="Script/scrambleScript.js" defer></script>
-    <script type="module" src="Script/bluetoothCube.js" defer></script>
-    <!-- Bootstrap 5.3 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- Google Addsense tag -->    
+    <script src="Script/stats.js" defer></script>
+    <script src="Script/settings.js" defer></script>
+    <script src="Script/feedback.js" defer></script>
+    <script src="Script/account.js" defer></script>
+    <script type="module" src="Script/scrambleScript.js"></script>
+    <script type="module" src="Script/bluetoothCube.js"></script>
+
+    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7865142075636059" crossorigin="anonymous"></script>
-    <!-- Google analytics tag -->
-    <!-- Google tag (gtag.js) -->
+
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DNL5446N18"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'G-DNL5446N18');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-DNL5446N18');
     </script>
-    </head>
-    <body>
-        <div class="container-fluid h-100 g-0">
-            <div class="row h-100 g-0">
-                <!-- Sidebar: Times Table -->
-                <aside class="col-lg-3 col-md-4 col-12 order-lg-1 order-2 d-flex flex-column">
-                    <div class="logo-sidebar-wrapper d-flex justify-content-center py-3 d-none d-lg-flex">
-                        <img id="logo-sidebar" src="Pictures\CubeTimerLogo_V2.png" alt="Logo" />
+</head>
+<body>
+    <div class="app">
+        <!-- ================================================================
+             Sidebar: sessie, tijden en statistieken
+             ================================================================ -->
+        <aside class="sidebar">
+            <div class="sidebar__brand">
+                <img id="logo-sidebar" src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" />
+            </div>
+
+            <div class="sidebar__scroll">
+                <!-- Sessie en cube -->
+                <section class="panel" aria-label="Sessie">
+                    <div class="panel__head">
+                        <h2 class="panel__title">Sessie</h2>
+                        <span id="cube-display" class="cube-display">3x3x3</span>
                     </div>
-                    <div id="times-table">
-                        <div class="table-container">
-                        <table class="table table-hover mb-0">
+                    <div class="panel__body">
+                        <div class="session-row">
+                            <label class="visually-hidden" for="session-select">Kies een sessie</label>
+                            <select id="session-select" class="select"></select>
+                            <div class="session-row__buttons">
+                                <button id="session-new" class="btn-icon btn-icon--sm" type="button" title="Nieuwe sessie" aria-label="Nieuwe sessie">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                                </button>
+                                <button id="session-rename" class="btn-icon btn-icon--sm" type="button" title="Sessie hernoemen" aria-label="Sessie hernoemen">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                                </button>
+                                <button id="session-reset" class="btn-icon btn-icon--sm" type="button" title="Sessie leegmaken" aria-label="Sessie leegmaken">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg>
+                                </button>
+                                <button id="session-delete" class="btn-icon btn-icon--sm btn-icon--danger" type="button" title="Sessie verwijderen" aria-label="Sessie verwijderen">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="M19 6l-1 14H6L5 6" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="cube-select">Cube / event</label>
+                            <select id="cube-select" class="select"></select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tijden -->
+                <section class="panel panel--grow" id="times-table" aria-label="Tijden">
+                    <div class="panel__head">
+                        <h2 class="panel__title">Tijden</h2>
+                        <span id="times-count" class="panel__title">0</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="solves-table">
+                            <colgroup>
+                                <col class="col-index" />
+                                <col class="col-time" />
+                                <col class="col-avg" />
+                                <col class="col-avg" />
+                            </colgroup>
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Time</th>
-                                    <th>AO5</th>
-                                    <th>AO12</th>
+                                    <th class="col-index" scope="col">#</th>
+                                    <th scope="col">Tijd</th>
+                                    <th scope="col">Ao5</th>
+                                    <th scope="col">Ao12</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body"></tbody>
                         </table>
-                        </div>
-                        <div class="session-controls">
-                            <select id="session-select" class="form-select form-select-sm flex-grow-1"></select>
-                            <div class="session-buttons">
-                                <button id="session-new" type="button" title="New session">+</button>
-                                <button id="session-rename" type="button" title="Rename session">✎</button>
-                                <button id="session-reset" type="button" title="Reset session">⟳</button>
-                                <button id="session-delete" type="button" class="danger" title="Delete session">✕</button>
-                            </div>
-                        </div>
-                        <div class="cube-controls">
-                            <label for="cube-select" class="form-label mb-0">Cube</label>
-                            <select id="cube-select" class="form-select form-select-sm"></select>
-                            <div id="cube-display" class="cube-display small fw-semibold">Session cube: --</div>
-                        </div>
+                        <p id="times-empty" class="table-empty">Nog geen tijden. Druk op de spatiebalk om te beginnen.</p>
                     </div>
-                </aside>
+                </section>
 
-                <!-- Main Timer Area -->
-                <div class="col-lg-9 col-md-8 col-12 order-lg-2 order-1 d-flex flex-column main-timer-column">
-                    <!-- Header -->
-                    <header class="position-relative py-3 flex-shrink-0">
-                        <div class="logo-header-wrapper d-flex justify-content-center d-lg-none mb-2">
-                            <img id="logo-header" src="Pictures\CubeTimerLogo_V2.png" alt="Logo" />
-                        </div>
-                        <div class="header-actions">
-                            <button id="settings-open" class="header-icon-button" type="button" aria-label="Open settings" title="Settings">⚙</button>
-                            <div class="toggle" id="theme-toggle">
-                                <span class="toggle-icon moon active">🌙</span>
-                                <span class="toggle-icon sun">☀️</span>
-                                <div class="toggle-knob"></div>
-                            </div>
-                        </div>
-                    </header>
-                      
-                    <div class="flex-grow-1 d-flex flex-column align-items-center justify-content-center gap-3 main-timer-stack">
-                        <div class="d-flex align-items-center gap-4">
-                            <div id="ready-lights">
-                                <div class="ready-light" id="light1"></div>
-                                <div class="ready-light" id="light2"></div>
-                            </div>
-                            <div id="timer">00:00:000</div>
-                        </div>
-                        <div id="session-pr" class="session-pr">Session PR: --</div>
+                <!-- Statistieken: sessie / vandaag / deze week -->
+                <section class="panel" id="stats-panel" aria-label="Statistieken">
+                    <div class="panel__head">
+                        <h2 class="panel__title">Statistieken</h2>
                     </div>
-                    <footer class="py-3 flex-shrink-0">
-                        <div id="Scrambles" class="ScrambleBox mx-auto">
+                    <div class="panel__body">
+                        <div class="segmented" id="stats-scope" role="tablist" aria-label="Periode">
+                            <button class="segmented__item is-active" type="button" data-stats-scope="session" role="tab" aria-selected="true">Sessie</button>
+                            <button class="segmented__item" type="button" data-stats-scope="today" role="tab" aria-selected="false">Vandaag</button>
+                            <button class="segmented__item" type="button" data-stats-scope="week" role="tab" aria-selected="false">Deze week</button>
                         </div>
-                    </footer>
+
+                        <p class="stats-meta">
+                            <span id="stats-scope-label">Huidige sessie</span>
+                            <strong id="stats-count">0 solves</strong>
+                        </p>
+
+                        <div class="stat-grid">
+                            <div class="stat stat--success">
+                                <span class="stat__label">Beste</span>
+                                <span class="stat__value" id="stat-best">--</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat__label">Slechtste</span>
+                                <span class="stat__value" id="stat-worst">--</span>
+                            </div>
+                            <div class="stat stat--accent">
+                                <span class="stat__label">Gemiddelde</span>
+                                <span class="stat__value" id="stat-mean">--</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat__label">Mediaan</span>
+                                <span class="stat__value" id="stat-median">--</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat__label">Beste Ao5</span>
+                                <span class="stat__value" id="stat-ao5">--</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat__label">Beste Ao12</span>
+                                <span class="stat__value" id="stat-ao12">--</span>
+                            </div>
+                        </div>
+
+                        <p class="field__hint" id="stats-footnote">Vandaag en Deze week tellen alle sessies van dit event mee.</p>
+                    </div>
+                </section>
+            </div>
+        </aside>
+
+        <!-- ================================================================
+             Hoofdgebied: timer
+             ================================================================ -->
+        <main class="main">
+            <header class="topbar">
+                <div class="topbar__brand">
+                    <img id="logo-header" src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" />
+                </div>
+
+                <div class="topbar__actions">
+                    <button id="feedback-open" class="btn-icon" type="button" title="Bug of idee melden" aria-label="Bug of idee melden">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6a4 4 0 0 1 8 0" /><rect x="6" y="6" width="12" height="13" rx="6" /><path d="M3 12h3M18 12h3M4.5 6.5 7 8M19.5 6.5 17 8M4.5 18.5 7 17M19.5 18.5 17 17" /></svg>
+                    </button>
+
+                    <button id="account-open" class="account-chip" type="button" aria-label="Account" hidden>
+                        <span class="account-chip__avatar" id="account-avatar">?</span>
+                        <span class="account-chip__name" id="account-name">Inloggen</span>
+                        <span class="account-chip__sync" id="account-sync" aria-hidden="true"></span>
+                    </button>
+
+                    <button id="settings-open" class="btn-icon" type="button" title="Instellingen" aria-label="Instellingen">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></svg>
+                    </button>
+
+                    <div class="toggle" id="theme-toggle" role="button" tabindex="0" aria-label="Wissel tussen licht en donker thema">
+                        <span class="toggle-icon moon active" aria-hidden="true">🌙</span>
+                        <span class="toggle-icon sun" aria-hidden="true">☀️</span>
+                        <div class="toggle-knob" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="stage">
+                <div class="stage__timer-row">
+                    <div id="ready-lights">
+                        <div class="ready-light" id="light1"></div>
+                        <div class="ready-light" id="light2"></div>
+                    </div>
+                    <div id="timer" role="timer" aria-live="off">00:00:000</div>
+                </div>
+
+                <div class="pr-strip">
+                    <span class="pr-strip__label">Sessie PR</span>
+                    <span id="session-pr">--</span>
+                </div>
+
+                <p class="stage__hint">
+                    <span><kbd>Spatie</kbd>inspectie, vasthouden, loslaten</span>
+                    <span><kbd>2</kbd>+2 op laatste solve</span>
+                    <span><kbd>D</kbd>DNF</span>
+                    <span><kbd>⌫</kbd>verwijderen</span>
+                </p>
+            </div>
+
+            <footer class="scramble-bar">
+                <div id="Scrambles" class="ScrambleBox" aria-live="polite"></div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Sessiegrafiek, zweeft rechtsonder op grote schermen -->
+    <div id="session-graph">
+        <span class="panel__title">Verloop</span>
+        <canvas id="session-graph-canvas" width="260" height="140"></canvas>
+    </div>
+
+    <canvas id="confetti-canvas"></canvas>
+    <div class="toast-host" id="toast-host" role="status" aria-live="polite"></div>
+
+    <!-- ====================================================================
+         Modal: solve bewerken
+         ==================================================================== -->
+    <div id="time-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="time-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-modal aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Solve</p>
+                <h2 class="modal__title" id="time-modal-title">Tijd bewerken</h2>
+            </div>
+
+            <div class="modal__body">
+                <div class="solve-summary">
+                    <p id="modal-current-time">00:00:000</p>
+                    <p id="modal-date">--</p>
+                </div>
+
+                <div class="field">
+                    <span class="field__label">Scramble</span>
+                    <p id="modal-scramble" class="time-modal__scramble">--</p>
+                </div>
+
+                <div class="time-modal__actions">
+                    <button id="modal-plus2" class="btn btn--warning" type="button">+2 aan/uit</button>
+                    <button id="modal-dnf" class="btn btn--danger" type="button">DNF</button>
+                    <button id="modal-normalize" class="btn" type="button">Straf wissen</button>
+                    <button id="modal-delete" class="btn btn--danger" type="button">Verwijderen</button>
                 </div>
             </div>
-        </div>
-        <div id="session-graph" class="session-graph d-none d-md-block">
-            <canvas id="session-graph-canvas" width="260" height="150"></canvas>
-        </div>
-        <canvas id="confetti-canvas"></canvas>
-        <div id="time-modal" class="time-modal" aria-hidden="true">
-        <div class="time-modal__dialog">
-            <button class="time-modal__close" type="button" data-close-modal>&times;</button>
-            <h2 class="h5 mb-2">Edit Solve</h2>
-            <p id="modal-current-time" class="mb-1 fw-semibold">Solve #1: 00:00:000</p>
-            <p id="modal-date" class="text-muted small mb-2">Date: --</p>
-            <div class="mb-3">
-                <p class="mb-1 fw-semibold">Scramble</p>
-                <p id="modal-scramble" class="time-modal__scramble small">Loading...</p>
-            </div>
-            <div class="time-modal__actions">
-                <button id="modal-plus2" type="button">Add / remove +2</button>
-                <button id="modal-dnf" type="button" class="danger">Mark as DNF</button>
-                <button id="modal-normalize" type="button">Clear penalty</button>
-                <button id="modal-delete" type="button" class="delete">Delete solve</button>
-            </div>
+
             <div class="time-modal__footer">
-                <button type="button" data-close-modal>Close</button>
+                <button class="btn" type="button" data-close-modal>Sluiten</button>
             </div>
         </div>
-        </div>
-        <div id="settings-modal" class="time-modal" aria-hidden="true">
+    </div>
+
+    <!-- ====================================================================
+         Modal: instellingen
+         ==================================================================== -->
+    <div id="settings-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" aria-hidden="true">
         <div class="time-modal__dialog settings-modal__dialog">
-            <button class="time-modal__close" type="button" data-close-settings>&times;</button>
-            <h2 class="h5 mb-2">Settings</h2>
+            <button class="time-modal__close" type="button" data-close-settings aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">CubeTimer</p>
+                <h2 class="modal__title" id="settings-modal-title">Instellingen</h2>
+            </div>
+
             <div class="settings-layout">
-                <nav class="settings-nav" aria-label="Settings sections">
-                    <button class="settings-nav__item active" type="button" data-settings-tab="general" aria-pressed="true">General</button>
+                <nav class="settings-nav" aria-label="Instellingen">
+                    <button class="settings-nav__item active" type="button" data-settings-tab="general" aria-pressed="true">Algemeen</button>
+                    <button class="settings-nav__item" type="button" data-settings-tab="timer" aria-pressed="false">Timer</button>
                     <button class="settings-nav__item" type="button" data-settings-tab="smart-cube" aria-pressed="false">Smart Cube</button>
                 </nav>
+
                 <div class="settings-content">
+                    <!-- Algemeen -->
                     <section class="settings-section" data-settings-panel="general">
-                        <p class="settings-section__eyebrow">General</p>
-                        <h3 class="settings-section__title">Settings</h3>
+                        <p class="settings-section__eyebrow">Algemeen</p>
+                        <h3 class="settings-section__title">Weergave</h3>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Thema</span>
+                                <span class="setting-row__hint">Volgt standaard je systeeminstelling.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <select id="setting-theme" class="select">
+                                    <option value="system">Systeem</option>
+                                    <option value="dark">Donker</option>
+                                    <option value="light">Licht</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Focusmodus</span>
+                                <span class="setting-row__hint">Dimt alles behalve de tijd zodra de timer loopt.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-focus-mode" checked />
+                                    <span class="switch__track"></span>
+                                    <span class="visually-hidden">Focusmodus</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Confetti bij een PR</span>
+                                <span class="setting-row__hint">Viert een nieuw sessierecord.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-confetti" checked />
+                                    <span class="switch__track"></span>
+                                    <span class="visually-hidden">Confetti bij een PR</span>
+                                </label>
+                            </div>
+                        </div>
                     </section>
-                    <section id="bluetooth-panel" class="bluetooth-panel bluetooth-panel--modal" aria-label="Bluetooth cube" data-settings-panel="smart-cube" hidden>
+
+                    <!-- Timer -->
+                    <section class="settings-section" data-settings-panel="timer" hidden>
+                        <p class="settings-section__eyebrow">Timer</p>
+                        <h3 class="settings-section__title">Timen en inspectie</h3>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">WCA-inspectie</span>
+                                <span class="setting-row__hint">15 seconden inspectietijd, met +2 na de limiet.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-inspection" checked />
+                                    <span class="switch__track"></span>
+                                    <span class="visually-hidden">WCA-inspectie</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Vasthoudtijd</span>
+                                <span class="setting-row__hint">Hoe lang de spatiebalk ingedrukt moet blijven voor groen licht.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <select id="setting-hold-time" class="select">
+                                    <option value="0">Uit (direct starten)</option>
+                                    <option value="300">0,3 seconde</option>
+                                    <option value="500">0,5 seconde (WCA)</option>
+                                    <option value="800">0,8 seconde</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Bevestigen bij verwijderen</span>
+                                <span class="setting-row__hint">Vraagt het na voor je een sessie leegmaakt of wist.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-confirm-destructive" checked />
+                                    <span class="switch__track"></span>
+                                    <span class="visually-hidden">Bevestigen bij verwijderen</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Smart Cube -->
+                    <section id="bluetooth-panel" class="bluetooth-panel settings-section" data-settings-panel="smart-cube" aria-label="Bluetooth cube" hidden>
                         <div class="bluetooth-panel__header">
                             <div>
                                 <p class="bluetooth-panel__eyebrow">Smart Cube</p>
-                                <h3 class="bluetooth-panel__title">Bluetooth Cube</h3>
+                                <h3 class="bluetooth-panel__title">Bluetooth-cube</h3>
                             </div>
                             <div class="bluetooth-panel__buttons">
-                                <button id="bluetooth-connect" type="button">Connect cube</button>
-                                <button id="bluetooth-disconnect" type="button" disabled>Disconnect</button>
-                                <button id="bluetooth-forget-mac" type="button">Forget MAC</button>
+                                <button id="bluetooth-connect" class="btn btn--primary btn--sm" type="button">Verbinden</button>
+                                <button id="bluetooth-disconnect" class="btn btn--sm" type="button" disabled>Loskoppelen</button>
+                                <button id="bluetooth-forget-mac" class="btn btn--sm" type="button">MAC vergeten</button>
                             </div>
                         </div>
-                        <p id="bluetooth-status" class="bluetooth-panel__status">Use Chrome or Edge on desktop/mobile with Web Bluetooth to pair a GAN or QiYi/X-Man smart cube.</p>
+
+                        <p id="bluetooth-status" class="bluetooth-panel__status">Gebruik Chrome of Edge met Web Bluetooth om een GAN- of QiYi/X-Man-cube te koppelen.</p>
+
                         <div class="bluetooth-panel__content">
                             <div class="bluetooth-panel__viewer">
                                 <twisty-player
@@ -169,38 +427,232 @@
                             </div>
                             <div class="bluetooth-panel__stats">
                                 <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Device</span>
-                                    <span id="bluetooth-device-name" class="bluetooth-stat__value">Not connected</span>
+                                    <span class="bluetooth-stat__label">Apparaat</span>
+                                    <span id="bluetooth-device-name" class="bluetooth-stat__value">Niet verbonden</span>
                                 </div>
                                 <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Battery</span>
+                                    <span class="bluetooth-stat__label">Batterij</span>
                                     <span id="bluetooth-battery" class="bluetooth-stat__value">--</span>
                                 </div>
                                 <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Auto Timer</span>
-                                    <span id="bluetooth-auto-timer" class="bluetooth-stat__value">Waiting for first turn</span>
+                                    <span class="bluetooth-stat__label">Auto-timer</span>
+                                    <span id="bluetooth-auto-timer" class="bluetooth-stat__value">Wacht op eerste draai</span>
                                 </div>
                                 <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Cube State</span>
-                                    <span id="bluetooth-cube-state" class="bluetooth-stat__value">Unknown</span>
+                                    <span class="bluetooth-stat__label">Cube-stand</span>
+                                    <span id="bluetooth-cube-state" class="bluetooth-stat__value">Onbekend</span>
                                 </div>
                                 <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Scramble Track</span>
-                                    <span id="bluetooth-scramble-progress" class="bluetooth-stat__value">0 / 0 moves matched</span>
+                                    <span class="bluetooth-stat__label">Scramble</span>
+                                    <span id="bluetooth-scramble-progress" class="bluetooth-stat__value">0 / 0 zetten</span>
                                 </div>
                                 <div class="bluetooth-stat bluetooth-stat--wide">
-                                    <span class="bluetooth-stat__label">Move Stream</span>
-                                    <span id="bluetooth-move-stream" class="bluetooth-stat__value bluetooth-stat__value--mono">Waiting for moves...</span>
+                                    <span class="bluetooth-stat__label">Zetten</span>
+                                    <span id="bluetooth-move-stream" class="bluetooth-stat__value bluetooth-stat__value--mono">Wacht op zetten...</span>
                                 </div>
                             </div>
                         </div>
                     </section>
                 </div>
             </div>
+
             <div class="time-modal__footer">
-                <button type="button" data-close-settings>Close</button>
+                <button class="btn" type="button" data-close-settings>Sluiten</button>
             </div>
         </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: bug of idee melden
+         ==================================================================== -->
+    <div id="feedback-modal" class="time-modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-feedback aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Feedback</p>
+                <h2 class="modal__title" id="feedback-modal-title">Iets melden</h2>
+                <p class="modal__subtitle">Je melding komt rechtstreeks als issue in GitHub terecht.</p>
+            </div>
+
+            <form id="feedback-form" class="modal__body" novalidate>
+                <div class="segmented" id="feedback-type" role="tablist" aria-label="Soort melding">
+                    <button class="segmented__item is-active" type="button" data-feedback-type="bug" role="tab" aria-selected="true">Bug melden</button>
+                    <button class="segmented__item" type="button" data-feedback-type="feature" role="tab" aria-selected="false">Idee delen</button>
+                </div>
+
+                <div class="field">
+                    <label class="field__label" for="feedback-title">Titel</label>
+                    <input class="input" type="text" id="feedback-title" name="title" maxlength="120" required
+                           placeholder="Korte samenvatting" autocomplete="off" />
+                </div>
+
+                <div class="field">
+                    <label class="field__label" for="feedback-description" id="feedback-description-label">Wat gaat er mis?</label>
+                    <textarea class="input" id="feedback-description" name="description" maxlength="4000" required
+                              placeholder="Beschrijf zo precies mogelijk wat je ziet."></textarea>
+                </div>
+
+                <div class="field" id="feedback-steps-field">
+                    <label class="field__label" for="feedback-steps">Stappen om het te zien <span class="field__hint">(optioneel)</span></label>
+                    <textarea class="input" id="feedback-steps" name="steps" maxlength="2000"
+                              placeholder="1. Start een solve&#10;2. Druk op ...&#10;3. Dan gebeurt er ..."></textarea>
+                </div>
+
+                <div class="field" id="feedback-expected-field">
+                    <label class="field__label" for="feedback-expected">Wat had je verwacht? <span class="field__hint">(optioneel)</span></label>
+                    <input class="input" type="text" id="feedback-expected" name="expected" maxlength="1000"
+                           placeholder="Wat had er moeten gebeuren?" autocomplete="off" />
+                </div>
+
+                <div class="field">
+                    <label class="field__label" for="feedback-email">Je e-mailadres <span class="field__hint">(optioneel)</span></label>
+                    <input class="input" type="email" id="feedback-email" name="email" maxlength="191"
+                           placeholder="voor als we een vraag hebben" autocomplete="email" />
+                    <span class="field__hint">Blijft privé — het komt niet in het publieke GitHub-issue.</span>
+                </div>
+
+                <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots. -->
+                <div class="honeypot" aria-hidden="true">
+                    <label for="feedback-website">Laat dit veld leeg</label>
+                    <input type="text" id="feedback-website" name="website" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <p class="notice">
+                    We sturen automatisch je browser, schermformaat en het actieve event mee, zodat we het probleem kunnen
+                    nabootsen. Er gaan geen tijden of persoonlijke gegevens mee.
+                </p>
+
+                <p class="form-error" id="feedback-error" role="alert"></p>
+
+                <div class="time-modal__footer">
+                    <button class="btn" type="button" data-close-feedback>Annuleren</button>
+                    <button class="btn btn--primary" type="submit" id="feedback-submit">Versturen</button>
+                </div>
+            </form>
+
+            <div class="feedback-success" id="feedback-success" hidden>
+                <div class="feedback-success__icon" aria-hidden="true">✓</div>
+                <h3 class="modal__title">Bedankt voor je melding!</h3>
+                <p class="modal__subtitle" id="feedback-success-text"></p>
+                <a class="btn" id="feedback-issue-link" href="#" target="_blank" rel="noopener noreferrer">Bekijk het issue</a>
+                <button class="btn btn--ghost" type="button" data-close-feedback>Sluiten</button>
+            </div>
         </div>
-    </body>
+    </div>
+
+    <!-- ====================================================================
+         Modal: account
+         ==================================================================== -->
+    <div id="account-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="account-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-account aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Account</p>
+                <h2 class="modal__title" id="account-modal-title">Inloggen</h2>
+                <p class="modal__subtitle" id="account-modal-subtitle">Bewaar je tijden en neem ze mee naar elk apparaat.</p>
+            </div>
+
+            <!-- Uitgelogd: inloggen of registreren -->
+            <div class="modal__body" id="account-guest">
+                <div class="segmented" id="auth-tabs" role="tablist" aria-label="Inloggen of registreren">
+                    <button class="segmented__item is-active" type="button" data-auth-tab="login" role="tab" aria-selected="true">Inloggen</button>
+                    <button class="segmented__item" type="button" data-auth-tab="register" role="tab" aria-selected="false">Registreren</button>
+                </div>
+
+                <form id="login-form" class="modal__body" novalidate>
+                    <div class="field">
+                        <label class="field__label" for="login-identifier">Gebruikersnaam of e-mail</label>
+                        <input class="input" type="text" id="login-identifier" autocomplete="username" required />
+                    </div>
+                    <div class="field">
+                        <label class="field__label" for="login-password">Wachtwoord</label>
+                        <input class="input" type="password" id="login-password" autocomplete="current-password" required />
+                    </div>
+                    <p class="form-error" id="login-error" role="alert"></p>
+                    <button class="btn btn--primary btn--block" type="submit" id="login-submit">Inloggen</button>
+                </form>
+
+                <form id="register-form" class="modal__body" novalidate hidden>
+                    <div class="field">
+                        <label class="field__label" for="register-username">Gebruikersnaam</label>
+                        <input class="input" type="text" id="register-username" autocomplete="username" required
+                               minlength="3" maxlength="32" />
+                        <span class="field__hint">3 tot 32 tekens: letters, cijfers, punt, streepje of underscore.</span>
+                    </div>
+                    <div class="field">
+                        <label class="field__label" for="register-email">E-mailadres</label>
+                        <input class="input" type="email" id="register-email" autocomplete="email" required />
+                    </div>
+                    <div class="field">
+                        <label class="field__label" for="register-password">Wachtwoord</label>
+                        <input class="input" type="password" id="register-password" autocomplete="new-password" required
+                               minlength="8" />
+                        <span class="field__hint">Minstens 8 tekens.</span>
+                    </div>
+                    <p class="form-error" id="register-error" role="alert"></p>
+                    <button class="btn btn--primary btn--block" type="submit" id="register-submit">Account aanmaken</button>
+                </form>
+            </div>
+
+            <!-- Ingelogd -->
+            <div class="modal__body" id="account-user" hidden>
+                <div class="account-summary">
+                    <div class="account-summary__avatar" id="account-summary-avatar">?</div>
+                    <div class="account-summary__meta">
+                        <span class="account-summary__name" id="account-summary-name">--</span>
+                        <span class="account-summary__sub" id="account-summary-email">--</span>
+                    </div>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat">
+                        <span class="stat__label">Sessies</span>
+                        <span class="stat__value" id="account-stat-sessions">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat__label">Solves</span>
+                        <span class="stat__value" id="account-stat-solves">0</span>
+                    </div>
+                </div>
+
+                <p class="notice" id="account-sync-status">Je tijden worden automatisch opgeslagen.</p>
+
+                <div class="time-modal__actions">
+                    <button class="btn" type="button" id="account-sync-now">Nu synchroniseren</button>
+                    <button class="btn btn--danger" type="button" id="account-logout">Uitloggen</button>
+                </div>
+            </div>
+
+            <!-- Accounts staan uit op deze server -->
+            <div class="modal__body" id="account-unavailable" hidden>
+                <p class="notice notice--warning">
+                    De accountfunctie is op deze server nog niet ingesteld. Je tijden worden voorlopig alleen in deze
+                    browser bewaard.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: generieke vraag (vervangt prompt() en confirm())
+         ==================================================================== -->
+    <div id="prompt-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="prompt-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <div class="modal__header">
+                <h2 class="modal__title" id="prompt-modal-title">Weet je het zeker?</h2>
+                <p class="modal__subtitle" id="prompt-modal-message"></p>
+            </div>
+            <form class="modal__body" id="prompt-modal-form">
+                <div class="field" id="prompt-modal-field" hidden>
+                    <label class="field__label" for="prompt-modal-input" id="prompt-modal-label">Naam</label>
+                    <input class="input" type="text" id="prompt-modal-input" maxlength="64" autocomplete="off" />
+                </div>
+                <div class="time-modal__footer">
+                    <button class="btn" type="button" id="prompt-modal-cancel">Annuleren</button>
+                    <button class="btn btn--primary" type="submit" id="prompt-modal-confirm">Oké</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
 </html>
