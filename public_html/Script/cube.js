@@ -1,8 +1,10 @@
 /**
  * CubeTimer - kleine kubusengine
  * ---------------------------------------------------------------------------
- * Genoeg 3x3 om de tutorialpagina mee te bedienen: een zettenreeks uitvoeren,
- * hem omkeren, en opvragen welke kleur er op een bepaald plaatje ligt.
+ * Genoeg 3x3 om de leerpagina en de smart cube mee te bedienen: een
+ * zettenreeks uitvoeren, hem omkeren, opvragen welke kleur er op een plaatje
+ * ligt, en een stand lezen en schrijven in de Kociemba-notatie die smart
+ * cubes gebruiken.
  *
  * Waarom dit bestand bestaat: de OLL-patronen en de PLL-pijlen worden hiermee
  * *afgeleid* uit het algoritme zelf. Er staat dus nergens een met de hand
@@ -261,8 +263,118 @@
         return true;
     }
 
+    /* =====================================================================
+     * Facelets: de kubus als tekst van 54 letters
+     *
+     * Smart cubes melden hun stand in de gangbare Kociemba-volgorde: eerst U,
+     * dan R, F, D, L en B, elk vlak rij voor rij. Die volgorde en onze eigen
+     * rij/kolom-indeling per vlak blijken precies samen te vallen, dus de
+     * omzetting is alleen een kwestie van opzoeken.
+     * ================================================================== */
+
+    const KOCIEMBA = ['U', 'R', 'F', 'D', 'L', 'B'];
+
+    function kociembaIndex(face, row, col) {
+        return KOCIEMBA.indexOf(face) * 9 + row * 3 + col;
+    }
+
+    /** De stand als Kociemba-tekst, bijv. "UUUUUUUUURRRRRRRRR...". */
+    function toFacelets(state) {
+        let uit = '';
+        KOCIEMBA.forEach(face => {
+            for (let row = 0; row < 3; row += 1) {
+                for (let col = 0; col < 3; col += 1) {
+                    uit += colorAt(state, face, row, col);
+                }
+            }
+        });
+        return uit;
+    }
+
+    /** De sleutel van een stuk: de vlakken waar het naar wijst, gesorteerd. */
+    function pieceKey(faces) {
+        return faces.slice().sort().join('');
+    }
+
+    /** Welke plaatjes horen bij welk stuk, per plek. */
+    const PIECES = (() => {
+        const perPlek = new Map();
+        STICKERS.forEach((sticker, index) => {
+            const plek = sticker.pos.join(',');
+            if (!perPlek.has(plek)) perPlek.set(plek, []);
+            perPlek.get(plek).push(index);
+        });
+        return Array.from(perPlek.values());
+    })();
+
+    /** Van "de kleuren van dit stuk" naar de plaatjes van het stuk dat zo hoort. */
+    const HOME_BY_COLORS = new Map(PIECES.map(slots => [
+        pieceKey(slots.map(index => STICKERS[index].face)),
+        slots
+    ]));
+
+    /**
+     * Zet een Kociemba-tekst om naar een stand, of geeft null als de tekst
+     * geen echte kubus beschrijft (een stuk met kleuren die niet bestaan, of
+     * hetzelfde stuk twee keer). Dat laatste is ook hoe we merken dat een
+     * smart cube met de verkeerde sleutel wordt uitgelezen: dan komt er
+     * willekeurige rommel uit, en die valt hier door de mand.
+     */
+    function fromFacelets(text) {
+        if (typeof text !== 'string' || text.length !== 54) return null;
+        const state = new Array(54);
+        const gebruikt = new Set();
+
+        for (const slots of PIECES) {
+            const kleuren = slots.map(index => {
+                const s = STICKERS[index];
+                return text.charAt(kociembaIndex(s.face, s.row, s.col));
+            });
+            const thuis = HOME_BY_COLORS.get(pieceKey(kleuren));
+            if (!thuis) return null;
+            const sleutel = thuis.join(',');
+            if (gebruikt.has(sleutel)) return null;
+            gebruikt.add(sleutel);
+
+            slots.forEach((slotIndex, i) => {
+                const doel = thuis.find(index => STICKERS[index].face === kleuren[i]);
+                if (doel === undefined) return;
+                state[slotIndex] = doel;
+            });
+        }
+        return state.some(value => value === undefined) ? null : state;
+    }
+
+    /**
+     * Liggen alle stukken die aan `test(pos)` voldoen goed? Een stuk ligt goed
+     * als elk van zijn plaatjes de kleur heeft van het vlak waar het op zit.
+     * Gebruikt voor de solve-analyse: kruis, F2L, OLL.
+     */
+    function piecesSolved(state, test) {
+        return PIECES.every(slots => {
+            if (!test(STICKERS[slots[0]].pos)) return true;
+            return slots.every(index => STICKERS[state[index]].face === STICKERS[index].face);
+        });
+    }
+
+    /** Heeft elk plaatje op dit vlak dezelfde kleur als het midden? */
+    function faceUniform(state, face) {
+        const midden = colorAt(state, face, 1, 1);
+        for (let row = 0; row < 3; row += 1) {
+            for (let col = 0; col < 3; col += 1) {
+                if (colorAt(state, face, row, col) !== midden) return false;
+            }
+        }
+        return true;
+    }
+
     root.CubeTimerCube = {
         FACES: FACE_NAMES,
+        NORMALS: FACES,
+        toFacelets,
+        fromFacelets,
+        piecesSolved,
+        faceUniform,
         STICKERS,
         parse,
         invert,

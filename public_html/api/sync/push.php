@@ -143,6 +143,7 @@ foreach (array_values($payload) as $order => $rawSession) {
                 'scramble'  => $clean($rawSolve['scramble'] ?? '', MAX_SCRAMBLE_LENGTH),
                 'source'    => $clean($rawSolve['source'] ?? 'manual', 16) ?: 'manual',
                 'solved_at' => $toUtc($rawSolve['timestamp'] ?? null),
+                'details'   => SolveAnalysis::clean($rawSolve['analysis'] ?? null),
             ];
         }
     }
@@ -191,17 +192,32 @@ try {
          ON DUPLICATE KEY UPDATE
             name = VALUES(name), event = VALUES(event), sort_order = VALUES(sort_order)'
     );
-    $upsertSolve = $pdo->prepare(
-        'INSERT INTO solves (user_id, timer_session_id, client_id, event, raw_ms, penalty, scramble, source, solved_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-            timer_session_id = VALUES(timer_session_id),
-            event            = VALUES(event),
-            raw_ms           = VALUES(raw_ms),
-            penalty          = VALUES(penalty),
-            scramble         = VALUES(scramble),
-            source           = VALUES(source),
-            solved_at        = VALUES(solved_at)'
+    // De analyse van smart-cubesolves kan pas na migratie 008 mee. Zonder die
+    // kolom slaan we hem over in plaats van de hele synchronisatie te laten
+    // mislukken.
+    $metAnalyse = Database::hasColumn('solves', 'details');
+    $upsertSolve = $pdo->prepare($metAnalyse
+        ? 'INSERT INTO solves (user_id, timer_session_id, client_id, event, raw_ms, penalty, scramble, source, solved_at, details)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE
+              timer_session_id = VALUES(timer_session_id),
+              event            = VALUES(event),
+              raw_ms           = VALUES(raw_ms),
+              penalty          = VALUES(penalty),
+              scramble         = VALUES(scramble),
+              source           = VALUES(source),
+              solved_at        = VALUES(solved_at),
+              details          = VALUES(details)'
+        : 'INSERT INTO solves (user_id, timer_session_id, client_id, event, raw_ms, penalty, scramble, source, solved_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE
+              timer_session_id = VALUES(timer_session_id),
+              event            = VALUES(event),
+              raw_ms           = VALUES(raw_ms),
+              penalty          = VALUES(penalty),
+              scramble         = VALUES(scramble),
+              source           = VALUES(source),
+              solved_at        = VALUES(solved_at)'
     );
 
     $sessionIds = [];
@@ -241,7 +257,7 @@ try {
     // 4. Solves bijwerken of aanmaken.
     foreach ($opgeslagen as $session) {
         foreach ($session['times'] as $solve) {
-            $upsertSolve->execute([
+            $waarden = [
                 $userId,
                 $session['db_id'],
                 $solve['client_id'],
@@ -251,7 +267,11 @@ try {
                 $solve['scramble'] === '' ? null : $solve['scramble'],
                 $solve['source'],
                 $solve['solved_at'],
-            ]);
+            ];
+            if ($metAnalyse) {
+                $waarden[] = $solve['details'];
+            }
+            $upsertSolve->execute($waarden);
         }
     }
 

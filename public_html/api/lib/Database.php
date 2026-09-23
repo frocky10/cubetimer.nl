@@ -123,4 +123,26 @@ final class Database
             return false;
         }
     }
+
+    /**
+     * Bestaat een kolom? Voor kolommen die er pas na een latere migratie zijn,
+     * zodat een installatie die nog niet is bijgewerkt gewoon blijft werken.
+     */
+    public static function hasColumn(string $table, string $column): bool
+    {
+        $pdo = self::tryConnection();
+        if ($pdo === null) {
+            return false;
+        }
+        try {
+            $statement = $pdo->prepare(
+                'SELECT COUNT(*) FROM information_schema.columns
+                 WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?'
+            );
+            $statement->execute([$table, $column]);
+            return (int) $statement->fetchColumn() > 0;
+        } catch (PDOException) {
+            return false;
+        }
+    }
 }

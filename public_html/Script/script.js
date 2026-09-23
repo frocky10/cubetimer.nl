@@ -489,6 +489,13 @@ function generateScrambleForActiveEvent() {
             scrambleDisplay.textContent = scrambleOverride;
         }
         window.currentScramble = scrambleOverride;
+        // Zelfde melding als een gewone scramble, anders volgt de smart cube
+        // de scramble van de dag of een oefengeval niet. `override` zegt dat
+        // dit geen willekeurige scramble is, zodat hij niet in de voorraad
+        // voor de scramble van de dag belandt.
+        window.dispatchEvent(new CustomEvent('cubetimer:scramble-change', {
+            detail: { eventType: getActiveSessionEvent(), scramble: scrambleOverride, override: true }
+        }));
         return;
     }
 
@@ -852,6 +859,10 @@ function saveTime(ms, penalty = null, metadata = {}) {
         scramble,
         source: metadata.source || 'manual'
     };
+    // Een smart cube levert per solve een analyse mee: zetten, TPS, fases.
+    if (metadata.analysis && typeof metadata.analysis === 'object') {
+        entry.analysis = metadata.analysis;
+    }
     if (solveCapture) {
         // Toernooisolves komen niet bij je gewone tijden terecht.
         solveCapture(entry);
@@ -888,7 +899,17 @@ function startTimer() {
     updateTimer();
 }
 
-function stopTimer() {
+/**
+ * Stopt de timer en slaat de tijd op.
+ *
+ * De tijd is het echte stopmoment, niet `lastDisplayTime`: dat is het laatst
+ * getekende beeldje, en dat kan tot een frame (zo'n 16 ms) achterlopen.
+ *
+ * Een smart cube geeft zelf de tijd mee (`options.ms`), gemeten met de klok in
+ * de cube, plus de analyse van de solve.
+ */
+function stopTimer(options = {}) {
+    const gemeten = performance.now() - startTime;
     resetLights();
     document.body.classList.remove('is-timing');
     readyLightsContainer.classList.remove('lights-hidden');
@@ -897,7 +918,10 @@ function stopTimer() {
     holdActive = false;
     clearTimeout(holdTimeout);
     const penalty = pendingInspectionPlusTwo ? 'plus2' : null;
-    saveTime(lastDisplayTime, penalty);
+    const ms = typeof options.ms === 'number' && options.ms > 0 ? options.ms : gemeten;
+    lastDisplayTime = ms;
+    if (timerDisplay) timerDisplay.textContent = formatTime(ms);
+    saveTime(ms, penalty, { source: options.source, analysis: options.analysis });
     pendingInspectionPlusTwo = false;
     resetInspectionCycle();
     generateScrambleForActiveEvent();
@@ -923,9 +947,9 @@ function startInspectionFromBluetooth() {
     return true;
 }
 
-function stopTimerFromBluetooth() {
+function stopTimerFromBluetooth(details = {}) {
     if (!running) return false;
-    stopTimer();
+    stopTimer({ source: 'bluetooth', ms: details.ms, analysis: details.analysis });
     return true;
 }
 
@@ -1089,6 +1113,8 @@ function openEditModal(index) {
     if (modalScrambleField) {
         modalScrambleField.textContent = entry.scramble || 'Scramble niet bewaard';
     }
+    // smartcube.js vult hiermee de analyse in, als die er is.
+    window.dispatchEvent(new CustomEvent('cubetimer:solve-open', { detail: { solve: { ...entry } } }));
     UI.openModal(editModal);
 }
 

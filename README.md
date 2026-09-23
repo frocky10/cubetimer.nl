@@ -118,10 +118,17 @@ terug te zien.
 
 **Smart cubes** — [#11](https://github.com/frocky10/cubetimer.nl/issues/11)
 
-- [x] GAN- en QiYi/X-Man-cubes via Web Bluetooth
-- [x] 3D-weergave van je cube die meedraait
-- [x] Timer start en stopt vanzelf op je eerste en laatste zet
-- [x] Scramble-tracker die bijhoudt hoever je bent
+- [x] Alle gangbare merken: GAN (gen1 t/m gen4), QiYi/X-Man, MoYu, Giiker en GoCube
+- [x] Eigen drivers, zonder CDN; één keuzevenster dat alleen cubes laat zien
+- [x] MAC-adres wordt zelf gevonden waar dat kan, en daarna onthouden
+- [x] Knop in de balk met status en batterij, en een eigen venster
+- [x] 3D-weergave van je cube die meedraait, ook de achterkant
+- [x] Scramble licht zet voor zet op, R2 mag ook als R' R', een foute zet valt op
+- [x] Inspectie start als de scramble af is; de eerste draai start de timer
+- [x] Tijd uit de klok van de cube, niet uit de wisselende Bluetooth-vertraging
+- [x] Analyse per solve: zetten, TPS, oplossing, en tijd per fase (kruis, F2L, OLL, PLL)
+- [x] Gemiste Bluetooth-pakketjes worden teruggehaald; de stand loopt niet uit de pas
+- [x] Testscript met nagebootste cubes, voor GAN ook tegen gan-web-bluetooth
 
 **Account** — [#10](https://github.com/frocky10/cubetimer.nl/issues/10)
 
@@ -231,6 +238,8 @@ terug te zien.
 - [ ] `bluetoothCube.js` opschonen; is bij de restyling met rust gelaten
 - [ ] Losse tijden per stuk kunnen bekijken (nu alleen als aantal)
 - [ ] F2L-gevallen ook gespiegeld tonen voor de sleuf linksvoor
+- [ ] Smart cube automatisch opnieuw verbinden als de verbinding wegvalt
+- [ ] Smart cube ook voor 2x2 (GAN 251) en met de gyroscoop
 - [x] ~~Tijden tonen als `11.53`~~ — besloten: blijft `00:11:530`
 
 **Beheer**
@@ -300,7 +309,8 @@ meteen zien wat het doet.
 | `.github/workflows/` | FTP-deploy naar DirectAdmin |
 
 **Externe afhankelijkheden:** [cubing.js](https://cubing.net) voor de scrambles
-en de 3D-cube, en Inter van Google Fonts. Verder niets.
+en Inter van Google Fonts. De smart-cubedrivers en AES (aes-js, MIT) staan
+lokaal in de repo. Verder niets.
 
 [`CLAUDE.md`](CLAUDE.md) beschrijft de werkafspraken, de laadvolgorde van de
 scripts, de vorm van de data en de regels voor de backend. Lees dat eerst als je

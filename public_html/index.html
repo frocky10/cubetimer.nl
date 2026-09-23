@@ -43,9 +43,9 @@
     <script src="Script/achievements.js" defer></script>
     <script src="Script/tournament.js" defer></script>
     <script src="Script/admin.js" defer></script>
+    <script src="Script/smartcube.js" defer></script>
     <script src="Script/account.js" defer></script>
     <script type="module" src="Script/scrambleScript.js"></script>
-    <script type="module" src="Script/bluetoothCube.js"></script>
 
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7865142075636059" crossorigin="anonymous"></script>
@@ -206,6 +206,13 @@
 
                 <div class="topbar__actions">
                     <div class="topbar__group" id="topbar-group">
+                    <button id="smartcube-open" class="btn-icon btn-icon--badged smartcube-button" type="button"
+                            title="Smart cube" aria-label="Smart cube" data-state="off" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4Z" /><path d="M4 7.4l8 4.6 8-4.6M12 12v9.2" /></svg>
+                        <span class="btn-icon__label">Smart cube</span>
+                        <span class="smartcube-button__dot" aria-hidden="true"></span>
+                    </button>
+
                     <button id="leaderboard-open" class="btn-icon" type="button" title="Ranglijsten" aria-label="Ranglijsten" hidden>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0Z" /><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" /></svg>
                         <span class="btn-icon__label">Ranglijsten</span>
@@ -319,6 +326,15 @@
 
             <footer class="scramble-bar">
                 <div id="Scrambles" class="ScrambleBox" aria-live="polite"></div>
+                <!-- Smart cube: hoe ver je bent met de scramble. Alleen als er een cube verbonden is. -->
+                <div class="smartcube-stage" id="smartcube-stage" hidden>
+                    <div class="smartcube-stage__cube" id="smartcube-stage-cube" aria-hidden="true"></div>
+                    <div class="smartcube-stage__text">
+                        <strong id="smartcube-stage-title">Smart cube</strong>
+                        <span id="smartcube-stage-hint">Volg de scramble op je cube.</span>
+                    </div>
+                    <div class="smartcube-stage__bar" aria-hidden="true"><span id="smartcube-stage-progress"></span></div>
+                </div>
             </footer>
         </main>
     </div>
@@ -354,6 +370,9 @@
                     <p id="modal-scramble" class="time-modal__scramble">--</p>
                 </div>
 
+                <!-- Alleen bij een solve met een smart cube. Gevuld door smartcube.js. -->
+                <div class="field solve-analysis" id="modal-analysis" hidden></div>
+
                 <div class="time-modal__actions">
                     <button id="modal-plus2" class="btn btn--warning" type="button">+2 aan/uit</button>
                     <button id="modal-dnf" class="btn btn--danger" type="button">DNF</button>
@@ -383,7 +402,6 @@
                 <nav class="settings-nav" aria-label="Instellingen">
                     <button class="settings-nav__item active" type="button" data-settings-tab="general" aria-pressed="true">Algemeen</button>
                     <button class="settings-nav__item" type="button" data-settings-tab="timer" aria-pressed="false">Timer</button>
-                    <button class="settings-nav__item" type="button" data-settings-tab="smart-cube" aria-pressed="false">Smart Cube</button>
                     <button class="settings-nav__item" type="button" data-settings-tab="admin" aria-pressed="false" id="settings-tab-admin" hidden>Beheer</button>
                 </nav>
 
@@ -506,62 +524,6 @@
                     </section>
 
                     <!-- Smart Cube -->
-                    <section id="bluetooth-panel" class="bluetooth-panel settings-section" data-settings-panel="smart-cube" aria-label="Bluetooth cube" hidden>
-                        <div class="bluetooth-panel__header">
-                            <div>
-                                <p class="bluetooth-panel__eyebrow">Smart Cube</p>
-                                <h3 class="bluetooth-panel__title">Bluetooth-cube</h3>
-                            </div>
-                            <div class="bluetooth-panel__buttons">
-                                <button id="bluetooth-connect" class="btn btn--primary btn--sm" type="button">Verbinden</button>
-                                <button id="bluetooth-disconnect" class="btn btn--sm" type="button" disabled>Loskoppelen</button>
-                                <button id="bluetooth-forget-mac" class="btn btn--sm" type="button">MAC vergeten</button>
-                            </div>
-                        </div>
-
-                        <p id="bluetooth-status" class="bluetooth-panel__status">Gebruik Chrome of Edge met Web Bluetooth om een GAN- of QiYi/X-Man-cube te koppelen.</p>
-
-                        <div class="bluetooth-panel__content">
-                            <div class="bluetooth-panel__viewer">
-                                <twisty-player
-                                    id="bluetooth-cube-player"
-                                    puzzle="3x3x3"
-                                    background="none"
-                                    control-panel="none"
-                                    hint-facelets="none"
-                                    visualization="3D"
-                                    camera-latitude="24"
-                                    camera-longitude="32"
-                                ></twisty-player>
-                            </div>
-                            <div class="bluetooth-panel__stats">
-                                <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Apparaat</span>
-                                    <span id="bluetooth-device-name" class="bluetooth-stat__value">Niet verbonden</span>
-                                </div>
-                                <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Batterij</span>
-                                    <span id="bluetooth-battery" class="bluetooth-stat__value">--</span>
-                                </div>
-                                <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Auto-timer</span>
-                                    <span id="bluetooth-auto-timer" class="bluetooth-stat__value">Wacht op eerste draai</span>
-                                </div>
-                                <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Cube-stand</span>
-                                    <span id="bluetooth-cube-state" class="bluetooth-stat__value">Onbekend</span>
-                                </div>
-                                <div class="bluetooth-stat">
-                                    <span class="bluetooth-stat__label">Scramble</span>
-                                    <span id="bluetooth-scramble-progress" class="bluetooth-stat__value">0 / 0 zetten</span>
-                                </div>
-                                <div class="bluetooth-stat bluetooth-stat--wide">
-                                    <span class="bluetooth-stat__label">Zetten</span>
-                                    <span id="bluetooth-move-stream" class="bluetooth-stat__value bluetooth-stat__value--mono">Wacht op zetten...</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
                 </div>
             </div>
 
@@ -1005,6 +967,98 @@
     <!-- ====================================================================
          Modal: generieke vraag (vervangt prompt() en confirm())
          ==================================================================== -->
+    <!-- ================================================================
+         Smart cube
+         ================================================================ -->
+    <div id="smartcube-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="smartcube-title" aria-hidden="true">
+        <div class="time-modal__dialog smartcube-dialog">
+            <button class="time-modal__close" type="button" data-close-smartcube aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Smart cube</p>
+                <h2 class="modal__title" id="smartcube-title">Verbind je smart cube</h2>
+                <p class="modal__subtitle" id="smartcube-subtitle">De timer start bij je eerste draai na de scramble en stopt als de cube opgelost is.</p>
+            </div>
+
+            <div class="modal__body">
+                <!-- Niet verbonden -->
+                <section class="smartcube-view" data-sc-view="idle">
+                    <ul class="smartcube-brands" aria-label="Ondersteunde merken">
+                        <li>GAN</li><li>MoYu</li><li>QiYi</li><li>X-Man</li><li>Giiker</li><li>GoCube</li>
+                    </ul>
+                    <p class="smartcube-error" id="smartcube-error" role="alert" hidden></p>
+                    <button class="btn btn--primary btn--block" type="button" id="smartcube-connect">Verbinden</button>
+                    <p class="field__hint">
+                        Zet je cube aan (even draaien is genoeg) en kies hem in het venster dat opent.
+                        Werkt in Chrome en Edge op Windows, macOS, Android en ChromeOS.
+                    </p>
+                </section>
+
+                <!-- Bezig met verbinden -->
+                <section class="smartcube-view" data-sc-view="busy" hidden>
+                    <ol class="smartcube-steps">
+                        <li data-sc-step="kiezen">Cube kiezen</li>
+                        <li data-sc-step="mac-zoeken">Adres van de cube zoeken</li>
+                        <li data-sc-step="verbinden">Verbinden</li>
+                        <li data-sc-step="stand">Stand ophalen</li>
+                    </ol>
+                </section>
+
+                <!-- MAC-adres nodig -->
+                <section class="smartcube-view" data-sc-view="mac" hidden>
+                    <form id="smartcube-mac-form" class="smartcube-mac" novalidate>
+                        <p class="smartcube-mac__lead" id="smartcube-mac-lead"></p>
+                        <div class="field">
+                            <label class="field__label" for="smartcube-mac-input">MAC-adres</label>
+                            <input class="input input--mono" type="text" id="smartcube-mac-input"
+                                   placeholder="AB:12:34:CD:56:EF" autocomplete="off" spellcheck="false" maxlength="17" />
+                            <p class="form-error" id="smartcube-mac-error" role="alert"></p>
+                        </div>
+                        <details class="smartcube-mac__help">
+                            <summary>Waar vind ik dat?</summary>
+                            <ul>
+                                <li><strong>In Chrome of Edge op de computer:</strong> open <code>chrome://bluetooth-internals</code>, klik op <em>Start scan</em> en zoek je cube in de lijst. Het adres staat erachter.</li>
+                                <li><strong>In de app van je cube:</strong> bij de apparaatgegevens of instellingen.</li>
+                                <li><strong>Sneller volgende keer:</strong> zet in Chrome <code>chrome://flags/#enable-experimental-web-platform-features</code> aan, dan leest de site het adres zelf uit.</li>
+                            </ul>
+                            <p>Je hoeft het maar één keer in te vullen; daarna onthoudt deze browser het.</p>
+                        </details>
+                        <div class="time-modal__footer">
+                            <button class="btn" type="button" id="smartcube-mac-cancel">Annuleren</button>
+                            <button class="btn btn--primary" type="submit">Verbinden</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Verbonden -->
+                <section class="smartcube-view" data-sc-view="connected" hidden>
+                    <div class="smartcube-live">
+                        <div class="smartcube-live__cube">
+                            <div id="smartcube-cube" class="smartcube-cube" aria-hidden="true"></div>
+                            <button class="btn btn--sm smartcube-flip" type="button" id="smartcube-flip" aria-pressed="false">Achterkant</button>
+                        </div>
+                        <dl class="smartcube-facts">
+                            <div><dt>Cube</dt><dd id="smartcube-name">--</dd></div>
+                            <div><dt>Protocol</dt><dd id="smartcube-protocol">--</dd></div>
+                            <div>
+                                <dt>Batterij</dt>
+                                <dd><span class="smartcube-battery"><span id="smartcube-battery-bar"></span></span> <span id="smartcube-battery">--</span></dd>
+                            </div>
+                            <div><dt>Stand</dt><dd id="smartcube-state">--</dd></div>
+                        </dl>
+                    </div>
+                    <p class="field__hint" id="smartcube-event-hint" hidden>
+                        De smart cube werkt alleen in een 3x3-sessie. Kies 3x3 om hem te gebruiken.
+                    </p>
+                    <div class="time-modal__actions">
+                        <button class="btn" type="button" id="smartcube-solved" hidden>Cube is opgelost</button>
+                        <button class="btn" type="button" id="smartcube-change-mac" hidden>MAC-adres wijzigen</button>
+                        <button class="btn btn--danger" type="button" id="smartcube-disconnect">Loskoppelen</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
     <div id="prompt-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="prompt-modal-title" aria-hidden="true">
         <div class="time-modal__dialog">
             <div class="modal__header">

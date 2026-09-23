@@ -23,7 +23,8 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Sessies met een eigen event, lopende Ao5 en Ao12 per solve
 - +2, DNF en verwijderen per solve (klik op een rij, of `2` / `D` / `⌫`)
 - Statistieken per sessie, per dag en per week (Mo3, Ao5, Ao12, Ao50, Ao100)
-- Smart cubes via Web Bluetooth (GAN en QiYi/X-Man) met 3D-weergave
+- Smart cubes via Web Bluetooth: GAN (gen1–4), QiYi/X-Man, MoYu, Giiker en GoCube,
+  met scramblehulp, automatisch starten en stoppen, en een analyse per solve
 - Accounts met synchronisatie van je tijden naar de server
 - Leaderboards per event, categorie en periode
 - XP, levels, streaks en een rangbadge
@@ -62,8 +63,14 @@ public_html/                   Precies wat er op de server komt te staan
     achievements.js            Achievements
     tournament.js              Toernooimodus
     admin.js                   Beoordeelwachtrij (alleen voor de rol admin)
+    smartcube.js               Smart cube: knop, venster, timer, analyse
+    smartcube-protocols.js     Drivers per merk (pas geladen bij gebruik)
+    smartcube-engine.js        Stand, scramble volgen, analyse (idem)
+    cube.js                    Kleine 3x3: zetten uitvoeren en omkeren
+    algorithms.js              OLL, PLL en F2L; plaatjes eruit afgeleid
+    tutorials.js               De leerpagina
+    vendor/aes.js              aes-js (MIT), voor de versleuteling van cubes
     scrambleScript.js          Scrambles via cubing.js (ES-module)
-    bluetoothCube.js           Smart cubes via Web Bluetooth (ES-module)
   api/                         PHP-backend
     bootstrap.php              Laadt de libs, zet de foutafhandeling
     status.php                 Welke onderdelen zijn beschikbaar?
@@ -71,11 +78,14 @@ public_html/                   Precies wat er op de server komt te staan
     lib/                       Config, Http, Database, Auth, RateLimiter, GitHubIssues,
                                SiteTime, Events, Averages, Records, Xp,
                                Leaderboard, Challenges, SolveFacts, Achievements,
-                               PublicProfile, Follows, Tournaments, TournamentField
+                               PublicProfile, Follows, Tournaments, TournamentField,
+                               SolveAnalysis
     auth/                      register, login, logout, me
     sync/                      pull, push
     feedback/                  report
     leaderboard/               list
+    archive/                   list, restore, clear (losse tijden)
+    algorithms/                list, toggle (geleerde algoritmes)
     profile/                   overview, settings, public
     challenges/                today, submit, contribute
     achievements/              list
@@ -115,13 +125,18 @@ find public_html/api -name '*.php' -exec php -l {} \;
 
 # JavaScript-syntax (de twee ES-modules kunnen hier niet doorheen)
 for f in ui script stats settings feedback account leaderboard challenges \
-         achievements tournament admin cube algorithms tutorials; do
+         achievements tournament admin cube algorithms tutorials \
+         smartcube smartcube-protocols smartcube-engine; do
   node --check public_html/Script/$f.js
 done
 
 # De algoritmes op de leerpagina controleren. Draai dit na elke wijziging aan
 # algorithms.js: een tikfout in een algoritme zie je niet met het blote oog.
 node tools/algoritmes-controleren.js
+
+# De smart-cubedrivers en het rekenwerk, met nagebootste cubes. Zie het
+# hoofdstuk Smart cubes voor de vergelijking met gan-web-bluetooth.
+node tools/smartcube-testen.js
 
 # De site lokaal draaien, inclusief werkende API
 php -S 127.0.0.1:8123 -t public_html
@@ -168,14 +183,15 @@ menu een naam heeft.
 
 ### Klassen die je niet zomaar mag hernoemen
 
-`script.js` en `bluetoothCube.js` zoeken elementen op id en klasse op. Deze
+`script.js` en `smartcube.js` zoeken elementen op id en klasse op. Deze
 namen liggen vast tenzij je het JS meeverandert:
 
 `#timer`, `#ready-lights`, `.ready-light` (+ `.active` / `.green`),
 `#table-body`, `#times-table`, `#Scrambles`, `.ScrambleBox`, `#session-pr`,
 `#session-graph-canvas`, `#confetti-canvas`, `#theme-toggle` (+ `.moon` /
 `.sun` / `.toggle-knob`), `#session-select`, `#cube-select`, `#cube-display`,
-`.time-modal` (+ `.visible`), alle `#modal-*`, alle `#bluetooth-*`,
+`.time-modal` (+ `.visible`), alle `#modal-*`, alle `#smartcube-*`,
+`[data-sc-view]` / `[data-sc-step]`, `.sc-move`,
 `[data-settings-tab]` / `[data-settings-panel]`.
 
 De klasse `.time-modal` is een historische naam en wordt door **alle** modals
@@ -186,14 +202,20 @@ gebruikt, niet alleen die van een solve.
 `ui.js` moet als eerste geladen worden (alle andere scripts gebruiken
 `window.CubeTimerUI`), daarna `script.js` (dat `window.cubeTimerApi` zet),
 daarna de rest. Ze staan met `defer` in de `<head>`, wat de volgorde
-garandeert. De twee ES-modules laden apart en mogen nergens vroeg op rekenen.
+garandeert. `scrambleScript.js` is een ES-module (cubing.js), laadt apart en
+mag nergens vroeg op rekenen.
+
+Een paar bestanden worden pas geladen als ze nodig zijn: `cube.js` en
+`algorithms.js` (door de oefenknop), en `vendor/aes.js`, `cube.js`,
+`smartcube-protocols.js` en `smartcube-engine.js` (zodra je het
+smart-cubevenster opent). Wie ze niet nodig heeft, downloadt ze ook niet.
 
 ### De twee globale objecten
 
 | Object | Van wie | Waarvoor |
 |---|---|---|
 | `window.CubeTimerUI` | `ui.js` | `toast`, `ask`, `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
-| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, en de Bluetooth-haken |
+| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, `startInspectionFromBluetooth`, `startTimerFromBluetooth`, `stopTimerFromBluetooth({ ms, analysis })` |
 | `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
 | `window.CubeTimerLeaderboard` | `leaderboard.js` | `open`, `reload` |
 | `window.CubeTimerChallenges` | `challenges.js` | `load`, `stopChallenge` |
@@ -201,6 +223,8 @@ garandeert. De twee ES-modules laden apart en mogen nergens vroeg op rekenen.
 | `window.CubeTimerTournament` | `tournament.js` | `load`, `stopCapture` |
 | `window.CubeTimerCube` | `cube.js` | `parse`, `invert`, `after`, `colorAt`, `slot`, `isSolved` — alleen op `leren.html` en bij het oefenen |
 | `window.CubeTimerAlgorithms` | `algorithms.js` | `all`, `byId`, `colorAt`, `pieceAt`, `groupLabel` |
+| `window.CubeTimerSmartCube` | `smartcube-protocols.js` | `connect`, `open`, `isSupported`, `requestOptions`, `brandFor`, `parseMac` |
+| `window.CubeTimerSmartEngine` | `smartcube-engine.js` | `Tracker`, `analyse`, `mergeMoves`, `moveTimes` |
 
 Gebruik **`CubeTimerUI.ask()` in plaats van `prompt()` of `confirm()`** en
 **`CubeTimerUI.toast()` in plaats van `alert()`**. De browserdialogen passen
@@ -211,8 +235,9 @@ niet bij de rest van de site en blokkeren de timer.
 | Event | Wanneer | Wie luistert |
 |---|---|---|
 | `cubetimer:data-change` | na elke wijziging aan tijden of sessies | `stats.js`, `account.js` |
-| `cubetimer:event-change` | ander cube/event gekozen | `stats.js`, `bluetoothCube.js` |
-| `cubetimer:scramble-change` | nieuwe scramble klaar | `bluetoothCube.js` |
+| `cubetimer:event-change` | ander cube/event gekozen | `stats.js`, `smartcube.js` |
+| `cubetimer:scramble-change` | nieuwe scramble klaar; `override: true` bij een vastgezette (scramble van de dag, oefengeval) | `smartcube.js`, `challenges.js` (slaat `override` over) |
+| `cubetimer:solve-open` | een solve wordt geopend in het solve-venster | `smartcube.js` (tekent de analyse) |
 | `cubetimer:settings-change` | instelling gewijzigd | `settings.js` |
 | `cubetimer:solve` | een solve is opgeslagen, met de solve erbij | `challenges.js` |
 | `cubetimer:synced` | synchronisatie geslaagd, server heeft herberekend | `challenges.js` |
@@ -231,6 +256,7 @@ blijft de timer dus gewoon werken.
 | `cubetimer_theme` | het opgeloste thema (`dark`/`light`) voor het inline script |
 | `cubetimer_stats_scope` | laatst gekozen periode in het statistiekenpaneel |
 | `cubetimer_removed_v1` | solve-id's die ook van het account af moeten, tot de volgende synchronisatie ze heeft doorgegeven |
+| `cubetimer_cube_macs` | per naam van een smart cube het MAC-adres dat werkte, zodat je het maar één keer hoeft in te vullen |
 
 Een solve ziet er zo uit:
 
@@ -241,7 +267,8 @@ Een solve ziet er zo uit:
   penalty: null | 'plus2' | 'dnf',// de +2 zit NIET in raw verwerkt
   timestamp: '2026-09-22T10:15:00.000Z',
   scramble: "R U R' U' F2 ...",
-  source: 'manual' | 'bluetooth'
+  source: 'manual' | 'bluetooth',
+  analysis: { ... }               // alleen bij een smart cube, zie Smart cubes
 }
 ```
 
@@ -295,7 +322,7 @@ uit `lib/`.
 | `auth/logout.php` | POST | Sessie beëindigen |
 | `auth/me.php` | GET | Huidige gebruiker, of `user: null` |
 | `sync/pull.php` | GET | Alle sessies en solves ophalen |
-| `sync/push.php` | POST | Volledige staat opslaan (vervangt) en alles herberekenen |
+| `sync/push.php` | POST | Volledige staat opslaan (legt ernaast, zie Synchronisatie) en alles herberekenen |
 | `feedback/report.php` | POST | Melding als GitHub-issue |
 | `leaderboard/list.php` | GET | Ranglijst per event, categorie en periode (openbaar) |
 | `profile/overview.php` | GET | XP, level, rang, streak, records, XP-logboek |
@@ -670,6 +697,116 @@ database — de server controleert een id alleen op vorm (`OLL-27`, `PLL-T`,
 
 ---
 
+## Smart cubes
+
+Eén knop in de balk, één venster, en daarna gaat het vanzelf: de scramble
+licht zet voor zet op, na de laatste zet start de inspectie (als die aanstaat),
+de eerste draai daarna start de timer, en de timer stopt als de cube opgelost
+is. De knop verschijnt alleen als de browser Web Bluetooth heeft (Chrome en
+Edge; niet Safari of Firefox).
+
+### Drie bestanden, elk met één taak
+
+| Bestand | Doet |
+|---|---|
+| `smartcube-protocols.js` | Praten met de cube: per merk versleutelen, ontcijferen en omzetten naar `move`, `facelets`, `battery`, `keyError` |
+| `smartcube-engine.js` | Rekenen: stand bijhouden, scramble volgen, solve herkennen, analyse maken |
+| `smartcube.js` | Interface en koppeling met de timer |
+
+De eerste twee zijn los te testen en worden pas geladen als je het venster
+opent. `smartcube.js` laadt altijd, want de analyse in het solve-venster moet
+ook werken op een apparaat zonder Bluetooth.
+
+### Merken
+
+| Merk | Namen | Protocol | MAC-adres nodig |
+|---|---|---|---|
+| GAN | `GAN…`, `MG…`, `AiCube…` | gen1 (356i), gen2, gen3, gen4; AiCube = gen2 met eigen sleutel | ja, behalve gen1 |
+| QiYi | `QY-QYSC…`, `XMD-TornadoV4-i…` | vaste AES-sleutel, begroeting met het MAC-adres | ja, wordt uit de naam afgeleid |
+| MoYu | `WCU_MY3…` (WeiLong AI), `MHC…` (oud) | WeiLong: als GAN gen2 met eigen sleutel; MHC: draaihoeken | WeiLong ja, uit de naam |
+| Giiker | `Gi…`, `Mi Smart Magic Cube`, `Hi-…` | hele stand per melding | nee |
+| GoCube | `GoCube…`, `Rubiks…` | berichten tussen `*` en `\r\n` | nee |
+
+De GAN-protocollen zijn een omzetting van gan-web-bluetooth (MIT, met
+bronvermelding bovenin het bestand). De andere merken zijn zelf geschreven op
+basis van wat er publiek over bekend is, onder meer uit csTimer. **Er staat geen
+code uit csTimer in**: dat is GPL, en dan zou de hele site GPL moeten worden.
+
+### Waarom het vroeger wisselend werkte
+
+De vorige versie opende eerst een keuzevenster voor QiYi met álle
+Bluetooth-apparaten, en na een mislukte poging een tweede venster voor GAN.
+Chrome weigert dat tweede venster vaak, omdat het niet meer direct op een klik
+volgt. Nu is er één venster dat alleen cubes toont, en wordt het merk herkend
+aan de naam (of anders aan de services). **Roep `CubeTimerSmartCube.connect()`
+altijd rechtstreeks aan vanuit de klik, zonder eerst iets te awaiten.**
+
+Verder: QiYi kreeg een verkeerd voorvoegsel voor het MAC-adres, schrijfacties
+botsten ("GATT operation already in progress") en gingen dan verloren, en
+een gemist Bluetooth-pakketje bracht de stand ongemerkt uit de pas. Nu staan
+schrijfacties in een rij, halen GAN gen3/4 gemiste zetten terug bij de cube,
+en corrigeren cubes die hun stand meesturen de bijgehouden stand vanzelf.
+
+### Het MAC-adres
+
+GAN (gen2+), QiYi en MoYu WeiLong gebruiken hun MAC-adres in de versleuteling,
+en dat geeft Web Bluetooth niet vrij. Volgorde: eerder gebruikt
+(`cubetimer_cube_macs`) → uit de advertentie van de cube (alleen Chrome op
+Windows, macOS en Android; op Linux en ChromeOS komt er nooit iets binnen) →
+afgeleid uit de naam (QiYi `CC:A3:00:00:xx:xx`, MoYu `CF:30:16:00:xx:xx`) →
+vragen. Een verkeerd adres herkennen we aan een onmogelijke stand, of aan een
+cube die binnen vijf seconden niets zegt; dan vraagt de site het opnieuw
+zonder de verbinding te verbreken.
+
+### De scramble volgen op de stand
+
+De engine telt geen zetten maar vergelijkt standen. Per scramblezet bewaart hij
+de stand erna, en bij een halve slag ook de twee standen halverwege. Daardoor
+telt R2 als R R én als R' R', en zit je na een verkeerde zet die je meteen
+terugdraait gewoon weer op het goede spoor. Ligt de cube bij het begin niet
+opgelost, dan zegt de hulpregel dat eerst.
+
+### Tijd en analyse
+
+De tijd van een smart-cubesolve komt uit de **klok in de cube** (GAN, QiYi,
+MoYu hebben er een): van de eerste tot de laatste draai. De Bluetooth-vertraging
+schommelt, die klok niet. Zonder klok (Giiker, GoCube) telt het moment van
+ontvangst. `stopTimerFromBluetooth({ ms, analysis })` geeft beide door;
+`saveTime` slaat de solve op met `source: 'bluetooth'`.
+
+De analyse: aantal zetten (na samenvoegen: R R = R2, R R' valt weg), zetten per
+seconde, de oplossing, en per fase — kruis, F2L, OLL, PLL — tijd en zetten.
+Het kruis mag op elke kleur; het eerste kruis dat ligt telt. Op de server staat
+hij in `solves.details` (migratie 008). `SolveAnalysis::clean()` bouwt hem
+opnieuw op uit alleen bekende velden met grenzen; wat de browser stuurt komt
+er nooit letterlijk in. De analyse telt nergens mee — records en ranglijsten
+komen uit de tijd zelf.
+
+### Testen zonder cube
+
+`tools/nep-smartcube.js` bootst Web Bluetooth na plus per merk een cube die
+zich gedraagt zoals het protocol voorschrijft, en die zetten kan laten
+wegvallen. `tools/smartcube-testen.js` verbindt elk merk via de echte code en
+controleert zetten, stand, batterij en het verkeerde-adrespad. Voor GAN
+gen2/3/4 kan hij ook tegen het origineel toetsen:
+
+```bash
+npm pack gan-web-bluetooth && tar xzf gan-web-bluetooth-*.tgz
+(cd package && npm install aes-js rxjs)
+GAN_REF=$PWD/package node tools/smartcube-testen.js
+```
+
+Voor de andere merken bewijst een groene test dat heen en terug klopt, niet
+dat een echte cube het zo doet: de nabootsing is geschreven vanuit hetzelfde
+begrip van het protocol. **Een echte cube blijft de laatste test.** In de
+console staat alles wat er gebeurt met het voorvoegsel `[smartcube]`.
+
+Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
+`cube.js` en `tools/nep-smartcube.js` vóór de pagina (in Playwright met
+`addInitScript`) en roep `NepSmartCube.install(new NepSmartCube.SIMS.gan())` aan.
+
+---
+
 ## Server (DirectAdmin)
 
 - **Deploy:** push naar `Release` → GitHub Action zet `public_html/` via FTP
@@ -694,8 +831,6 @@ database — de server controleert een id alleen op vorm (`OLL-27`, `PLL-T`,
 - De statistieken rekenen in de browser over alle sessies. Bij duizenden solves
   kan dat beter naar een query op `solves` met de index
   `(user_id, event, solved_at)`, die daar al voor ligt.
-- `bluetoothCube.js` is nog niet nagelopen op stijl of structuur; het werkt en
-  is met rust gelaten bij de restyling.
 - De tijdweergave blijft `mm:ss:mmm`. Dat is besloten; niet meer voorstellen om
   er `11.53` van te maken.
 - De herberekening na een synchronisatie draait over álle solves. Bij 18.000
@@ -727,5 +862,15 @@ database — de server controleert een id alleen op vorm (`OLL-27`, `PLL-T`,
   kunnen bekijken, dan moet `archive/list.php` gaan pagineren.
 - De leerpagina legt F2L uit voor de sleuf rechtsvoor. De andere drie sleuven
   doe je door de kubus te draaien; er staan dus geen gespiegelde varianten in.
+- Smart cubes werken alleen in een 3x3-sessie. De GAN 251 (2x2) kent een eigen
+  variant van gen4 die er niet in zit.
+- Valt de verbinding met een smart cube weg, dan verbind je opnieuw met één
+  klik; automatisch opnieuw verbinden zit er niet in (was een keuze).
+- De smart-cubedrivers zijn getest met nagebootste cubes, GAN ook tegen
+  gan-web-bluetooth. Met een echte cube: de eigenaar heeft een GAN en een QiYi;
+  MoYu, Giiker en GoCube heeft niemand van ons. Bij de oude MoYu (MHC) is
+  draaien tegen de klok in onzeker: csTimer leest de hoek zonder teken, en dat
+  hebben we zo overgenomen.
+- De gyroscoop van GAN-cubes (kantelen van de hele cube) wordt niet gebruikt.
 - Bij OLL en PLL staat één algoritme per geval. Alternatieven (links- of
   rechtshandige varianten) zouden een tweede veld in `algorithms.js` vragen.
