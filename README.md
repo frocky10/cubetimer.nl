@@ -127,7 +127,10 @@ terug te zien.
 
 - [x] Registreren en inloggen
 - [x] Tijden synchroniseren naar de server
-- [x] Samenvoegen van lokale tijden en servertijden bij het inloggen
+- [x] Bij het inloggen wint je account; een oude browser duwt niets meer terug
+- [x] Een sessie verwijderen laat je tijden op je account staan
+- [x] Verwijderen is een keuze: uit de sessie, of ook van je account
+- [x] Losse tijden terug te halen of alsnog te wissen vanuit je account
 - [x] Blijft werken zonder internet; localStorage is altijd de werkkopie
 
 **Ranglijsten en voortgang**
@@ -150,7 +153,7 @@ terug te zien.
 
 **Achievements** — [#27](https://github.com/frocky10/cubetimer.nl/issues/27)
 
-- [x] 114 achievements: 25 families in vier niveaus, plus 14 geheime
+- [x] 120 achievements: 26 families in vier niveaus, plus 16 geheime
 - [x] Mijlpalen: solves, dagen, sessies, records, XP
 - [x] Ontdekken: hoeveel events je geprobeerd en opgelost hebt
 - [x] Snelheid: sub-drempels op 3x3, 2x2, 4x4, 5x5 en Pyraminx, single én Ao12
@@ -158,7 +161,7 @@ terug te zien.
 - [x] Challenges en ranglijst: challenges gehaald, beste positie, scrambles gewonnen
 - [x] Pech: je +2's en je DNF's tellen ook mee
 - [x] Toernooien en vrienden hebben hun eigen achievements
-- [x] Twaalf geheime, van een palindroomtijd tot een PB direct na een DNF
+- [x] Zestien geheime, van een palindroomtijd tot alle 57 OLL's geleerd
 - [x] Voortgangsbalk naar het volgende niveau en hoe zeldzaam elk niveau is
 - [x] Gelden met terugwerkende kracht: alles wat je ooit timede telt mee
 
@@ -187,6 +190,17 @@ terug te zien.
 - [x] Landcode naast je naam op de ranglijst en op je profiel
 - [x] Uit te zetten: geen ranglijst betekent ook geen profiel
 
+**Leren** — [#21](https://github.com/frocky10/cubetimer.nl/issues/21)
+
+- [x] Eigen pagina op `/leren.html` met vier tabbladen
+- [x] De beginnersmethode in zeven stappen, van het witte kruis tot de laatste laag
+- [x] Uitleg over F2L, plus alle 41 gevallen voor de sleuf rechtsvoor
+- [x] Alle 57 OLL- en 21 PLL-algoritmes, gegroepeerd op de vorm die je ziet
+- [x] Plaatjes die uit het algoritme zelf berekend worden, dus altijd kloppend
+- [x] Oefenknop die de timer opent met precies dat geval opgezet
+- [x] Afvinken wat je geleerd hebt, bewaard op je account
+- [x] Controlescript dat elk algoritme naloopt (`tools/algoritmes-controleren.js`)
+
 **De site zelf**
 
 - [x] Eigen design system, geen CSS-framework meer
@@ -205,7 +219,6 @@ terug te zien.
 
 - [ ] Training tools — [#30](https://github.com/frocky10/cubetimer.nl/issues/30)
 - [ ] Special gamemodes — [#31](https://github.com/frocky10/cubetimer.nl/issues/31)
-- [ ] Tutorialpagina's — [#21](https://github.com/frocky10/cubetimer.nl/issues/21)
 
 **Techniek**
 
@@ -216,6 +229,8 @@ terug te zien.
 - [ ] Scramble van de dag ook voor Megaminx, Square-1 en Clock (lastige notatie)
 - [ ] Echte vlaggen in plaats van landcodes (vraagt meegeleverde SVG-bestanden)
 - [ ] `bluetoothCube.js` opschonen; is bij de restyling met rust gelaten
+- [ ] Losse tijden per stuk kunnen bekijken (nu alleen als aantal)
+- [ ] F2L-gevallen ook gespiegeld tonen voor de sleuf linksvoor
 - [x] ~~Tijden tonen als `11.53`~~ — besloten: blijft `00:11:530`
 
 **Beheer**
@@ -281,6 +296,7 @@ meteen zien wat het doet.
 | `public_html/Style/style.css` | Eén design system met alle tokens bovenaan |
 | `public_html/api/` | PHP-backend: accounts, synchronisatie en meldingen |
 | `database/` | Genummerde SQL-migraties, met uitleg per stap |
+| `tools/` | Hulpscripts voor het ontwikkelen; gaan niet mee met de deploy |
 | `.github/workflows/` | FTP-deploy naar DirectAdmin |
 
 **Externe afhankelijkheden:** [cubing.js](https://cubing.net) voor de scrambles
