@@ -439,6 +439,86 @@ function persistSessions() {
     }
 }
 
+/* =========================================================================
+ * Tijden die echt weg moeten
+ *
+ * Een tijd uit een sessie halen is niet hetzelfde als hem van je account
+ * wissen. Het eerste is gewoon opruimen: de server houdt zo'n solve als losse
+ * tijd vast, zodat je records en achievements heel blijven. Het tweede moet je
+ * uitdrukkelijk kiezen, en dan onthouden we hier welke id's het betreft tot de
+ * volgende synchronisatie ze heeft doorgegeven.
+ *
+ * Waarom een lijstje en niet meteen een verzoek naar de server: je kunt offline
+ * zijn, en het moet ook dan werken. Bij de eerstvolgende push gaan ze mee.
+ * ====================================================================== */
+
+const REMOVED_KEY = 'cubetimer_removed_v1';
+const MAX_REMOVED = 5000;
+
+let removedSolveIds = UI.storage.get(REMOVED_KEY, []);
+if (!Array.isArray(removedSolveIds)) removedSolveIds = [];
+
+function persistRemovedSolveIds() {
+    UI.storage.set(REMOVED_KEY, removedSolveIds);
+}
+
+/** Onthoudt dat deze solves ook van het account af moeten. */
+function markSolvesRemoved(entries) {
+    const ids = (Array.isArray(entries) ? entries : [entries])
+        .map(entry => (entry && typeof entry === 'object' ? entry.id : entry))
+        .filter(id => typeof id === 'string' && id !== '');
+    if (!ids.length) return;
+
+    removedSolveIds = [...new Set([...removedSolveIds, ...ids])].slice(-MAX_REMOVED);
+    persistRemovedSolveIds();
+}
+
+/** Wat er bij de volgende synchronisatie mee moet. */
+function getRemovedSolveIds() {
+    return removedSolveIds.slice();
+}
+
+/** Aangekomen bij de server, dus hier niet meer nodig. */
+function clearRemovedSolveIds(ids) {
+    if (!Array.isArray(ids) || !ids.length) return;
+    const weg = new Set(ids);
+    removedSolveIds = removedSolveIds.filter(id => !weg.has(id));
+    persistRemovedSolveIds();
+}
+
+/**
+ * Vraagt wat er met tijden moet gebeuren en geeft terug wat de gebruiker koos:
+ * 'session' om ze alleen hier weg te halen, 'account' om ze ook te wissen, of
+ * null om niets te doen.
+ *
+ * Zonder account is er niets te kiezen - dan is weg gewoon weg, en stellen we
+ * één nette vraag in plaats van een keuze die nergens op slaat.
+ */
+async function askRemoval({ title, keepMessage, plainMessage, keepLabel, wipeLabel }) {
+    const status = await UI.status().catch(() => null);
+    const ingelogd = status?.authenticated === true;
+
+    if (!ingelogd) {
+        if (!getSetting('confirmDestructive')) return 'session';
+        const akkoord = await UI.ask({
+            title,
+            message: plainMessage,
+            confirmLabel: 'Verwijderen',
+            danger: true
+        });
+        return akkoord ? 'session' : null;
+    }
+
+    const antwoord = await UI.ask({
+        title,
+        message: keepMessage,
+        confirmLabel: keepLabel,
+        extraLabel: wipeLabel
+    });
+    if (antwoord === 'extra') return 'account';
+    return antwoord === true ? 'session' : null;
+}
+
 function loadSessionsFromStorage() {
     if (typeof localStorage === 'undefined') {
         createDefaultSession();
@@ -556,16 +636,21 @@ async function renameActiveSession() {
 
 async function resetActiveSession() {
     const session = sessions[activeSessionId];
-    if (!session) return;
-    if (getSetting('confirmDestructive')) {
-        const confirmed = await UI.ask({
-            title: 'Sessie leegmaken?',
-            message: `Alle ${session.times.length} tijden in "${session.name}" worden gewist. Dit kun je niet ongedaan maken.`,
-            confirmLabel: 'Leegmaken',
-            danger: true
-        });
-        if (!confirmed) return;
-    }
+    if (!session || !session.times.length) return;
+
+    const aantal = session.times.length;
+    const keuze = await askRemoval({
+        title: 'Sessie leegmaken?',
+        keepMessage: `De ${aantal} tijden in "${session.name}" verdwijnen uit deze sessie. `
+            + 'Op je account blijven ze staan en tellen ze mee voor je records, tenzij je ze ook daar weghaalt.',
+        plainMessage: `Alle ${aantal} tijden in "${session.name}" worden gewist. Dit kun je niet ongedaan maken.`,
+        keepLabel: 'Uit de sessie halen',
+        wipeLabel: 'Ook van mijn account'
+    });
+    if (keuze === null) return;
+
+    if (keuze === 'account') markSolvesRemoved(session.times);
+
     session.times = [];
     syncActiveSessionTimes();
     renderTimes();
@@ -575,15 +660,23 @@ async function resetActiveSession() {
 
 async function deleteActiveSession() {
     const session = sessions[activeSessionId];
-    if (getSetting('confirmDestructive')) {
-        const confirmed = await UI.ask({
-            title: 'Sessie verwijderen?',
-            message: `"${session?.name ?? 'Deze sessie'}" en alle tijden erin verdwijnen definitief.`,
-            confirmLabel: 'Verwijderen',
-            danger: true
-        });
-        if (!confirmed) return;
-    }
+    const aantal = session?.times.length ?? 0;
+    const naam = session?.name ?? 'Deze sessie';
+
+    const keuze = await askRemoval({
+        title: 'Sessie verwijderen?',
+        keepMessage: aantal
+            ? `"${naam}" verdwijnt uit je lijst. De ${aantal} tijden erin blijven op je account staan `
+                + 'en tellen mee voor je records; je vindt ze terug onder Losse tijden.'
+            : `"${naam}" verdwijnt uit je lijst. Er staan geen tijden in.`,
+        plainMessage: `"${naam}" en alle tijden erin verdwijnen definitief.`,
+        keepLabel: 'Sessie verwijderen',
+        wipeLabel: 'Sessie én tijden wissen'
+    });
+    if (keuze === null) return;
+
+    if (keuze === 'account' && session) markSolvesRemoved(session.times);
+
     delete sessions[activeSessionId];
     const remainingIds = Object.keys(sessions);
     if (!remainingIds.length) {
@@ -972,9 +1065,32 @@ function applyPenaltyToEntry(penalty) {
     closeEditModal();
 }
 
-function deleteEntryAtIndex() {
+async function deleteEntryAtIndex() {
     if (editIndex === null) return;
-    times.splice(editIndex, 1);
+    const entry = times[editIndex];
+    if (!entry) return;
+
+    const keuze = await askRemoval({
+        title: 'Tijd verwijderen?',
+        keepMessage: 'De tijd verdwijnt uit deze sessie. Op je account blijft hij staan en telt hij '
+            + 'mee voor je records, tenzij je hem daar ook weghaalt.',
+        plainMessage: 'Deze tijd wordt verwijderd.',
+        keepLabel: 'Uit de sessie halen',
+        wipeLabel: 'Ook van mijn account'
+    });
+    if (keuze === null) return;
+
+    // De tabel kan tussen de vraag en het antwoord veranderd zijn, dus zoeken
+    // we de tijd op zijn id terug in plaats van op de onthouden regel.
+    const index = times.findIndex(item => item === entry);
+    if (index === -1) {
+        closeEditModal();
+        return;
+    }
+
+    if (keuze === 'account') markSolvesRemoved(entry);
+
+    times.splice(index, 1);
     renderTimes();
     persistSessions();
     closeEditModal();
@@ -1287,6 +1403,14 @@ window.cubeTimerApi = {
     getEventOptions: () => EVENT_OPTIONS.map(option => ({ ...option })),
     getActiveSessionEvent,
     getActiveSessionId: () => activeSessionId,
+
+    /**
+     * Solves die de gebruiker niet alleen uit een sessie heeft gehaald maar ook
+     * van zijn account af wil. account.js stuurt ze mee met de synchronisatie
+     * en meldt daarna met clearRemovedSolveIds() dat ze aangekomen zijn.
+     */
+    getRemovedSolveIds,
+    clearRemovedSolveIds,
 
     /** Alle sessies, als array. Een kopie: aanpassen doet hier niets. */
     getSessions: () => Object.values(sessions).map(session => ({

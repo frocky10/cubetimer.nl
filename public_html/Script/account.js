@@ -4,14 +4,22 @@
  * Inloggen, registreren en het bewaren van je tijden op de server.
  *
  * Hoe de synchronisatie werkt:
- *   - Bij het inloggen worden de sessies van de server opgehaald en met de
- *     lokale sessies samengevoegd (zie mergeSessions). Dat is het enige moment
- *     waarop er echt samengevoegd wordt.
+ *   - Bij het inloggen wint de server. Wat er op je account staat komt in deze
+ *     browser te staan, punt. Alleen als je account nog helemaal leeg is neemt
+ *     hij over wat hier al lag; zo raak je bij je eerste login niets kwijt.
  *   - Daarna is de browser de bron van waarheid: bij elke wijziging wordt de
- *     volledige staat naar de server geduwd. Dat is bewust simpel en maakt
- *     merge-conflicten onmogelijk.
+ *     volledige staat naar de server geduwd.
  *   - localStorage blijft altijd gevuld, ook als je ingelogd bent. Zonder
  *     internet blijft de timer dus gewoon werken.
+ *
+ * Waarom de server wint en er niet meer samengevoegd wordt: dat samenvoegen
+ * duwde bij elke login terug wat er toevallig in díe browser stond. Wie op zijn
+ * telefoon had opgeruimd, kreeg op zijn laptop alles weer terug - inclusief
+ * sessies van voor hij een account had. Een browser is een werkkopie, geen
+ * tweede administratie.
+ *
+ * Kwijtraken doe je er niets mee: de server gooit solves die niet meekomen niet
+ * weg maar bewaart ze als losse tijd. Zie api/sync/push.php.
  *
  * Staat de accountfunctie niet aan op de server, dan verdwijnt de knop uit de
  * topbar en verandert er niets aan de timer.
@@ -45,6 +53,10 @@
     const summaryEmail = document.getElementById('account-summary-email');
     const statSessions = document.getElementById('account-stat-sessions');
     const statSolves = document.getElementById('account-stat-solves');
+    const looseBox = document.getElementById('account-loose');
+    const looseText = document.getElementById('account-loose-text');
+    const looseRestore = document.getElementById('account-loose-restore');
+    const looseClear = document.getElementById('account-loose-clear');
     const syncStatus = document.getElementById('account-sync-status');
     const flagNotice = document.getElementById('account-flag-notice');
 
@@ -80,6 +92,8 @@
     let syncTimer = null;
     let syncing = false;
     let pendingChanges = false;
+    // Tijden die wel op het account staan maar niet meer in een sessie.
+    let looseSolves = 0;
 
     /* =====================================================================
      * Weergave
@@ -359,6 +373,98 @@
     }
 
     /* =====================================================================
+     * Losse tijden
+     *
+     * Solves die op het account staan maar niet meer onder een sessie hangen.
+     * Dat gebeurt als je een sessie opruimt: de tijden zelf blijven, want je
+     * records en achievements staan erop. Hier kun je ze terughalen of alsnog
+     * weggooien - en dat laatste is de enige plek op de site waar tijden echt
+     * verdwijnen.
+     * ================================================================== */
+
+    function renderLooseSolves() {
+        if (!looseBox) return;
+        looseBox.hidden = !currentUser || looseSolves <= 0;
+        if (looseBox.hidden || !looseText) return;
+
+        looseText.textContent = looseSolves === 1
+            ? 'Er staat 1 tijd op je account die niet in een sessie zit. Hij telt gewoon mee voor je '
+                + 'records en ranglijsten.'
+            : `Er staan ${looseSolves} tijden op je account die niet in een sessie zitten. Ze tellen `
+                + 'gewoon mee voor je records en ranglijsten.';
+    }
+
+    /** Vraagt de server hoeveel losse tijden er zijn. */
+    async function refreshLooseSolves() {
+        if (!currentUser) {
+            looseSolves = 0;
+            renderLooseSolves();
+            return;
+        }
+        try {
+            const antwoord = await UI.api('archive/list.php');
+            looseSolves = Number(antwoord.total) || 0;
+        } catch (err) {
+            looseSolves = 0;
+        }
+        renderLooseSolves();
+    }
+
+    looseRestore?.addEventListener('click', async () => {
+        looseRestore.disabled = true;
+        try {
+            const antwoord = await UI.api('archive/restore.php', { body: {} });
+            const aantal = Number(antwoord.restored) || 0;
+            const sessies = Number(antwoord.sessions) || 0;
+            if (!aantal) {
+                UI.toast('Er was niets meer om terug te halen.', { type: 'info' });
+            } else {
+                // Opnieuw ophalen, want de server heeft er sessies omheen gezet.
+                const verse = await UI.api('sync/pull.php');
+                if (Array.isArray(verse.sessions) && verse.sessions.length) {
+                    api.replaceSessions(verse.sessions, api.getActiveSessionId());
+                }
+                looseSolves = Number(verse.looseSolves) || 0;
+                renderCounts();
+                UI.toast(`${aantal} ${aantal === 1 ? 'tijd' : 'tijden'} teruggehaald in `
+                    + `${sessies} ${sessies === 1 ? 'sessie' : 'sessies'}.`, { type: 'success' });
+            }
+            renderLooseSolves();
+        } catch (err) {
+            UI.toast('Terughalen is niet gelukt: ' + err.message, { type: 'error' });
+        } finally {
+            looseRestore.disabled = false;
+        }
+    });
+
+    looseClear?.addEventListener('click', async () => {
+        const aantal = looseSolves;
+        const akkoord = await UI.ask({
+            title: 'Losse tijden wissen?',
+            message: `${aantal} ${aantal === 1 ? 'tijd verdwijnt' : 'tijden verdwijnen'} definitief van je `
+                + 'account. Je records worden daarna opnieuw uitgerekend, dus een persoonlijk record kan '
+                + 'hierdoor vervallen. Dit kun je niet ongedaan maken.',
+            confirmLabel: 'Definitief wissen',
+            danger: true
+        });
+        if (akkoord !== true) return;
+
+        looseClear.disabled = true;
+        try {
+            const antwoord = await UI.api('archive/clear.php', { body: { confirm: true } });
+            const weg = Number(antwoord.deleted) || 0;
+            looseSolves = 0;
+            renderLooseSolves();
+            await loadProfile();
+            UI.toast(`${weg} ${weg === 1 ? 'tijd' : 'tijden'} van je account verwijderd.`, { type: 'success' });
+        } catch (err) {
+            UI.toast('Wissen is niet gelukt: ' + err.message, { type: 'error' });
+        } finally {
+            looseClear.disabled = false;
+        }
+    });
+
+    /* =====================================================================
      * Modal
      * ================================================================== */
 
@@ -367,6 +473,8 @@
         loginError.textContent = '';
         registerError.textContent = '';
         UI.openModal(modal);
+        // Op de achtergrond: staan er losse tijden op het account?
+        refreshLooseSolves();
     }
 
     chip.addEventListener('click', openAccountModal);
@@ -390,61 +498,6 @@
     });
 
     /* =====================================================================
-     * Samenvoegen van lokale en serverdata
-     * ================================================================== */
-
-    /**
-     * Voegt de sessies van de server en die uit de browser samen.
-     * Sessies worden gekoppeld op hun id; binnen een sessie worden solves
-     * gekoppeld op hun solve-id. Bestaat een solve aan beide kanten, dan wint
-     * de versie van de browser (daar is hij net mogelijk nog bewerkt).
-     */
-    function mergeSessions(serverSessions, localSessions) {
-        const merged = new Map();
-
-        const put = (session, preferIncoming) => {
-            if (!session || !session.id) return;
-            const existing = merged.get(session.id);
-
-            if (!existing) {
-                merged.set(session.id, {
-                    id: session.id,
-                    name: session.name || 'Sessie',
-                    event: session.event || '333',
-                    times: (session.times || []).slice()
-                });
-                return;
-            }
-
-            if (preferIncoming) {
-                existing.name = session.name || existing.name;
-                existing.event = session.event || existing.event;
-            }
-
-            const byId = new Map(existing.times.map(entry => [entry.id, entry]));
-            (session.times || []).forEach(entry => {
-                if (!entry) return;
-                if (!entry.id) {
-                    // Geen id: kan niet ontdubbeld worden, dus altijd meenemen.
-                    existing.times.push(entry);
-                    return;
-                }
-                if (!byId.has(entry.id) || preferIncoming) {
-                    byId.set(entry.id, entry);
-                }
-            });
-
-            existing.times = Array.from(byId.values())
-                .sort((a, b) => Date.parse(a.timestamp || 0) - Date.parse(b.timestamp || 0));
-        };
-
-        serverSessions.forEach(session => put(session, false));
-        localSessions.forEach(session => put(session, true));
-
-        return Array.from(merged.values());
-    }
-
-    /* =====================================================================
      * Synchroniseren
      * ================================================================== */
 
@@ -458,8 +511,21 @@
         pendingChanges = false;
         setSyncState('syncing', 'Bezig met opslaan…');
 
+        // Tijden die de gebruiker ook van zijn account af wil. Pas opruimen als
+        // de server ze heeft gehad; bij een mislukte push gaan ze dus gewoon mee
+        // met de volgende poging.
+        const teVerwijderen = api.getRemovedSolveIds ? api.getRemovedSolveIds() : [];
+
         try {
-            const response = await UI.api('sync/push.php', { body: { sessions: api.getSessions() } });
+            const response = await UI.api('sync/push.php', {
+                body: { sessions: api.getSessions(), removedSolveIds: teVerwijderen }
+            });
+
+            if (teVerwijderen.length && api.clearRemovedSolveIds) {
+                api.clearRemovedSolveIds(teVerwijderen);
+            }
+            looseSolves = Number(response.looseSolves) || 0;
+            renderLooseSolves();
 
             // De server meldt wat er onderweg ontgrendeld is.
             const nieuw = response.derived?.achievements;
@@ -498,24 +564,42 @@
         syncTimer = window.setTimeout(pushNow, SYNC_DEBOUNCE_MS);
     }
 
-    /** Haalt de server op, voegt samen en duwt het resultaat terug. */
+    /**
+     * Haalt op wat er op het account staat en zet dat in deze browser.
+     *
+     * Staat er al iets op het account, dan is dat wat je krijgt: de server
+     * wint. Er wordt dan ook niet teruggeduwd, want anders zou deze browser
+     * alsnog zijn eigen oude staat opleggen - precies wat we niet willen.
+     *
+     * Is het account nog leeg, dan is dit iemands eerste login en nemen we over
+     * wat er in de browser ligt.
+     */
     async function syncAfterLogin() {
         setSyncState('syncing', 'Je tijden ophalen…');
         try {
             const remote = await UI.api('sync/pull.php');
-            const localSessions = api.getSessions();
             const serverSessions = Array.isArray(remote.sessions) ? remote.sessions : [];
+            looseSolves = Number(remote.looseSolves) || 0;
 
             if (serverSessions.length) {
-                const merged = mergeSessions(serverSessions, localSessions);
-                api.replaceSessions(merged, api.getActiveSessionId());
+                api.replaceSessions(serverSessions, api.getActiveSessionId());
+                const solves = serverSessions.reduce((totaal, sessie) => totaal + sessie.times.length, 0);
+                UI.toast(`Welkom terug! ${solves} ${solves === 1 ? 'solve' : 'solves'} opgehaald.`, { type: 'success' });
+                setSyncState('synced', 'Je tijden komen van je account.');
+                renderCounts();
+                renderLooseSolves();
+            } else {
+                // Leeg account: dit is de eerste keer. Wat hier ligt gaat mee.
+                const lokaal = api.getSessions();
+                const solves = lokaal.reduce((totaal, sessie) => totaal + sessie.times.length, 0);
+                await pushNow();
+                UI.toast(solves
+                    ? `Je ${solves} ${solves === 1 ? 'solve staat' : 'solves staan'} nu op je account.`
+                    : 'Je account is klaar voor gebruik.', { type: 'success' });
             }
 
-            await pushNow();
-
-            const solves = api.getSessions().reduce((total, session) => total + session.times.length, 0);
-            UI.toast(`Welkom terug! ${solves} solves gesynchroniseerd.`, { type: 'success' });
             await loadProfile();
+            window.dispatchEvent(new CustomEvent('cubetimer:synced'));
         } catch (err) {
             setSyncState('error', 'Synchroniseren is niet gelukt: ' + err.message);
             UI.toast('Synchroniseren is niet gelukt. Je tijden staan nog in deze browser.', { type: 'error' });
@@ -638,8 +722,10 @@
 
         currentUser = null;
         profile = null;
+        looseSolves = 0;
         setSyncState('idle', '');
         renderAccount();
+        renderLooseSolves();
         UI.closeModal(modal);
         await announceAuthChange();
         UI.toast('Je bent uitgelogd.', { type: 'info' });

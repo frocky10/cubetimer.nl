@@ -748,6 +748,19 @@
                     <ul class="xp-log" id="account-xp-log"></ul>
                 </div>
 
+                <!--
+                  Losse tijden: solves die wel op het account staan maar niet
+                  meer in een sessie. Alleen zichtbaar als je ze hebt.
+                -->
+                <div class="field" id="account-loose" hidden>
+                    <span class="field__label">Losse tijden</span>
+                    <p class="field__hint" id="account-loose-text"></p>
+                    <div class="time-modal__actions">
+                        <button class="btn" type="button" id="account-loose-restore">Terughalen als sessie</button>
+                        <button class="btn btn--danger" type="button" id="account-loose-clear">Definitief wissen</button>
+                    </div>
+                </div>
+
                 <div class="setting-row">
                     <div class="setting-row__text">
                         <span class="setting-row__label">Hoofd-event</span>
@@ -990,6 +1003,8 @@
                 </div>
                 <div class="time-modal__footer">
                     <button class="btn" type="button" id="prompt-modal-cancel">Annuleren</button>
+                    <!-- Tweede keuze, bijvoorbeeld "ook uit mijn account". Normaal verborgen. -->
+                    <button class="btn btn--danger" type="button" id="prompt-modal-extra" hidden>Ook verwijderen</button>
                     <button class="btn btn--primary" type="submit" id="prompt-modal-confirm">Oké</button>
                 </div>
             </form>
