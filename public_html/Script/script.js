@@ -412,6 +412,76 @@ function setScrambleOverride(scramble) {
     generateScrambleForActiveEvent();
 }
 
+/* =========================================================================
+ * Oefenen met een algoritme
+ *
+ * Vanaf de leerpagina kom je hier binnen met ?oefen=OLL-27. De opzetscramble
+ * is het algoritme achterstevoren, en die rekenen we uit met dezelfde
+ * kubusengine als op die pagina - er staat dus nergens een tweede lijstje met
+ * scrambles dat uit de pas kan lopen.
+ *
+ * cube.js en algorithms.js worden pas op dit moment ingeladen. Wie gewoon komt
+ * timen heeft ze niet nodig en krijgt ze dus ook niet.
+ * ====================================================================== */
+
+const practiceBanner = document.getElementById('practice-banner');
+const practiceTitle = document.getElementById('practice-banner-title');
+const practiceHint = document.getElementById('practice-banner-hint');
+const practiceCancel = document.getElementById('practice-banner-cancel');
+
+/** Laadt losse scripts na elkaar in, en slaat over wat er al staat. */
+function loadScriptsInOrder(bronnen) {
+    return bronnen.reduce((eerder, src) => eerder.then(() => new Promise((klaar, mislukt) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+            klaar();
+            return;
+        }
+        const element = document.createElement('script');
+        element.src = src;
+        element.onload = () => klaar();
+        element.onerror = () => mislukt(new Error('Kon ' + src + ' niet laden'));
+        document.head.appendChild(element);
+    })), Promise.resolve());
+}
+
+function stopPractice() {
+    if (practiceBanner) practiceBanner.hidden = true;
+    setScrambleOverride(null);
+    if (window.history.replaceState) {
+        window.history.replaceState(null, '', window.location.pathname);
+    }
+}
+
+practiceCancel?.addEventListener('click', () => {
+    stopPractice();
+    UI.toast('Klaar met oefenen. Je gewone scramble staat weer klaar.', { type: 'info' });
+});
+
+async function startPracticeFromUrl() {
+    const gevraagd = new URLSearchParams(window.location.search).get('oefen');
+    if (!gevraagd) return;
+
+    try {
+        await loadScriptsInOrder(['Script/cube.js', 'Script/algorithms.js']);
+    } catch (err) {
+        UI.toast('De algoritmes konden niet geladen worden.', { type: 'error' });
+        return;
+    }
+
+    const geval = window.CubeTimerAlgorithms?.byId(gevraagd);
+    if (!geval) {
+        UI.toast('Dat algoritme kennen we niet.', { type: 'warning' });
+        return;
+    }
+
+    setScrambleOverride(geval.setup);
+    if (practiceBanner && practiceTitle && practiceHint) {
+        practiceTitle.textContent = 'Oefenen: ' + geval.titel;
+        practiceHint.textContent = geval.alg;
+        practiceBanner.hidden = false;
+    }
+}
+
 function generateScrambleForActiveEvent() {
     if (scrambleOverride) {
         if (scrambleDisplay) {
@@ -1390,6 +1460,9 @@ refreshCubeControls();
 renderTimes();
 persistSessions();
 generateScrambleForActiveEvent();
+
+// Kom je van de leerpagina met ?oefen=..., dan zetten we dat geval klaar.
+startPracticeFromUrl();
 
 /**
  * Alles wat de andere scripts (statistieken, account, instellingen, Bluetooth)

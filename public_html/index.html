@@ -229,6 +229,11 @@
                         <span class="btn-icon__badge" id="challenges-badge" hidden>0</span>
                     </button>
 
+                    <a id="learn-open" class="btn-icon" href="leren.html" title="Leren" aria-label="Leren">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5Z" /><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5Z" /></svg>
+                        <span class="btn-icon__label">Leren</span>
+                    </a>
+
                     <button id="feedback-open" class="btn-icon" type="button" title="Bug of idee melden" aria-label="Bug of idee melden">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6a4 4 0 0 1 8 0" /><rect x="6" y="6" width="12" height="13" rx="6" /><path d="M3 12h3M18 12h3M4.5 6.5 7 8M19.5 6.5 17 8M4.5 18.5 7 17M19.5 18.5 17 17" /></svg>
                         <span class="btn-icon__label">Iets melden</span>
@@ -279,6 +284,16 @@
                         <span id="challenge-banner-hint">Je hebt een poging. Je volgende solve telt.</span>
                     </span>
                     <button class="btn btn--sm" type="button" id="challenge-banner-cancel">Stoppen</button>
+                </div>
+
+                <!-- Oefenen met een algoritme van de leerpagina. -->
+                <div class="challenge-banner" id="practice-banner" hidden>
+                    <span class="challenge-banner__dot" aria-hidden="true"></span>
+                    <span class="challenge-banner__text">
+                        <strong id="practice-banner-title">Oefenen</strong>
+                        <span id="practice-banner-hint">De scramble zet dit geval voor je op.</span>
+                    </span>
+                    <button class="btn btn--sm" type="button" id="practice-banner-cancel">Stoppen</button>
                 </div>
 
                 <div class="stage__timer-row">

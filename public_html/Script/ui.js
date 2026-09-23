@@ -256,9 +256,10 @@
             menuButton.setAttribute('aria-expanded', open ? 'true' : 'false');
         });
 
-        // Een keuze uit het menu sluit het menu.
+        // Een keuze uit het menu sluit het menu. Ook een link, want niet elke
+        // knop in de balk is een <button>.
         menuGroup.addEventListener('click', event => {
-            if (event.target.closest('button')) closeTopbarMenu();
+            if (event.target.closest('button, a')) closeTopbarMenu();
         });
 
         document.addEventListener('click', event => {

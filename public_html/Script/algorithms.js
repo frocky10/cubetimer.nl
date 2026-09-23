@@ -181,26 +181,6 @@
         return Cube.invert(alg);
     }
 
-    /**
-     * Het plaatje van een OLL: welke van de 21 zichtbare vakjes al goed staan.
-     * `top` is de bovenkant (9 vakjes, rij voor rij), `sides` is per zijkant
-     * de bovenste rij van drie, van links naar rechts gezien vanaf die kant.
-     */
-    function ollPattern(alg) {
-        const state = caseState(alg);
-        const top = [];
-        for (let row = 0; row < 3; row += 1) {
-            for (let col = 0; col < 3; col += 1) {
-                top.push(Cube.colorAt(state, 'U', row, col) === 'U');
-            }
-        }
-        const sides = {};
-        SIDES.forEach(face => {
-            sides[face] = [0, 1, 2].map(col => Cube.colorAt(state, face, 0, col) === 'U');
-        });
-        return { top, sides };
-    }
-
     /** In welke groep hoort een OLL, afgaand op de randen die al goed staan? */
     function ollGroup(alg) {
         const state = caseState(alg);
@@ -238,33 +218,6 @@
         const movesEdges = edges.some((from, index) => from !== index);
         if (movesCorners && movesEdges) return 'beide';
         return movesCorners ? 'hoeken' : 'randen';
-    }
-
-    /**
-     * Het plaatje van een F2L-geval: waar liggen de hoek en de rand van het
-     * paar, en hoe liggen ze gedraaid. De pagina tekent daar de bovenlaag en
-     * de sleuf rechtsvoor mee.
-     *
-     * `corner` en `edge` geven per plaatje van het stuk terug op welke plek
-     * het nu ligt, als vlak + rij + kolom.
-     */
-    function f2lPieces(alg) {
-        const state = caseState(alg);
-        const where = new Array(54);
-        state.forEach((sticker, slotIndex) => { where[sticker] = slotIndex; });
-
-        const find = predicate => Cube.STICKERS
-            .map((sticker, index) => ({ sticker, index }))
-            .filter(({ sticker }) => predicate(sticker.pos))
-            .map(({ sticker, index }) => {
-                const at = Cube.STICKERS[where[index]];
-                return { color: sticker.face, face: at.face, row: at.row, col: at.col };
-            });
-
-        return {
-            corner: find(([x, y, z]) => x === 1 && y === -1 && z === 1),
-            edge: find(([x, y, z]) => x === 1 && y === 0 && z === 1)
-        };
     }
 
     /**
@@ -325,7 +278,7 @@
             setup: setup(item.alg),
             groep: ollGroup(item.alg),
             hoekenGoed: ollCornerCount(item.alg),
-            patroon: ollPattern(item.alg)
+            state: caseState(item.alg)
         }));
 
         const pll = PLL.map(item => ({
@@ -335,7 +288,8 @@
             alg: item.alg,
             setup: setup(item.alg),
             groep: pllGroup(item.alg),
-            pijlen: pllArrows(item.alg)
+            pijlen: pllArrows(item.alg),
+            state: caseState(item.alg)
         }));
 
         const f2l = F2L.map(item => ({
@@ -345,7 +299,7 @@
             alg: item.alg,
             setup: setup(item.alg),
             groep: f2lGroup(item.alg),
-            stukken: f2lPieces(item.alg)
+            state: caseState(item.alg)
         }));
 
         return { oll, pll, f2l };
@@ -364,6 +318,19 @@
             const sets = this.all();
             return [...sets.oll, ...sets.pll, ...sets.f2l].find(item => item.id === id) || null;
         },
+        /**
+         * De kleur op een vakje van een geval, als vlaknaam ('U', 'F', ...).
+         * De tekenlaag maakt daar een CSS-token van.
+         */
+        colorAt(state, face, row, col) {
+            return Cube.colorAt(state, face, row, col);
+        },
+
+        /** Welk stuk ligt er op deze plek? Nodig om het paar bij F2L te vinden. */
+        pieceAt(state, face, row, col) {
+            return Cube.STICKERS[state[Cube.slot(face, row, col)]].pos;
+        },
+
         groupLabel(soort, groep) {
             const labels = soort === 'oll' ? OLL_GROUP_LABELS
                 : soort === 'pll' ? PLL_GROUP_LABELS
