@@ -77,6 +77,12 @@ final class Achievements
                 'description' => 'Aantal sessies dat je hebt aangemaakt.',
                 'tiers' => ['brons' => 3, 'zilver' => 10, 'goud' => 25, 'platina' => 50],
             ],
+            'algoritmes' => [
+                'category' => 'mijlpalen', 'metric' => 'learnedAlgorithms',
+                'title' => 'Uit je hoofd', 'unit' => 'algoritmes', 'unitOne' => 'algoritme', 'format' => 'number',
+                'description' => 'Aantal algoritmes dat je op de leerpagina hebt afgevinkt.',
+                'tiers' => ['brons' => 10, 'zilver' => 30, 'goud' => 60, 'platina' => 119],
+            ],
             'records' => [
                 'category' => 'mijlpalen', 'metric' => 'pbCount',
                 'title' => 'Recordjager', 'unit' => 'records', 'unitOne' => 'record', 'format' => 'number',
@@ -238,6 +244,14 @@ final class Achievements
                 'title' => 'Het begin', 'metric' => 'validSolves', 'threshold' => 1,
                 'description' => 'Je allereerste afgeronde solve.',
             ],
+            'allepll' => [
+                'title' => 'Alle 21', 'metric' => 'learnedPll', 'threshold' => 21,
+                'description' => 'Elke PLL afgevinkt als geleerd.',
+            ],
+            'alleoll' => [
+                'title' => 'Alle 57', 'metric' => 'learnedOll', 'threshold' => 57,
+                'description' => 'Elke OLL afgevinkt als geleerd.',
+            ],
             'middernacht' => [
                 'title' => 'Klokslag twaalf', 'metric' => 'midnightSolve',
                 'description' => 'Een solve in de eerste vijf minuten van een nieuwe dag.',
@@ -333,6 +347,10 @@ final class Achievements
         );
         $metrics['challengesCompleted'] = (int) ($challenges['aantal'] ?? 0);
 
+        foreach (self::algorithmMetrics($userId) as $sleutel => $waarde) {
+            $metrics[$sleutel] = $waarde;
+        }
+
         $metrics['scrambleWins'] = self::scrambleWins($userId);
         foreach (self::tournamentMetrics($userId) as $sleutel => $waarde) {
             $metrics[$sleutel] = $waarde;
@@ -379,6 +397,39 @@ final class Achievements
             'wonAtWorldLevel'    => (int) ($row['wk'] ?? 0) > 0,
             'wonOpenTournament'  => (int) ($row['open_gewonnen'] ?? 0) > 0,
         ];
+    }
+
+    /**
+     * Hoeveel algoritmes iemand als geleerd heeft afgevinkt, in totaal en per
+     * soort. De tabel is er pas vanaf migratie 007; op een installatie die nog
+     * niet is bijgewerkt telt er simpelweg niets mee.
+     *
+     * @return array<string,int>
+     */
+    private static function algorithmMetrics(int $userId): array
+    {
+        $leeg = ['learnedAlgorithms' => 0, 'learnedOll' => 0, 'learnedPll' => 0, 'learnedF2l' => 0];
+        if (!Database::hasTable('user_algorithms')) {
+            return $leeg;
+        }
+
+        $rijen = Database::all(
+            "SELECT SUBSTRING_INDEX(algorithm_id, '-', 1) AS soort, COUNT(*) AS aantal
+             FROM user_algorithms WHERE user_id = ? GROUP BY soort",
+            [$userId]
+        );
+
+        $per = ['OLL' => 'learnedOll', 'PLL' => 'learnedPll', 'F2L' => 'learnedF2l'];
+        $uit = $leeg;
+        foreach ($rijen as $rij) {
+            $aantal = (int) $rij['aantal'];
+            $uit['learnedAlgorithms'] += $aantal;
+            $sleutel = $per[(string) $rij['soort']] ?? null;
+            if ($sleutel !== null) {
+                $uit[$sleutel] = $aantal;
+            }
+        }
+        return $uit;
     }
 
     /** Hoe vaak deze gebruiker de snelste was op een scramble van de dag. */

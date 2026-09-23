@@ -28,7 +28,8 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Leaderboards per event, categorie en periode
 - XP, levels, streaks en een rangbadge
 - Daily challenges: scramble van de dag plus twee opdrachten
-- 96 achievements in vier niveaus, plus twaalf geheime
+- 120 achievements in vier niveaus, plus zestien geheime
+- Leerpagina met de beginnersmethode, F2L, en alle OLL- en PLL-algoritmes
 - Openbare, deelbare profielen op /profiel.php?u=naam
 - Volgen en vrienden, met een eigen vriendenranglijst
 - Toernooimodus: een simulatie van een WCA-competitie tegen bots
@@ -42,8 +43,10 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 ```
 .github/workflows/deploy.yml   FTP-deploy naar DirectAdmin (branch: Release)
 database/                      Genummerde SQL-migraties + uitleg
+tools/                         Hulpscripts voor het ontwikkelen (niet gedeployd)
 public_html/                   Precies wat er op de server komt te staan
   index.html                   De timer
+  leren.html                   Leerpagina: beginner, F2L, OLL, PLL
   profiel.php                  Openbaar profiel, serverside gerenderd
   .htaccess                    Rewrite van /u/naam naar profiel.php
   Style/style.css              Eén design system, met tokens bovenaan
@@ -112,9 +115,13 @@ find public_html/api -name '*.php' -exec php -l {} \;
 
 # JavaScript-syntax (de twee ES-modules kunnen hier niet doorheen)
 for f in ui script stats settings feedback account leaderboard challenges \
-         achievements tournament admin; do
+         achievements tournament admin cube algorithms tutorials; do
   node --check public_html/Script/$f.js
 done
+
+# De algoritmes op de leerpagina controleren. Draai dit na elke wijziging aan
+# algorithms.js: een tikfout in een algoritme zie je niet met het blote oog.
+node tools/algoritmes-controleren.js
 
 # De site lokaal draaien, inclusief werkende API
 php -S 127.0.0.1:8123 -t public_html
@@ -186,12 +193,14 @@ garandeert. De twee ES-modules laden apart en mogen nergens vroeg op rekenen.
 | Object | Van wie | Waarvoor |
 |---|---|---|
 | `window.CubeTimerUI` | `ui.js` | `toast`, `ask`, `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
-| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture`, `getState`, en de Bluetooth-haken |
+| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, en de Bluetooth-haken |
 | `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
 | `window.CubeTimerLeaderboard` | `leaderboard.js` | `open`, `reload` |
 | `window.CubeTimerChallenges` | `challenges.js` | `load`, `stopChallenge` |
 | `window.CubeTimerAchievements` | `achievements.js` | `load`, `announce` |
 | `window.CubeTimerTournament` | `tournament.js` | `load`, `stopCapture` |
+| `window.CubeTimerCube` | `cube.js` | `parse`, `invert`, `after`, `colorAt`, `slot`, `isSolved` — alleen op `leren.html` en bij het oefenen |
+| `window.CubeTimerAlgorithms` | `algorithms.js` | `all`, `byId`, `colorAt`, `pieceAt`, `groupLabel` |
 
 Gebruik **`CubeTimerUI.ask()` in plaats van `prompt()` of `confirm()`** en
 **`CubeTimerUI.toast()` in plaats van `alert()`**. De browserdialogen passen
@@ -221,6 +230,7 @@ blijft de timer dus gewoon werken.
 | `cubetimer_settings_v1` | thema, focusmodus, confetti, inspectie, vasthoudtijd, bevestigen |
 | `cubetimer_theme` | het opgeloste thema (`dark`/`light`) voor het inline script |
 | `cubetimer_stats_scope` | laatst gekozen periode in het statistiekenpaneel |
+| `cubetimer_removed_v1` | solve-id's die ook van het account af moeten, tot de volgende synchronisatie ze heeft doorgegeven |
 
 Een solve ziet er zo uit:
 
@@ -295,6 +305,11 @@ uit `lib/`.
 | `challenges/submit.php` | POST | Je poging voor de scramble van de dag |
 | `challenges/contribute.php` | POST | Scrambles aanleveren voor de voorraad |
 | `achievements/list.php` | GET | De catalogus, met je eigen stand als je ingelogd bent |
+| `archive/list.php` | GET | Hoeveel losse tijden er zijn, per event |
+| `archive/restore.php` | POST | Losse tijden terug in een sessie zetten |
+| `archive/clear.php` | POST | Losse tijden definitief wissen — de enige DELETE op solves |
+| `algorithms/list.php` | GET | Welke algoritmes je als geleerd hebt afgevinkt |
+| `algorithms/toggle.php` | POST | Een algoritme aan- of afvinken |
 | `follows/toggle.php` | POST | Iemand volgen of ontvolgen |
 | `follows/list.php` | GET | Wie je volgt, wie jou volgt, wie je vrienden zijn |
 | `tournament/state.php` | GET | Lopend toernooi, keuzes, historie en samenvatting |
@@ -502,8 +517,8 @@ losse naam.
 
 ## Achievements
 
-Zesennegentig stuks: eenentwintig families in vier niveaus (brons, zilver,
-goud, platina) plus twaalf geheime. De catalogus staat in
+Honderdtwintig stuks: zesentwintig families in vier niveaus (brons, zilver,
+goud, platina) plus zestien geheime. De catalogus staat in
 `lib/Achievements.php`, niet in de database. Een nieuwe achievement toevoegen
 is dus een regel in `families()` of `secrets()` — geen migratie.
 
@@ -547,21 +562,111 @@ een verzonnen tijd hoort geen achievement op te leveren.
 
 ## Synchronisatie
 
-Bewust simpel gehouden:
-
-1. **Bij het inloggen** haalt `account.js` de server op en voegt die samen met
-   wat er lokaal staat (`mergeSessions`). Koppelen gebeurt op `id` van de
-   sessie en op `id` van de solve; staat een solve aan beide kanten, dan wint
-   de lokale versie.
+1. **Bij het inloggen wint de server.** `account.js` haalt `sync/pull.php` op en
+   zet dat in de browser, punt. Er wordt niet samengevoegd en er wordt daarna
+   ook niet teruggeduwd. Alleen als het account nog helemaal leeg is — iemands
+   eerste login — gaat de lokale staat omhoog.
 2. **Daarna is de browser de bron van waarheid.** Bij elke wijziging wordt na
-   2,5 seconde de *volledige* staat naar `sync/push.php` geduwd, dat alle rijen
-   van die gebruiker vervangt in één transactie.
+   2,5 seconde de volledige staat naar `sync/push.php` geduwd.
 
-Daardoor zijn er geen merge-conflicten mogelijk. Nadeel: twee tabbladen
-tegelijk open die allebei timen, overschrijven elkaar. Zolang dat geen echt
-probleem is, houden we het zo. Gaan we het wél oplossen, dan wordt het
-incrementeel synchroniseren met een `updated_at` per solve — dat is de reden dat
-elke solve al een eigen `id` heeft.
+De vorige versie voegde bij elke login samen (`mergeSessions`). Dat duwde terug
+wat er toevallig in díe browser stond: wie op zijn telefoon opruimde kreeg het
+op zijn laptop weer terug, inclusief sessies van vóór hij een account had. Die
+functie is weg. Een browser is een werkkopie, geen tweede administratie.
+
+### Een sessie weggooien kost geen tijden
+
+`sync/push.php` **vervangt** de staat van een gebruiker niet meer, hij legt hem
+ernaast:
+
+| Wat de browser doet | Wat de server doet |
+|---|---|
+| een sessie meesturen | bijwerken of aanmaken |
+| een sessie weglaten | de sessierij weg, de solves erin worden **losse tijden** |
+| een solve weglaten | wordt een **losse tijd** |
+| een id in `removedSolveIds` | `DELETE` — de enige weg naar echt weg |
+
+Een **losse tijd** is een solve met `timer_session_id IS NULL`. Hij staat nog op
+het account en telt gewoon mee voor records, ranglijsten, XP en achievements;
+alleen hangt hij niet meer onder een sessie en komt hij niet mee met
+`sync/pull.php`. Via `api/archive/` kun je ze tellen, terughalen in een nieuwe
+sessie per event, of alsnog wissen.
+
+Daarmee is het ergste geval onschadelijk: een browser die zijn localStorage
+kwijt is en een lege staat duwt, wist niets meer.
+
+In de interface is verwijderen daarom altijd een keuze van twee: *uit de sessie
+halen* of *ook van mijn account*. Uitgelogd valt er niets te kiezen en is het
+één gewone vraag. Wat van het account af moet gaat naar `cubetimer_removed_v1`
+en wordt pas gewist als de synchronisatie het heeft doorgegeven — zo werkt het
+ook als je offline bent.
+
+**In stappen, in één transactie:** tombstones wissen → sessies upserten → *alle*
+solves van die gebruiker losmaken → de meegestuurde solves upserten (en daarmee
+weer vastmaken) → sessies opruimen die niet meekwamen. Dat losmaken in stap 3
+lijkt omslachtig maar is één `UPDATE`; het alternatief was een `NOT IN` met
+achttienduizend id's erin. Gemeten op 18.000 solves: 2,2 seconde, net als de
+oude aanpak.
+
+**Nadeel dat blijft:** twee tabbladen tegelijk open die allebei timen,
+overschrijven elkaar nog steeds — al kost dat nu geen solves meer, ze worden
+hooguit los. Gaan we het echt oplossen, dan wordt het incrementeel
+synchroniseren met een `updated_at` per solve; dat is de reden dat elke solve al
+een eigen `id` heeft.
+
+---
+
+## De leerpagina
+
+`/leren.html` is een losse statische pagina met vier tabbladen: de
+beginnersmethode, F2L, OLL en PLL. Hij laadt alleen `ui.js`, `cube.js`,
+`algorithms.js` en `tutorials.js` — niet de timer.
+
+### De plaatjes worden berekend, niet bewaard
+
+Er staat geen map met 119 afbeeldingen en geen lijst met vormbeschrijvingen.
+`algorithms.js` bevat **alleen de zetten**; het plaatje, de groep waarin een
+geval hoort en de opzetscramble om ermee te oefenen worden er met `cube.js` uit
+afgeleid. Verander je een algoritme, dan verandert het plaatje mee. Een
+diagram kan dus niet iets anders laten zien dan de zetten eronder doen.
+
+`cube.js` is een kleine 3x3 met een ruimtelijk model: een plaatje is een blokje
+op een plek `(x, y, z)` met een richting, en een draai is een echte rotatie om
+een as. Daardoor volgen wide moves, slices en `x`/`y`/`z` er vanzelf uit in
+plaats van uit zes extra permutatietabellen.
+
+### Na elke wijziging aan `algorithms.js`
+
+```bash
+node tools/algoritmes-controleren.js
+```
+
+Dat controleert per algoritme dat het de kubus niet netto draait, niets sloopt
+wat heel moest blijven en een echt geval oplost, en per soort dat alle gevallen
+onderling verschillend zijn en het er precies zoveel zijn als er bestaan
+(57 OLL, 21 PLL, 41 F2L). Die twee samen betekenen dat de lijst compleet is.
+Een tikfout in een algoritme zie je niet met het blote oog, en iemand die een
+fout algoritme uit zijn hoofd leert is er slechter aan toe dan iemand die niets
+geleerd heeft.
+
+De 41 F2L-algoritmes zijn niet overgeschreven maar gezocht: per geval het
+kortste dat binnen `R`, `U` en `F` bestaat, en bij gelijke lengte dat met de
+minste `F`-zetten (die vragen een hergreep).
+
+### Oefenen
+
+De oefenknop stuurt je naar `index.html?oefen=OLL-27`. `script.js` laadt
+`cube.js` en `algorithms.js` dan alsnog in — wie gewoon komt timen krijgt ze
+niet — en zet de opzetscramble vast met `setScrambleOverride()`. De
+opzetscramble is het algoritme achterstevoren; ook die staat dus nergens apart.
+
+### Wat je geleerd hebt
+
+De vinkjes staan in `user_algorithms` op de server, niet in localStorage: het is
+iets wat je leert, geen instelling van dit apparaat. Uitgelogd werkt de pagina
+gewoon, hij onthoudt dan alleen niets. De catalogus staat bewust **niet** in de
+database — de server controleert een id alleen op vorm (`OLL-27`, `PLL-T`,
+`F2L-13`), want welke gevallen er bestaan staat in het JavaScript.
 
 ---
 
@@ -617,3 +722,10 @@ elke solve al een eigen `id` heeft.
   voortgang vers te hebben. Dat is dezelfde 2,5 seconde als een synchronisatie
   bij een heel groot account; bij klachten kan het scherm de laatst bekende
   cijfers gebruiken in plaats van opnieuw te rekenen.
+- Losse tijden zijn alleen als aantal zichtbaar, niet als lijst. Terughalen doet
+  ze allemaal tegelijk, in een nieuwe sessie per event. Wil je ze per stuk
+  kunnen bekijken, dan moet `archive/list.php` gaan pagineren.
+- De leerpagina legt F2L uit voor de sleuf rechtsvoor. De andere drie sleuven
+  doe je door de kubus te draaien; er staan dus geen gespiegelde varianten in.
+- Bij OLL en PLL staat één algoritme per geval. Alternatieven (links- of
+  rechtshandige varianten) zouden een tweede veld in `algorithms.js` vragen.

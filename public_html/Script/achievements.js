@@ -1,8 +1,8 @@
 /**
  * CubeTimer - achievements
  * ---------------------------------------------------------------------------
- * Zesennegentig stuks: eenentwintig families in vier niveaus (brons, zilver,
- * goud, platina) plus twaalf geheime.
+ * Honderdveertien stuks: vijfentwintig families in vier niveaus (brons, zilver,
+ * goud, platina) plus veertien geheime.
  *
  * De server rekent uit wat je hebt; dit bestand tekent het en meldt wat er
  * nieuw bij komt. Achievements gelden met terugwerkende kracht: alles wat je

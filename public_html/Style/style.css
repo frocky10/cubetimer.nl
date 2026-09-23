@@ -12,6 +12,7 @@
      8. Bluetooth-paneel
      9. Toasts
     10. Responsive
+    11. Leerpagina (leren.html)
    ========================================================================== */
 
 /* ==========================================================================
@@ -116,6 +117,18 @@
     --glow: 0 0 46px rgba(var(--brand-rgb), 0.28);
 
     --scrim: rgba(3, 6, 14, 0.72);
+
+    /* Kubuskleuren voor de plaatjes op de leerpagina. De standaard WCA-kleuren,
+       met de bovenkant geel en de onderkant wit. `--cube-blank` is een vlakje
+       waarvan de kleur er niet toe doet. */
+    --cube-u: #f6d64a;
+    --cube-d: #ffffff;
+    --cube-f: #3ec46d;
+    --cube-b: #2f7be8;
+    --cube-r: #e8504a;
+    --cube-l: #f0912f;
+    --cube-blank: rgba(255, 255, 255, 0.13);
+    --cube-line: rgba(3, 6, 14, 0.55);
 }
 
 /* --- Licht thema --------------------------------------------------------- */
@@ -146,6 +159,11 @@
     --glow: 0 0 46px rgba(var(--brand-rgb), 0.22);
 
     --scrim: rgba(16, 32, 60, 0.38);
+
+    /* Zelfde kubuskleuren, maar het lege vlakje moet op een lichte achtergrond
+       donker genoeg blijven om het van een wit plaatje te onderscheiden. */
+    --cube-blank: rgba(12, 32, 66, 0.26);
+    --cube-line: rgba(12, 32, 66, 0.45);
 }
 
 /* ==========================================================================
@@ -3429,5 +3447,217 @@ body.profile-page {
         flex-direction: column;
         align-items: stretch;
         gap: var(--space-2);
+    }
+}
+
+/* ==========================================================================
+   11. Leerpagina (leren.html)
+   --------------------------------------------------------------------------
+   De kaarten met OLL-, PLL- en F2L-gevallen, en de kubusplaatjes daarin. De
+   plaatjes zijn SVG die door tutorials.js wordt opgebouwd; hier staat alleen
+   hoe groot ze zijn en hoe de kaart eromheen eruitziet.
+   ========================================================================== */
+
+.learn__tabs {
+    margin-top: var(--space-4);
+}
+
+.learn__prose h2 {
+    margin: 0 0 var(--space-2);
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.learn__prose h3 {
+    margin: var(--space-5) 0 var(--space-2);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-text);
+}
+
+.learn__prose p,
+.learn__prose ul {
+    margin: 0 0 var(--space-3);
+    color: var(--text-muted);
+    max-width: 46rem;
+}
+
+.learn__prose ul {
+    padding-left: var(--space-4);
+}
+
+.learn__prose li {
+    margin-bottom: var(--space-2);
+}
+
+.learn__prose strong {
+    color: var(--text);
+}
+
+/* Zetten in een lopende zin, en zetten op een eigen regel. */
+.alg-inline,
+.alg-line {
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+}
+
+.alg-inline {
+    padding: 0.05em 0.35em;
+    border-radius: var(--radius-sm);
+    background: var(--surface-3);
+    color: var(--text);
+}
+
+.alg-line {
+    display: inline-block;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text);
+    font-weight: 600;
+}
+
+.learn__progress {
+    font-weight: 600;
+    color: var(--accent-text) !important;
+}
+
+/* --- Groepen en het raster ----------------------------------------------- */
+
+.alg-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: var(--space-5) 0 var(--space-3);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.alg-group__count {
+    padding: 0.1em 0.5em;
+    border-radius: 999px;
+    background: var(--surface-3);
+    font-size: 0.8rem;
+    color: var(--text-subtle);
+}
+
+.alg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: var(--space-3);
+}
+
+/* --- De kaart ------------------------------------------------------------ */
+
+.alg-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.alg-card.is-learned {
+    border-color: rgba(var(--success-rgb), 0.55);
+    background: var(--surface-2);
+}
+
+.alg-card__figure {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.alg-card__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.alg-card__meta {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-subtle);
+}
+
+.alg-card__moves {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.alg-card__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border);
+}
+
+.alg-card__check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+}
+
+/* --- De kubusplaatjes ----------------------------------------------------- */
+
+.cube-face {
+    width: 6.5rem;
+    height: 6.5rem;
+    flex: none;
+}
+
+.cube-slot {
+    width: 3rem;
+    height: 3rem;
+}
+
+.cube-pair {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+}
+
+.cube-pair__slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15em;
+    font-size: 0.65rem;
+    color: var(--text-subtle);
+}
+
+/* De pijlen bij PLL. `currentColor` laat de punt meelopen met de lijn. */
+.cube-arrow {
+    color: var(--cube-line);
+    stroke: var(--cube-line);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+@media (max-width: 560px) {
+    .alg-grid {
+        grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    }
+
+    .cube-face {
+        width: 5.5rem;
+        height: 5.5rem;
     }
 }

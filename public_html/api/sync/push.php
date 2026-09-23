@@ -5,19 +5,32 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * POST /api/sync/push.php
- * Body: { sessions: [ { id, name, event, times: [ { id, raw, penalty, timestamp, scramble, source } ] } ] }
+ * Body: {
+ *   sessions: [ { id, name, event, times: [ { id, raw, penalty, timestamp, scramble, source } ] } ],
+ *   removedSolveIds: [ '<solve-id>', ... ]
+ * }
  *
- * De browser stuurt zijn volledige staat; de server vervangt die van de
- * gebruiker in één transactie. Dat is bewust simpel gehouden: er is per account
- * maar één bron van waarheid (de browser die als laatste synct), en daarmee
- * zijn er geen merge-conflicten mogelijk. De client voert de eigenlijke merge
- * uit bij het inloggen.
+ * De browser stuurt zijn volledige staat en de server legt die ernaast. Wat
+ * meekomt wordt bijgewerkt of toegevoegd; sessies die niet meekomen worden
+ * opgeruimd.
+ *
+ * Wat er *niet* gebeurt: een solve weggooien omdat de browser hem niet
+ * meestuurt. Die wordt een losse tijd - hij blijft op het account staan en
+ * telt gewoon mee voor records, ranglijsten, XP en achievements, maar hangt
+ * niet meer onder een sessie. Sessies zijn er om te ordenen waar je mee bezig
+ * bent; een sessie opruimen hoort geen tijden te kosten, en al helemaal niet
+ * op een ander apparaat dan waar je aan het opruimen was.
+ *
+ * Echt weggooien gaat alleen via `removedSolveIds`. Dat is een aparte keuze in
+ * de interface ("ook uit mijn account verwijderen") en de enige weg naar een
+ * DELETE.
  */
 Http::requireMethod('POST');
 Http::requireAjaxHeader();
 
 const MAX_SESSIONS = 300;
 const MAX_SOLVES = 50000;
+const MAX_REMOVED = 5000;
 const MAX_SCRAMBLE_LENGTH = 2000;
 const VALID_PENALTIES = ['none', 'plus2', 'dnf'];
 
@@ -31,6 +44,23 @@ if (!is_array($payload)) {
 if (count($payload) > MAX_SESSIONS) {
     Http::fail('too_many_sessions', 'Je hebt meer sessies dan we kunnen opslaan (maximaal ' . MAX_SESSIONS . ').', 422);
 }
+
+// Solves die de gebruiker uitdrukkelijk van zijn account af wil hebben.
+$removed = Http::input('removedSolveIds', []);
+if (!is_array($removed)) {
+    $removed = [];
+}
+$removedIds = [];
+foreach ($removed as $value) {
+    if (!is_scalar($value)) {
+        continue;
+    }
+    $id = mb_substr(trim((string) $value), 0, 64);
+    if ($id !== '') {
+        $removedIds[$id] = true;
+    }
+}
+$removedIds = array_slice(array_keys($removedIds), 0, MAX_REMOVED);
 
 /** Maakt een tekst veilig en kort genoeg voor de kolom. */
 $clean = static function (mixed $value, int $maxLength): string {
@@ -126,35 +156,94 @@ foreach (array_values($payload) as $order => $rawSession) {
     ];
 }
 
+/* -------------------------------------------------------------------------
+ * Opslaan
+ *
+ * De volgorde doet ertoe:
+ *   1. wat weg mag, gaat weg
+ *   2. de meegestuurde sessies bijwerken of aanmaken
+ *   3. *alle* solves van deze gebruiker losmaken van hun sessie
+ *   4. de meegestuurde solves bijwerken of aanmaken, en daarmee meteen weer
+ *      aan de juiste sessie hangen
+ *   5. de sessies opruimen die niet meekwamen
+ *
+ * Stap 3 lijkt omslachtig, maar is juist het simpelst: na stap 4 hangt precies
+ * wat de browser stuurde weer onder een sessie, en houdt de rest zichzelf over
+ * als losse tijd. Het alternatief was een NOT IN met alle solve-id's erin, en
+ * dat is bij achttienduizend solves geen query meer.
+ * ---------------------------------------------------------------------- */
 $pdo = Database::connection();
 $pdo->beginTransaction();
 try {
-    // De solves hangen met ON DELETE CASCADE aan de sessies.
-    Database::run('DELETE FROM timer_sessions WHERE user_id = ?', [$userId]);
+    // 1. Wat de gebruiker echt kwijt wil.
+    if ($removedIds !== []) {
+        $plaatshouders = implode(',', array_fill(0, count($removedIds), '?'));
+        Database::run(
+            'DELETE FROM solves WHERE user_id = ? AND client_id IN (' . $plaatshouders . ')',
+            array_merge([$userId], $removedIds)
+        );
+    }
 
-    $insertSession = $pdo->prepare(
+    // 2. Sessies bijwerken of aanmaken.
+    $upsertSession = $pdo->prepare(
         'INSERT INTO timer_sessions (user_id, client_id, name, event, sort_order)
-         VALUES (?, ?, ?, ?, ?)'
+         VALUES (?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+            name = VALUES(name), event = VALUES(event), sort_order = VALUES(sort_order)'
     );
-    $insertSolve = $pdo->prepare(
+    $upsertSolve = $pdo->prepare(
         'INSERT INTO solves (user_id, timer_session_id, client_id, event, raw_ms, penalty, scramble, source, solved_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+            timer_session_id = VALUES(timer_session_id),
+            event            = VALUES(event),
+            raw_ms           = VALUES(raw_ms),
+            penalty          = VALUES(penalty),
+            scramble         = VALUES(scramble),
+            source           = VALUES(source),
+            solved_at        = VALUES(solved_at)'
     );
 
+    $sessionIds = [];
+    $opgeslagen = [];   // de sessies met hun id in de database erbij
     foreach ($sessions as $session) {
-        $insertSession->execute([
+        $upsertSession->execute([
             $userId,
             $session['client_id'],
             $session['name'],
             $session['event'],
             $session['sort_order'],
         ]);
+        // lastInsertId() geeft 0 terug als de rij alleen bijgewerkt is, dus
+        // halen we hem er in dat geval bij op.
         $sessionId = (int) $pdo->lastInsertId();
+        if ($sessionId === 0) {
+            $rij = Database::first(
+                'SELECT id FROM timer_sessions WHERE user_id = ? AND client_id = ?',
+                [$userId, $session['client_id']]
+            );
+            $sessionId = (int) ($rij['id'] ?? 0);
+        }
+        if ($sessionId === 0) {
+            continue;
+        }
+        $sessionIds[] = $sessionId;
+        $session['db_id'] = $sessionId;
+        $opgeslagen[] = $session;
+    }
 
+    // 3. Alles losmaken; stap 4 hangt terug wat de browser stuurde.
+    Database::run(
+        'UPDATE solves SET timer_session_id = NULL WHERE user_id = ? AND timer_session_id IS NOT NULL',
+        [$userId]
+    );
+
+    // 4. Solves bijwerken of aanmaken.
+    foreach ($opgeslagen as $session) {
         foreach ($session['times'] as $solve) {
-            $insertSolve->execute([
+            $upsertSolve->execute([
                 $userId,
-                $sessionId,
+                $session['db_id'],
                 $solve['client_id'],
                 $session['event'],
                 $solve['raw_ms'],
@@ -166,6 +255,18 @@ try {
         }
     }
 
+    // 5. Sessies die niet meekwamen opruimen. Hun solves zijn na stap 3 al los,
+    //    dus hier gaat geen tijd verloren.
+    if ($sessionIds === []) {
+        Database::run('DELETE FROM timer_sessions WHERE user_id = ?', [$userId]);
+    } else {
+        $plaatshouders = implode(',', array_fill(0, count($sessionIds), '?'));
+        Database::run(
+            'DELETE FROM timer_sessions WHERE user_id = ? AND id NOT IN (' . $plaatshouders . ')',
+            array_merge([$userId], $sessionIds)
+        );
+    }
+
     $pdo->commit();
 } catch (Throwable $e) {
     if ($pdo->inTransaction()) {
@@ -173,6 +274,12 @@ try {
     }
     throw $e;
 }
+
+// Hoeveel tijden staan er nu op het account zonder sessie?
+$losseTijden = (int) (Database::first(
+    'SELECT COUNT(*) AS aantal FROM solves WHERE user_id = ? AND timer_session_id IS NULL',
+    [$userId]
+)['aantal'] ?? 0);
 
 /* -------------------------------------------------------------------------
  * Records, XP en challenges bijwerken
@@ -212,8 +319,10 @@ try {
 }
 
 Http::ok([
-    'sessions'  => count($sessions),
-    'solves'    => $storedSolves,
-    'syncedAt'  => gmdate('c'),
-    'derived'   => $afgeleid,
+    'sessions'    => count($sessions),
+    'solves'      => $storedSolves,
+    'removed'     => count($removedIds),
+    'looseSolves' => $losseTijden,
+    'syncedAt'    => gmdate('c'),
+    'derived'     => $afgeleid,
 ]);

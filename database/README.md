@@ -29,6 +29,7 @@ database/<nummer>_<wat_het_doet>.sql
 | 004    | `004_daily_challenges.sql`  | `scramble_pool`, `daily_challenges`, `challenge_entries` |
 | 005    | `005_achievements.sql`      | `user_achievements` — wat iemand behaald heeft en wanneer |
 | 006    | `006_toernooien_en_volgen.sql` | `user_follows`, plus de zes toernooitabellen |
+| 007    | `007_losse_tijden_en_algoritmes.sql` | `solves.timer_session_id` mag leeg zijn (losse tijden), sleutel naar `ON DELETE SET NULL`, en `user_algorithms` |
 
 ## Eenmalige setup in DirectAdmin
 
@@ -105,16 +106,22 @@ door dezelfde gemiddelden te lopen, maar wel ergens zichtbaar te zijn. Op het
 profiel krijgen ze een eigen blok.
 
 De achievements zelf staan **niet** in de database maar in
-`public_html/api/lib/Achievements.php`. Het zijn er zesennegentig, de drempel
+`public_html/api/lib/Achievements.php`. Het zijn er honderdtwintig, de drempel
 en de controle horen bij elkaar, en zo is er geen migratie nodig als er eentje
-bij komt.
+bij komt. Hetzelfde geldt voor de algoritmes op de leerpagina: `user_algorithms`
+bewaart alleen wélke id's iemand heeft afgevinkt, de catalogus staat in
+`public_html/Script/algorithms.js`.
 
 `user_records` wordt volledig door de server berekend uit `solves`, na elke
 synchronisatie. De browser levert nooit een gemiddelde aan; dat zou met de
 console te vervalsen zijn. De leaderboards lezen rechtstreeks uit deze tabel.
 
-`solve_flags` staat bewust los van `solves`, want die tabel wordt bij elke
-synchronisatie volledig vervangen. Een markering moet dat overleven.
+`solve_flags` staat bewust los van `solves`. Een markering is een
+beoordelingsstatus en geen eigenschap van de solve zelf: hij komt van de server,
+niet van de browser, en moet blijven staan als de gebruiker zijn tijd bewerkt.
+(Tot migratie 007 was er nog een tweede reden: `solves` werd bij elke
+synchronisatie volledig vervangen. Dat gebeurt niet meer — rijen worden nu
+bijgewerkt in plaats van weggegooid.)
 
 `xp_events` heeft een unieke sleutel op `(user_id, type, reference)`. Dat is wat
 voorkomt dat dezelfde solve of hetzelfde record bij een volgende synchronisatie
@@ -122,7 +129,11 @@ opnieuw XP oplevert.
 
 `solves` draagt zowel `timer_session_id` als een eigen `event` en `solved_at`.
 Die duplicatie is bewust: de daily/weekly averages draaien op de index
-`(user_id, event, solved_at)` en hoeven daardoor niet te joinen.
+`(user_id, event, solved_at)` en hoeven daardoor niet te joinen. Sinds migratie
+007 mag `timer_session_id` leeg zijn: zo'n solve is een *losse tijd* die nog wel
+op het account staat en meetelt, maar niet meer onder een sessie hangt. Juist
+omdat het event in de rij zelf staat, telt zo'n tijd gewoon mee in alle
+berekeningen.
 
 `client_id` op `timer_sessions` en `solves` is het id dat de browser zelf
 genereert. Daarmee is lokale localStorage-data en serverdata aan elkaar te

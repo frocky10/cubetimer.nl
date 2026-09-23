@@ -128,6 +128,7 @@
     const promptInput = document.getElementById('prompt-modal-input');
     const promptConfirm = document.getElementById('prompt-modal-confirm');
     const promptCancel = document.getElementById('prompt-modal-cancel');
+    const promptExtra = document.getElementById('prompt-modal-extra');
 
     let resolveAsk = null;
 
@@ -143,8 +144,15 @@
      * antwoord true/false; met `input` als prompt() en is het antwoord de
      * ingevulde tekst of null bij annuleren.
      *
+     * Met `extraLabel` komt er een derde knop bij, voor een vraag met twee
+     * verschillende "ja"s. Die knop geeft de tekst 'extra' terug. Dat is precies
+     * wat verwijderen nodig heeft: uit de sessie halen is iets anders dan van je
+     * account wissen, en dat verschil hoort in de knop te zitten en niet in een
+     * vinkje dat je over het hoofd ziet.
+     *
      * @param {{title: string, message?: string, confirmLabel?: string,
-     *          cancelLabel?: string, danger?: boolean,
+     *          cancelLabel?: string, extraLabel?: string, danger?: boolean,
+     *          extraDanger?: boolean,
      *          input?: {label?: string, value?: string, placeholder?: string}}} options
      * @returns {Promise<string|boolean|null>}
      */
@@ -169,6 +177,15 @@
         promptCancel.textContent = settings.cancelLabel || 'Annuleren';
         promptConfirm.classList.toggle('btn--danger', settings.danger === true);
         promptConfirm.classList.toggle('btn--primary', settings.danger !== true);
+
+        if (promptExtra) {
+            const heeftExtra = typeof settings.extraLabel === 'string' && settings.extraLabel !== '';
+            promptExtra.hidden = !heeftExtra;
+            if (heeftExtra) {
+                promptExtra.textContent = settings.extraLabel;
+                promptExtra.classList.toggle('btn--danger', settings.extraDanger !== false);
+            }
+        }
 
         if (settings.input) {
             promptField.hidden = false;
@@ -209,6 +226,8 @@
         settleAsk(promptField && !promptField.hidden ? null : false);
     });
 
+    promptExtra?.addEventListener('click', () => settleAsk('extra'));
+
     registerModal(promptModal, () => {
         settleAsk(promptField && !promptField.hidden ? null : false);
     });
@@ -237,9 +256,10 @@
             menuButton.setAttribute('aria-expanded', open ? 'true' : 'false');
         });
 
-        // Een keuze uit het menu sluit het menu.
+        // Een keuze uit het menu sluit het menu. Ook een link, want niet elke
+        // knop in de balk is een <button>.
         menuGroup.addEventListener('click', event => {
-            if (event.target.closest('button')) closeTopbarMenu();
+            if (event.target.closest('button, a')) closeTopbarMenu();
         });
 
         document.addEventListener('click', event => {
