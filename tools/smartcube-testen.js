@@ -34,11 +34,13 @@ const script = path.join(__dirname, '..', 'public_html', 'Script');
 globalThis.aesjs = require(path.join(script, 'vendor', 'aes.js'));
 require(path.join(script, 'cube.js'));
 require(path.join(script, 'smartcube-protocols.js'));
+require(path.join(script, 'smartcube-engine.js'));
 require(path.join(__dirname, 'nep-smartcube.js'));
 
 const Cube = globalThis.CubeTimerCube;
 const Smart = globalThis.CubeTimerSmartCube;
 const Nep = globalThis.NepSmartCube;
+const Engine = globalThis.CubeTimerSmartEngine;
 
 const wacht = ms => new Promise(klaar => setTimeout(klaar, ms));
 let fouten = 0;
@@ -267,8 +269,99 @@ function testKeuzevenster() {
         'merk herkend aan de naam, de langste passende naam wint');
 }
 
+/* -------------------------------------------------------------------------
+ * Het rekenwerk: scramble volgen, solve herkennen, analyse
+ * ---------------------------------------------------------------------- */
+
+/** Een zettenreeks zoals een smart cube hem meldt: alleen kwartslagen. */
+function kwartslagen(alg) {
+    const uit = [];
+    Cube.parse(alg).forEach(t => {
+        if (t.quarters === 2) uit.push(t.face, t.face);
+        else uit.push(t.face + (t.quarters === 3 ? "'" : ''));
+    });
+    return uit;
+}
+
+function testEngine() {
+    const scramble = "R2 U' F2 D L' B2 R U2 F' L2 D' B U R'";
+    const tr = new Engine.Tracker();
+    tr.setScramble(scramble);
+    check(tr.progress.status === 'wacht' && tr.progress.total === 14, 'scramble: 14 zetten, wacht op de eerste');
+
+    // R2 als R' R': na één kwartslag halverwege, na twee klaar met zet 1.
+    tr.applyMove({ move: "R'" });
+    check(tr.progress.done === 0 && tr.progress.half, 'scramble: na R\' staat R2 halverwege');
+    tr.applyMove({ move: "R'" });
+    check(tr.progress.done === 1 && !tr.progress.half, 'scramble: R\' R\' telt als R2');
+
+    // Verkeerde zet, en meteen terugdraaien.
+    tr.applyMove({ move: 'F' });
+    check(tr.progress.status === 'afwijking', 'scramble: verkeerde zet wordt gezien');
+    tr.applyMove({ move: "F'" });
+    check(tr.progress.status === 'bezig' && tr.progress.done === 1, 'scramble: na terugdraaien weer op het goede spoor');
+
+    kwartslagen("U' F2 D L' B2 R U2 F' L2 D' B U R'").forEach(m => tr.applyMove({ move: m }));
+    check(tr.progress.status === 'klaar' && tr.phase === 'armed', 'scramble: klaar, en de eerste draai start de solve');
+
+    const eerste = tr.applyMove({ move: 'R', cubeTime: 0, localTime: 0 });
+    check(eerste.start === true && tr.phase === 'solving', 'solve: begint bij de eerste draai na de scramble');
+
+    // Een cube die niet opgelost begon: dat moet je eerst oplossen.
+    const scheef = new Engine.Tracker();
+    scheef.reset(Cube.toFacelets(Cube.after('R U')));
+    scheef.setScramble(scramble);
+    check(scheef.progress.status === 'eerst-oplossen', 'scramble: een cube die niet opgelost is krijgt de melding "eerst oplossen"');
+
+    // Solve met bekende fases: F2L ligt al, dan OLL 27 en de T-perm.
+    const oll = "R U R' U R U2 R'";
+    const pll = "R U R' U' R' F R2 U' R' U' R U R' F'";
+    const setup = Cube.invert(oll + ' ' + pll);
+    const t2 = new Engine.Tracker();
+    t2.setScramble(setup);
+    kwartslagen(setup).forEach(m => t2.applyMove({ move: m }));
+    check(t2.phase === 'armed', 'analyse: opzet voor OLL 27 + T-perm voltooid');
+    const zetten = kwartslagen(oll + ' ' + pll);
+    let uitslag = null;
+    zetten.forEach((m, i) => {
+        const r = t2.applyMove({ move: m, cubeTime: 1000 + i * 125, localTime: 5000 + i * 130 });
+        if (r.solved) uitslag = r;
+    });
+    check(uitslag && uitslag.solved, 'analyse: solve herkend als opgelost');
+    const a = uitslag.analysis;
+    const perFase = Object.fromEntries(a.phases.map(f => [f.key, f]));
+    check(perFase.cross.moves === 0 && perFase.f2l.moves === 0, 'analyse: kruis en F2L lagen er al, 0 zetten');
+    check(perFase.oll.moves === 7 && perFase.pll.moves === 14,
+        'analyse: OLL 7 zetten, PLL 14 zetten (' + perFase.oll.moves + ' en ' + perFase.pll.moves + ')');
+    check(a.moves === Engine.mergeMoves(zetten).length && a.solution === Engine.mergeMoves(zetten).join(' '),
+        'analyse: oplossing teruggelezen als "' + a.solution + '"');
+    check(uitslag.ms === (zetten.length - 1) * 125 && a.hardwareTimes, 'analyse: tijd uit de klok van de cube (' + uitslag.ms + ' ms)');
+    check(a.phases.reduce((s, f) => s + f.ms, 0) === uitslag.ms, 'analyse: de fasetijden tellen op tot de totaaltijd');
+
+    // Zonder klok in de cube: dan het moment van ontvangst.
+    const zonder = Engine.moveTimes([{ localTime: 100 }, { localTime: 350 }, { localTime: null }, { localTime: 900 }]);
+    check(!zonder.hardware && zonder.times.join(',') === '0,250,800,800', 'tijden: zonder klok, gaten gevuld met de buren');
+
+    check(Engine.mergeMoves(['R', 'R', 'U', "U'", 'F', 'F', 'F']).join(' ') === "R2 F'", 'samenvoegen: R R = R2, U U\' valt weg, F F F = F\'');
+
+    // Een solve met een echt kruis: de fases moeten in de goede volgorde vallen.
+    const t3 = new Engine.Tracker();
+    const s3 = "F2 D' L2 U R2 B2 D2 F' U2 R' D B L F' U2";
+    t3.setScramble(s3);
+    kwartslagen(s3).forEach(m => t3.applyMove({ move: m }));
+    let r3 = null;
+    kwartslagen(Cube.invert(s3)).forEach((m, i) => {
+        const r = t3.applyMove({ move: m, cubeTime: i * 100, localTime: i * 100 });
+        if (r.solved) r3 = r;
+    });
+    const volgorde = r3.analysis.phases.map(f => f.key).join(',');
+    check(volgorde === 'cross,f2l,oll,pll' && ['U', 'D', 'F', 'B', 'R', 'L'].includes(r3.analysis.crossFace),
+        'analyse: vier fases, kruis op vlak ' + r3.analysis.crossFace);
+}
+
 (async function main() {
     testKeuzevenster();
+    testEngine();
     for (const gen of [2, 3, 4]) await testGan(gen);
     await testGan(2, { aiCube: true });
     let vergeleken = false;

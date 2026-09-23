@@ -9,10 +9,14 @@
      5. Componenten (panel, knoppen, velden, tabel, segmented, stats)
      6. Timer, scrambles, grafiek, confetti
      7. Modals (solve, settings, account, melding, prompt)
-     8. Bluetooth-paneel
+     8. Smart cube (knop, venster, scramblehulp, analyse)
      9. Toasts
     10. Responsive
-    11. Leerpagina (leren.html)
+    11. Ranglijsten, XP en challenges
+    12. Achievements
+    13. Landcode, openbaar profiel en het mobiele menu
+    14. Toernooien
+    15. Leerpagina (leren.html)
    ========================================================================== */
 
 /* ==========================================================================
@@ -118,15 +122,16 @@
 
     --scrim: rgba(3, 6, 14, 0.72);
 
-    /* Kubuskleuren voor de plaatjes op de leerpagina. De standaard WCA-kleuren,
-       met de bovenkant geel en de onderkant wit. `--cube-blank` is een vlakje
+    /* Kubuskleuren, bij hun naam en niet bij een vlak: de leerpagina houdt geel
+       boven, de smart cube wit (zoals een WCA-scramble). Welk vlak welke kleur
+       krijgt staat in het script dat tekent. `--cube-blank` is een vlakje
        waarvan de kleur er niet toe doet. */
-    --cube-u: #f6d64a;
-    --cube-d: #ffffff;
-    --cube-f: #3ec46d;
-    --cube-b: #2f7be8;
-    --cube-r: #e8504a;
-    --cube-l: #f0912f;
+    --cube-white: #ffffff;
+    --cube-yellow: #f6d64a;
+    --cube-green: #3ec46d;
+    --cube-blue: #2f7be8;
+    --cube-red: #e8504a;
+    --cube-orange: #f0912f;
     --cube-blank: rgba(255, 255, 255, 0.13);
     --cube-line: rgba(3, 6, 14, 0.55);
 }
@@ -1730,139 +1735,468 @@ body.is-timing #timer {
 }
 
 /* ==========================================================================
-   8. Bluetooth-paneel
+   8. Smart cube
+   --------------------------------------------------------------------------
+   De knop in de balk met zijn statusbolletje, het venster om te verbinden,
+   de hulpregel onder de scramble en de analyse in het solve-venster. Alle
+   vakjes van de kubus kleuren met de --cube-*-tokens.
    ========================================================================== */
 
-.bluetooth-panel {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+/* --- De knop -------------------------------------------------------------- */
+
+.smartcube-button {
+    position: relative;
 }
 
-.bluetooth-panel__header {
+.smartcube-button__dot {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--text-subtle);
+    box-shadow: 0 0 0 2px var(--bg);
+    transition: background 0.2s ease;
+}
+
+.smartcube-button[data-state="busy"] .smartcube-button__dot {
+    background: var(--warning);
+    animation: smartcube-pulse 1.1s ease-in-out infinite;
+}
+
+.smartcube-button[data-state="on"] .smartcube-button__dot {
+    background: var(--success);
+    box-shadow: 0 0 0 2px var(--bg), 0 0 10px rgba(var(--success-rgb), 0.7);
+}
+
+@keyframes smartcube-pulse {
+    50% { opacity: 0.35; }
+}
+
+/* --- Het venster ---------------------------------------------------------- */
+
+.smartcube-dialog {
+    max-width: 34rem;
+}
+
+.smartcube-view {
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
+    flex-direction: column;
     gap: var(--space-3);
 }
 
-.bluetooth-panel__eyebrow {
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--accent-text);
-}
-
-.bluetooth-panel__title {
-    font-size: 1.05rem;
-    font-weight: 700;
-}
-
-.bluetooth-panel__buttons {
+.smartcube-brands {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-.bluetooth-panel__status {
-    padding: var(--space-3);
-    font-size: 0.8rem;
-    line-height: 1.5;
-    color: var(--text-muted);
-    background: var(--surface-2);
+.smartcube-brands li {
+    padding: 0.3em 0.75em;
     border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.smartcube-error {
+    margin: 0;
+    padding: var(--space-3);
+    border: 1px solid rgba(var(--danger-rgb), 0.35);
     border-radius: var(--radius-md);
+    background: rgba(var(--danger-rgb), 0.1);
+    color: var(--text);
+    font-size: 0.9rem;
 }
 
-.bluetooth-panel__content {
-    display: grid;
-    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
-    gap: var(--space-4);
-    align-items: start;
+/* Stappen tijdens het verbinden */
+.smartcube-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: stap;
 }
 
-.bluetooth-panel__viewer {
-    position: relative;
+.smartcube-steps li {
     display: flex;
     align-items: center;
-    justify-content: center;
-    aspect-ratio: 1 / 1;
-    padding: var(--space-3);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
+    gap: var(--space-3);
+    color: var(--text-subtle);
+    counter-increment: stap;
 }
 
-#bluetooth-cube-player {
+.smartcube-steps li::before {
+    content: counter(stap);
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.smartcube-steps li.is-active {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.smartcube-steps li.is-active::before {
+    border-color: var(--brand-400);
+    color: var(--accent-text);
+    animation: smartcube-pulse 1.1s ease-in-out infinite;
+}
+
+.smartcube-steps li.is-done {
+    color: var(--text-muted);
+}
+
+.smartcube-steps li.is-done::before {
+    content: '✓';
+    border-color: transparent;
+    background: rgba(var(--success-rgb), 0.18);
+    color: var(--success);
+}
+
+/* MAC-adres */
+.smartcube-mac {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.smartcube-mac__lead {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.input--mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.smartcube-mac__help {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.smartcube-mac__help summary {
+    cursor: pointer;
+    color: var(--accent-text);
+    font-weight: 600;
+}
+
+.smartcube-mac__help ul {
+    margin: var(--space-2) 0;
+    padding-left: var(--space-4);
+}
+
+.smartcube-mac__help li {
+    margin-bottom: var(--space-2);
+}
+
+.smartcube-mac__help code {
+    padding: 0.05em 0.3em;
+    border-radius: var(--radius-sm);
+    background: var(--surface-3);
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+}
+
+/* Verbonden */
+.smartcube-live {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    gap: var(--space-4);
+    align-items: center;
+}
+
+.smartcube-live__cube {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.smartcube-cube {
+    width: 11rem;
+    aspect-ratio: 170 / 190;
+}
+
+.smartcube-svg {
+    display: block;
     width: 100%;
     height: 100%;
 }
 
-.bluetooth-cube-player--hidden {
-    display: none !important;
+.smartcube-svg__body {
+    fill: var(--cube-line);
 }
 
-.bluetooth-cube-net {
+.smartcube-svg polygon:not(.smartcube-svg__body) {
+    stroke: var(--cube-line);
+    stroke-width: 0.8;
+    stroke-linejoin: round;
+}
+
+.smartcube-facts {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-auto-rows: 1fr;
-    gap: 2px;
-    width: 100%;
-    aspect-ratio: 12 / 9;
-}
-
-.bluetooth-cube-net[hidden] {
-    display: none !important;
-}
-
-.bluetooth-cube-net__facelet {
-    background: var(--surface-3);
-    border-radius: 2px;
-}
-
-.bluetooth-panel__stats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-2);
+    margin: 0;
 }
 
-.bluetooth-stat {
-    padding: var(--space-3);
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    min-width: 0;
+.smartcube-facts > div {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: var(--space-2);
+    align-items: center;
 }
 
-.bluetooth-stat--wide {
-    grid-column: 1 / -1;
-}
-
-.bluetooth-stat__label {
-    display: block;
-    font-size: 0.64rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+.smartcube-facts dt {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--text-subtle);
 }
 
-.bluetooth-stat__value {
-    display: block;
-    margin-top: 2px;
-    font-size: 0.88rem;
+.smartcube-facts dd {
+    margin: 0;
     font-weight: 600;
-    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
-.bluetooth-stat__value--mono {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    font-weight: 500;
+.smartcube-battery {
+    display: inline-block;
+    width: 2.4rem;
+    height: 0.75rem;
+    margin-right: 0.35rem;
+    padding: 1px;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    vertical-align: -0.05em;
+}
+
+.smartcube-battery span {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 2px;
+    background: var(--success);
+    transition: width 0.3s ease;
+}
+
+.smartcube-battery span[data-laag="true"] {
+    background: var(--danger);
+}
+
+/* Een knop die in de rij van twee alleen overblijft, krijgt de hele breedte. */
+.smartcube-view .time-modal__actions > :not([hidden]):last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
+
+/* --- Onder de scramble ---------------------------------------------------- */
+
+.smartcube-stage {
+    display: grid;
+    grid-template-columns: 3.4rem 1fr;
+    grid-template-rows: auto auto;
+    column-gap: var(--space-3);
+    row-gap: var(--space-1);
+    align-items: center;
+    max-width: 30rem;
+    margin: var(--space-3) auto 0;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface-1);
+    text-align: left;
+}
+
+.smartcube-stage__cube {
+    grid-row: span 2;
+    width: 3.4rem;
+    aspect-ratio: 170 / 190;
+}
+
+.smartcube-stage__text {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 var(--space-2);
+    font-size: 0.85rem;
     color: var(--text-muted);
+}
+
+.smartcube-stage__text strong {
+    color: var(--text);
+}
+
+.smartcube-stage__bar {
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-3);
+    overflow: hidden;
+}
+
+.smartcube-stage__bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--gradient-brand);
+    transition: width 0.2s ease;
+}
+
+.smartcube-stage[data-status="klaar"] {
+    border-color: rgba(var(--success-rgb), 0.5);
+}
+
+.smartcube-stage[data-status="klaar"] .smartcube-stage__bar span {
+    background: var(--success);
+}
+
+.smartcube-stage[data-status="afwijking"],
+.smartcube-stage[data-status="eerst-oplossen"] {
+    border-color: rgba(var(--warning-rgb), 0.55);
+}
+
+.smartcube-stage[data-status="afwijking"] .smartcube-stage__bar span {
+    background: var(--warning);
+}
+
+/* De zetten in de scramble zelf */
+.sc-move {
+    display: inline-block;
+    padding: 0 0.08em;
+    border-radius: 4px;
+    transition: color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.sc-move.is-done {
+    opacity: 0.32;
+}
+
+.sc-move.is-next {
+    color: var(--accent-text);
+    background: rgba(var(--brand-rgb), 0.14);
+    box-shadow: 0 0 0 1px rgba(var(--brand-rgb), 0.35);
+}
+
+.sc-move.is-next.is-half {
+    background: linear-gradient(90deg, rgba(var(--brand-rgb), 0.3) 50%, rgba(var(--brand-rgb), 0.08) 50%);
+}
+
+.sc-move.is-wrong {
+    color: var(--warning);
+    background: rgba(var(--warning-rgb), 0.14);
+}
+
+/* --- Analyse in het solve-venster ----------------------------------------- */
+
+.solve-analysis__headline {
+    margin: 0 0 var(--space-2);
+    color: var(--text-muted);
+}
+
+.solve-analysis__headline strong {
+    color: var(--text);
+    font-size: 1.05rem;
+}
+
+.solve-analysis__bar {
+    display: flex;
+    height: 10px;
+    gap: 2px;
+    margin-bottom: var(--space-2);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.solve-analysis__seg {
+    flex-basis: 0;
+    min-width: 3px;
+}
+
+.solve-analysis__seg--cross,
+.solve-analysis__key--cross { background: var(--brand-400); }
+.solve-analysis__seg--f2l,
+.solve-analysis__key--f2l { background: var(--success); }
+.solve-analysis__seg--oll,
+.solve-analysis__key--oll { background: var(--warning); }
+.solve-analysis__seg--pll,
+.solve-analysis__key--pll { background: var(--danger); }
+
+.solve-analysis__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.solve-analysis__table th,
+.solve-analysis__table td {
+    padding: 0.3rem 0;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    font-weight: 500;
+}
+
+.solve-analysis__table td {
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+
+.solve-analysis__table td:last-child {
+    text-align: right;
+    font-family: var(--font-ui);
+}
+
+.solve-analysis__key {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    margin-right: 0.5rem;
+    border-radius: 2px;
+}
+
+.solve-analysis__solution {
+    margin-top: var(--space-2);
+    font-size: 0.85rem;
+}
+
+.solve-analysis__solution summary {
+    cursor: pointer;
+    color: var(--accent-text);
+    font-weight: 600;
+}
+
+.solve-analysis__solution p {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-mono);
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .smartcube-live {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    .smartcube-facts {
+        width: 100%;
+    }
 }
 
 /* ==========================================================================
@@ -2085,13 +2419,7 @@ body.is-timing #timer {
         white-space: nowrap;
     }
 
-    .bluetooth-panel__content {
-        grid-template-columns: 1fr;
-    }
 
-    .bluetooth-panel__stats {
-        grid-template-columns: 1fr;
-    }
 
     .time-modal__actions {
         grid-template-columns: 1fr;
@@ -3451,7 +3779,7 @@ body.profile-page {
 }
 
 /* ==========================================================================
-   11. Leerpagina (leren.html)
+   15. Leerpagina (leren.html)
    --------------------------------------------------------------------------
    De kaarten met OLL-, PLL- en F2L-gevallen, en de kubusplaatjes daarin. De
    plaatjes zijn SVG die door tutorials.js wordt opgebouwd; hier staat alleen

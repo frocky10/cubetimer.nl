@@ -48,7 +48,9 @@
     const VLAK = 3 * CEL + 2 * KIER;
     const TOTAAL = VLAK + 2 * START;
 
-    const kleur = face => 'var(--cube-' + face.toLowerCase() + ')';
+    // Op de leerpagina ligt geel boven en wit onder, zoals bij CFOP gebruikelijk.
+    const KLEUR_PER_VLAK = { U: 'yellow', D: 'white', F: 'green', B: 'blue', R: 'red', L: 'orange' };
+    const kleur = face => 'var(--cube-' + KLEUR_PER_VLAK[face] + ')';
     const LEEG = 'var(--cube-blank)';
 
     function vierkant(x, y, breedte, hoogte, vulling, radius) {

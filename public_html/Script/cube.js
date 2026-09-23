@@ -1,8 +1,10 @@
 /**
  * CubeTimer - kleine kubusengine
  * ---------------------------------------------------------------------------
- * Genoeg 3x3 om de tutorialpagina mee te bedienen: een zettenreeks uitvoeren,
- * hem omkeren, en opvragen welke kleur er op een bepaald plaatje ligt.
+ * Genoeg 3x3 om de leerpagina en de smart cube mee te bedienen: een
+ * zettenreeks uitvoeren, hem omkeren, opvragen welke kleur er op een plaatje
+ * ligt, en een stand lezen en schrijven in de Kociemba-notatie die smart
+ * cubes gebruiken.
  *
  * Waarom dit bestand bestaat: de OLL-patronen en de PLL-pijlen worden hiermee
  * *afgeleid* uit het algoritme zelf. Er staat dus nergens een met de hand

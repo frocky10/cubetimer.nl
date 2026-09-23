@@ -30,6 +30,7 @@ database/<nummer>_<wat_het_doet>.sql
 | 005    | `005_achievements.sql`      | `user_achievements` — wat iemand behaald heeft en wanneer |
 | 006    | `006_toernooien_en_volgen.sql` | `user_follows`, plus de zes toernooitabellen |
 | 007    | `007_losse_tijden_en_algoritmes.sql` | `solves.timer_session_id` mag leeg zijn (losse tijden), sleutel naar `ON DELETE SET NULL`, en `user_algorithms` |
+| 008    | `008_smartcube_analyse.sql` | `solves.details`: analyse van een smart-cubesolve (JSON, door de server gecontroleerd) |
 
 ## Eenmalige setup in DirectAdmin
 
