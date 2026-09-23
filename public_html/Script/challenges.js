@@ -338,6 +338,9 @@
     window.addEventListener('cubetimer:scramble-change', event => {
         if (!ingelogd) return;
         if (actieveChallenge) return;
+        // Een vastgezette scramble (van de dag, of een oefengeval van de
+        // leerpagina) is niet willekeurig en hoort niet in de voorraad.
+        if (event.detail.override) return;
 
         const eventId = event.detail.eventType;
         if (!voorraadEvents.includes(eventId)) return;
