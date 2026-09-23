@@ -22,6 +22,7 @@ $challengesReady = $databaseReady && Database::hasTable('daily_challenges');
 $achievementsReady = $databaseReady && Database::hasTable('user_achievements');
 $tournamentsReady = $databaseReady && Database::hasTable('tournaments');
 $followsReady = $databaseReady && Database::hasTable('user_follows');
+$algorithmsReady = $databaseReady && Database::hasTable('user_algorithms');
 
 $user = Auth::user();
 
@@ -35,6 +36,7 @@ Http::ok([
         'achievements' => $achievementsReady,
         'tournaments'  => $tournamentsReady,
         'follows'      => $followsReady,
+        'algorithms'   => $algorithmsReady,
     ],
     'timezone'      => SiteTime::zoneName(),
     'authenticated' => $user !== null,

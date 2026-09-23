@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <meta name="description" content="Leer de Rubik's kubus oplossen: de beginnersmethode stap voor stap, uitleg over F2L, en alle 57 OLL- en 21 PLL-algoritmes met plaatjes en een oefenknop." />
+    <meta name="keywords" content="rubiks kubus leren, beginnersmethode, f2l, oll, pll, algoritmes, speedcubing, cfop" />
+    <title>Leren — CubeTimer</title>
+
+    <link rel="icon" type="image/png" href="Pictures/CubeTimerFavicon_V2.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Leer de kubus oplossen — CubeTimer" />
+    <meta property="og:description" content="De beginnersmethode, F2L, en alle OLL- en PLL-algoritmes met plaatjes en een oefenknop." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="Style/style.css" />
+
+    <!-- Thema meteen zetten, vóór de eerste paint. Zelfde script als in
+         index.html en profiel.php; bewust inline, anders flitst de pagina. -->
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+            } catch (err) {
+                /* localStorage geblokkeerd: dan blijft het donkere standaardthema staan. */
+            }
+        })();
+    </script>
+
+    <script src="Script/ui.js" defer></script>
+    <script src="Script/cube.js" defer></script>
+    <script src="Script/algorithms.js" defer></script>
+    <script src="Script/tutorials.js" defer></script>
+</head>
+<body class="profile-page">
+    <!-- Eén pijl die in het plaatje bij elke PLL hergebruikt wordt. -->
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+        <defs>
+            <marker id="cube-arrowhead" viewBox="0 0 10 10" refX="8" refY="5"
+                    markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M0 1 L9 5 L0 9 z" fill="currentColor" />
+            </marker>
+        </defs>
+    </svg>
+
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="index.html" aria-label="Naar de timer">
+            <img src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" />
+        </a>
+        <a class="btn btn--primary" href="index.html">Naar de timer</a>
+    </header>
+
+    <main class="profile-main learn">
+        <section class="panel">
+            <div class="panel__body">
+                <p class="modal__eyebrow">Leren</p>
+                <h1 class="modal__title">De kubus oplossen</h1>
+                <p class="modal__subtitle">
+                    Begin bij de beginnersmethode als je nog niet kunt oplossen. Kun je dat al, dan is
+                    F2L de eerstvolgende stap, en daarna OLL en PLL. Alle plaatjes op deze pagina zijn
+                    getekend vanuit het algoritme dat eronder staat, dus wat je ziet klopt met wat je doet.
+                </p>
+
+                <div class="segmented learn__tabs" role="tablist" aria-label="Onderdeel">
+                    <button class="segmented__item is-active" type="button" role="tab" data-leer-tab="beginner">Beginner</button>
+                    <button class="segmented__item" type="button" role="tab" data-leer-tab="f2l">F2L</button>
+                    <button class="segmented__item" type="button" role="tab" data-leer-tab="oll">OLL</button>
+                    <button class="segmented__item" type="button" role="tab" data-leer-tab="pll">PLL</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             Beginnersmethode
+             ================================================================ -->
+        <section data-leer-panel="beginner">
+            <div class="panel">
+                <div class="panel__body learn__prose">
+                    <h2>De beginnersmethode</h2>
+                    <p>
+                        Je lost de kubus laag voor laag op: eerst de witte kant, dan de middelste laag,
+                        en dan de gele. Je hebt er maar een handjevol zetten voor nodig. Houd de kubus
+                        steeds met <strong>wit onder</strong> en <strong>geel boven</strong> zodra je bij
+                        stap 3 bent.
+                    </p>
+
+                    <h3>Hoe je de zetten leest</h3>
+                    <p>
+                        Een letter is een kwartslag met de klok mee van dat vlak, gezien vanaf die kant.
+                        <span class="alg-inline">R</span> is rechts, <span class="alg-inline">L</span> links,
+                        <span class="alg-inline">U</span> boven, <span class="alg-inline">D</span> onder,
+                        <span class="alg-inline">F</span> voor en <span class="alg-inline">B</span> achter.
+                        Een apostrof betekent tegen de klok in (<span class="alg-inline">R'</span>) en een
+                        twee betekent een halve slag (<span class="alg-inline">R2</span>). Meer is het niet.
+                    </p>
+
+                    <h3>Stap 1 — het witte kruis</h3>
+                    <p>
+                        Zoek de vier randen met wit en leg ze als een kruis rond het witte midden. Let op
+                        de tweede kleur: die moet aansluiten op het midden van dat zijvlak. Een rand met
+                        wit en groen hoort dus bij het groene midden. Dit doe je op gevoel, zonder
+                        algoritme — probeer het net zo lang tot het klopt.
+                    </p>
+
+                    <h3>Stap 2 — de witte hoeken</h3>
+                    <p>
+                        Draai de kubus om, zodat wit onder ligt. Zoek een hoek met wit erin, breng hem
+                        boven de plek waar hij hoort, en herhaal dan:
+                    </p>
+                    <p class="alg-line">R U R' U'</p>
+                    <p>
+                        Hooguit zes keer en de hoek valt vanzelf goed op zijn plek. Zit een witte hoek
+                        verkeerd in de onderste laag, doe dit dan één keer om hem eruit te wippen en
+                        begin opnieuw. Deze vier zetten heten de <em>sexy move</em>; je komt ze overal
+                        weer tegen.
+                    </p>
+
+                    <h3>Stap 3 — de middelste laag</h3>
+                    <p>
+                        Zoek in de bovenste laag een rand <em>zonder</em> geel. Draai hem zo dat zijn
+                        voorkleur op het midden eronder past, en kijk waar hij heen moet:
+                    </p>
+                    <p class="alg-line">naar rechts: U R U' R' U' F' U F</p>
+                    <p class="alg-line">naar links: U' L' U L U F U' F'</p>
+                    <p>
+                        Zit een rand op de goede plek maar verkeerd om? Doe er dan een van de twee op om
+                        hem eruit te halen, en zet hem daarna goed terug.
+                    </p>
+
+                    <h3>Stap 4 — het gele kruis</h3>
+                    <p>
+                        Nu alleen de bovenkant nog. Je ziet een punt, een haakje of een lijn geel. Deze
+                        zes zetten brengen je steeds een stap verder, tot je een kruis hebt:
+                    </p>
+                    <p class="alg-line">F R U R' U' F'</p>
+                    <p>
+                        Bij een haakje houd je hem linksboven, bij een lijn houd je hem horizontaal.
+                        Bij een punt maakt het niet uit; dan heb je het drie keer nodig.
+                    </p>
+
+                    <h3>Stap 5 — de gele hoeken draaien</h3>
+                    <p>
+                        Houd een hoek die nog niet geel is rechtsvoor en herhaal:
+                    </p>
+                    <p class="alg-line">R U R' U R U2 R'</p>
+                    <p>
+                        Draai <em>alleen de bovenste laag</em> naar de volgende verkeerde hoek en doe het
+                        opnieuw. Tussendoor ziet de kubus er rommelig uit — dat hoort zo, hij komt goed.
+                        Dit algoritme heet de <em>Sune</em> en staat bij OLL als geval 27.
+                    </p>
+
+                    <h3>Stap 6 — de hoeken op hun plek</h3>
+                    <p>
+                        De bovenkant is geel, maar de hoeken staan mogelijk verkeerd. Zoek twee hoeken
+                        naast elkaar die er al goed staan, houd die achter, en doe:
+                    </p>
+                    <p class="alg-line">U R U' L' U R' U' L</p>
+                    <p>Staat er geen enkel paar goed, doe het dan één keer en kijk opnieuw.</p>
+
+                    <h3>Stap 7 — de randen op hun plek</h3>
+                    <p>
+                        Nog drie randen te draaien. Houd de rand die al goed staat achter en doe:
+                    </p>
+                    <p class="alg-line">R U' R U R U R U' R' U' R2</p>
+                    <p>
+                        Klopt het nog niet? Dan draaien ze de andere kant op: doe het twee keer. Dit is
+                        de Ua-perm; je vindt hem ook bij PLL terug.
+                    </p>
+
+                    <h3>En daarna?</h3>
+                    <p>
+                        Zo kom je met zeven stappen rond. Wil je sneller, dan vervang je stap 2 en 3 door
+                        <strong>F2L</strong> (hoek en rand in één keer), stap 4 en 5 door <strong>OLL</strong>
+                        (bovenkant in één keer geel) en stap 6 en 7 door <strong>PLL</strong> (bovenlaag in
+                        één keer goed). Dat is de CFOP-methode, en die vind je in de andere tabbladen.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             F2L
+             ================================================================ -->
+        <section data-leer-panel="f2l" hidden>
+            <div class="panel">
+                <div class="panel__body learn__prose">
+                    <h2>F2L — de eerste twee lagen</h2>
+                    <p>
+                        Bij de beginnersmethode zet je eerst alle witte hoeken en daarna alle randen van
+                        de middelste laag. F2L doet die twee tegelijk: je zoekt een hoek en de rand die
+                        ernaast hoort, maakt er boven een paar van, en stopt dat paar in één beweging in
+                        zijn sleuf. Vier paren, vier sleuven, en je eerste twee lagen staan.
+                    </p>
+                    <p>
+                        Het idee is belangrijker dan de lijst. Alles hieronder komt neer op drie dingen:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Zit het paar al aan elkaar?</strong> Dan draai je het met
+                            <span class="alg-inline">U</span> boven de goede sleuf en stop je het erin met
+                            <span class="alg-inline">R U R'</span> of <span class="alg-inline">F' U' F</span>.
+                        </li>
+                        <li>
+                            <strong>Zitten hoek en rand los van elkaar?</strong> Dan breng je ze eerst bij
+                            elkaar. Dat is bijna altijd één sleuf openen, de rand ernaast draaien, en de
+                            sleuf weer sluiten.
+                        </li>
+                        <li>
+                            <strong>Zit er al iets in de sleuf?</strong> Haal het eruit met
+                            <span class="alg-inline">R U R'</span> en behandel het daarna als een gewoon
+                            geval. Dat kost een paar zetten meer, maar je hoeft er niets extra's voor te
+                            onthouden.
+                        </li>
+                    </ul>
+                    <p>
+                        Hieronder staan alle 41 gevallen voor de sleuf <strong>rechtsvoor</strong>. De
+                        andere drie sleuven doe je door de kubus te draaien tot de sleuf waar je aan werkt
+                        rechtsvoor zit. In het plaatje zie je alleen de hoek en de rand van het paar; de
+                        rest is weggelaten, want daar hoef je niet naar te kijken. Het tweede plaatje is
+                        de sleuf zelf.
+                    </p>
+                    <p class="learn__progress" data-progress="f2l"></p>
+                    <p class="field__hint" data-signin-hint hidden>
+                        Log in om bij te houden wat je geleerd hebt.
+                    </p>
+                </div>
+            </div>
+            <div data-leer-list="f2l"></div>
+        </section>
+
+        <!-- ================================================================
+             OLL
+             ================================================================ -->
+        <section data-leer-panel="oll" hidden>
+            <div class="panel">
+                <div class="panel__body learn__prose">
+                    <h2>OLL — de bovenkant geel maken</h2>
+                    <p>
+                        Je eerste twee lagen staan en de bovenkant is nog een rommeltje. OLL maakt hem in
+                        één algoritme helemaal geel. Waar de stukken belanden maakt nog niet uit; dat doet
+                        PLL daarna.
+                    </p>
+                    <p>
+                        Er zijn 57 gevallen. Dat lijkt veel, maar je herkent ze aan de vorm die het geel
+                        maakt, en die vier vormen staan hieronder uit elkaar. Begin bij
+                        <strong>Kruis</strong>: dat zijn er maar zeven, en met die zeven kun je al elke
+                        kubus af — de rest is puur tijdwinst.
+                    </p>
+                    <p>
+                        In het plaatje is geel wat al goed ligt en leeg wat nog gedraaid moet worden. De
+                        randjes eromheen zijn de zijkanten: daaraan zie je waar het geel nu naartoe wijst.
+                    </p>
+                    <p class="learn__progress" data-progress="oll"></p>
+                    <p class="field__hint" data-signin-hint hidden>
+                        Log in om bij te houden wat je geleerd hebt.
+                    </p>
+                </div>
+            </div>
+            <div data-leer-list="oll"></div>
+        </section>
+
+        <!-- ================================================================
+             PLL
+             ================================================================ -->
+        <section data-leer-panel="pll" hidden>
+            <div class="panel">
+                <div class="panel__body learn__prose">
+                    <h2>PLL — de bovenlaag op zijn plek</h2>
+                    <p>
+                        De bovenkant is geel, maar de stukken staan nog niet waar ze horen. PLL legt ze in
+                        één algoritme goed. Eenentwintig gevallen, en daarna is de kubus af.
+                    </p>
+                    <p>
+                        Herkennen doe je aan de zijkanten, niet aan de bovenkant: twee vakjes van dezelfde
+                        kleur naast elkaar zijn <em>koplampen</em>, drie op een rij is een <em>blok</em>.
+                        In het plaatje zijn de zijkanten daarom gekleurd, met pijlen erbij die laten zien
+                        welk stuk waarheen moet.
+                    </p>
+                    <p>
+                        Begin met de <strong>alleen randen</strong>-groep en de T- en J-perm: daarmee dek
+                        je al een groot deel van je solves af, en de rest kun je er rustig bij leren.
+                    </p>
+                    <p class="learn__progress" data-progress="pll"></p>
+                    <p class="field__hint" data-signin-hint hidden>
+                        Log in om bij te houden wat je geleerd hebt.
+                    </p>
+                </div>
+            </div>
+            <div data-leer-list="pll"></div>
+        </section>
+    </main>
+</body>
+</html>
