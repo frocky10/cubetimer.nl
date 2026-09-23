@@ -28,7 +28,7 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Leaderboards per event, categorie en periode
 - XP, levels, streaks en een rangbadge
 - Daily challenges: scramble van de dag plus twee opdrachten
-- 96 achievements in vier niveaus, plus twaalf geheime
+- 114 achievements in vier niveaus, plus veertien geheime
 - Openbare, deelbare profielen op /profiel.php?u=naam
 - Volgen en vrienden, met een eigen vriendenranglijst
 - Toernooimodus: een simulatie van een WCA-competitie tegen bots
@@ -502,8 +502,8 @@ losse naam.
 
 ## Achievements
 
-Zesennegentig stuks: eenentwintig families in vier niveaus (brons, zilver,
-goud, platina) plus twaalf geheime. De catalogus staat in
+Honderdveertien stuks: vijfentwintig families in vier niveaus (brons, zilver,
+goud, platina) plus veertien geheime. De catalogus staat in
 `lib/Achievements.php`, niet in de database. Een nieuwe achievement toevoegen
 is dus een regel in `families()` of `secrets()` — geen migratie.
 
