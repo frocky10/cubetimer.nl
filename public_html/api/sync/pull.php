@@ -7,6 +7,10 @@ require_once __DIR__ . '/../bootstrap.php';
  * GET /api/sync/pull.php
  * Geeft alle sessies en solves van de ingelogde gebruiker terug, in precies
  * de vorm die de browser in localStorage bewaart.
+ *
+ * Losse tijden (solves zonder sessie) komen hier *niet* in mee: die horen bij
+ * het account, niet bij de timer. Wel het aantal, zodat het accountscherm kan
+ * laten zien dat ze er zijn en wat je ermee kunt.
  */
 Http::requireMethod('GET');
 
@@ -34,7 +38,7 @@ foreach ($sessionRows as $row) {
 if ($sessions !== []) {
     $solveRows = Database::all(
         'SELECT timer_session_id, client_id, raw_ms, penalty, scramble, source, solved_at
-         FROM solves WHERE user_id = ? ORDER BY solved_at, id',
+         FROM solves WHERE user_id = ? AND timer_session_id IS NOT NULL ORDER BY solved_at, id',
         [$userId]
     );
 
@@ -55,7 +59,13 @@ if ($sessions !== []) {
     }
 }
 
+$losseTijden = (int) (Database::first(
+    'SELECT COUNT(*) AS aantal FROM solves WHERE user_id = ? AND timer_session_id IS NULL',
+    [$userId]
+)['aantal'] ?? 0);
+
 Http::ok([
-    'sessions'  => $sessions,
-    'serverNow' => gmdate('c'),
+    'sessions'    => $sessions,
+    'looseSolves' => $losseTijden,
+    'serverNow'   => gmdate('c'),
 ]);
