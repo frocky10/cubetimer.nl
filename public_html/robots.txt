@@ -1,0 +1,11 @@
+# CubeTimer - robots.txt
+#
+# Alles mag gelezen worden, behalve de API: dat zijn JSON-antwoorden, geen
+# pagina's. Profielen staan hier bewust NIET in: die moeten Google juist
+# kunnen lezen, anders ziet hij de noindex erop niet en kan hij de URL alsnog
+# (zonder inhoud) in de zoekresultaten zetten.
+
+User-agent: *
+Disallow: /api/
+
+Sitemap: https://cubetimer.nl/sitemap.xml

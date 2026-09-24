@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Pagina niet gevonden – CubeTimer</title>
+    <!-- Een foutpagina hoort niet in Google. De server stuurt er ook een 404 bij. -->
+    <meta name="robots" content="noindex, follow" />
+
+    <!-- Deze pagina kan op elk pad verschijnen (/iets/anders), dus alle paden
+         beginnen bij de root. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/Style/style.css" />
+
+    <!-- Thema meteen zetten, vóór de eerste paint. Zelfde script als in
+         index.html; bewust inline, anders flitst de pagina. -->
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+            } catch (err) { /* privemodus: dan blijft het donkere thema staan */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/" aria-label="Naar de timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <a class="btn btn--primary" href="/">Naar de timer</a>
+    </header>
+
+    <main class="profile-main">
+        <section class="panel">
+            <div class="panel__body">
+                <p class="modal__eyebrow">404</p>
+                <h1 class="modal__title">Deze pagina bestaat niet</h1>
+                <p class="modal__subtitle">
+                    Misschien is de link oud, of zit er een tikfout in. De timer staat gewoon klaar.
+                </p>
+                <p>
+                    <a class="btn btn--primary" href="/">Naar de timer</a>
+                    <a class="btn" href="/leren.html">Leren oplossen</a>
+                </p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
