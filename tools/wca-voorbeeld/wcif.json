@@ -1,0 +1,93 @@
+{
+ "formatVersion": "1.0",
+ "id": "NepOpen2024",
+ "name": "Nep Open 2024",
+ "persons": [],
+ "events": [
+  {
+   "id": "333",
+   "rounds": [
+    {
+     "id": "333-r1",
+     "format": "a",
+     "timeLimit": {
+      "centiseconds": 6000,
+      "cumulativeRoundIds": []
+     },
+     "cutoff": {
+      "numberOfAttempts": 2,
+      "attemptResult": 2000
+     },
+     "advancementCondition": {
+      "type": "ranking",
+      "level": 6
+     },
+     "results": []
+    },
+    {
+     "id": "333-r2",
+     "format": "a",
+     "timeLimit": {
+      "centiseconds": 6000,
+      "cumulativeRoundIds": []
+     },
+     "cutoff": null,
+     "advancementCondition": null,
+     "results": []
+    }
+   ]
+  },
+  {
+   "id": "666",
+   "rounds": [
+    {
+     "id": "666-r1",
+     "format": "m",
+     "timeLimit": {
+      "centiseconds": 60000,
+      "cumulativeRoundIds": [
+       "666-r1"
+      ]
+     },
+     "cutoff": {
+      "numberOfAttempts": 1,
+      "attemptResult": 12000
+     },
+     "advancementCondition": null,
+     "results": []
+    }
+   ]
+  },
+  {
+   "id": "333bf",
+   "rounds": [
+    {
+     "id": "333bf-r1",
+     "format": "3",
+     "timeLimit": {
+      "centiseconds": 60000,
+      "cumulativeRoundIds": [
+       "333bf-r1"
+      ]
+     },
+     "cutoff": null,
+     "advancementCondition": null,
+     "results": []
+    }
+   ]
+  },
+  {
+   "id": "333fm",
+   "rounds": [
+    {
+     "id": "333fm-r1",
+     "format": "m",
+     "timeLimit": null,
+     "cutoff": null,
+     "advancementCondition": null,
+     "results": []
+    }
+   ]
+  }
+ ]
+}

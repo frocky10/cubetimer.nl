@@ -23,6 +23,9 @@ $achievementsReady = $databaseReady && Database::hasTable('user_achievements');
 $tournamentsReady = $databaseReady && Database::hasTable('tournaments');
 $followsReady = $databaseReady && Database::hasTable('user_follows');
 $algorithmsReady = $databaseReady && Database::hasTable('user_algorithms');
+$gamesReady = $databaseReady && Database::hasTable('game_runs');
+$duelsReady = $gamesReady && $followsReady && Database::hasTable('duels');
+$wcaReady = $tournamentsReady && Wca::isReady();
 
 $user = Auth::user();
 
@@ -37,6 +40,9 @@ Http::ok([
         'tournaments'  => $tournamentsReady,
         'follows'      => $followsReady,
         'algorithms'   => $algorithmsReady,
+        'games'        => $gamesReady,
+        'duels'        => $duelsReady,
+        'wcaTournaments' => $wcaReady,
     ],
     'timezone'      => SiteTime::zoneName(),
     'authenticated' => $user !== null,

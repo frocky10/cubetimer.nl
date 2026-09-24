@@ -1,0 +1,38 @@
+[
+ {
+  "id": "NepOpen2024",
+  "name": "Nep Open 2024",
+  "city": "Utrecht",
+  "country_iso2": "NL",
+  "start_date": "2024-03-09",
+  "end_date": "2024-03-10",
+  "event_ids": [
+   "333",
+   "666",
+   "333bf",
+   "333fm"
+  ]
+ },
+ {
+  "id": "NepToekomst2099",
+  "name": "Nep Toekomst 2099",
+  "city": "Delft",
+  "country_iso2": "NL",
+  "start_date": "2099-01-01",
+  "end_date": "2099-01-02",
+  "event_ids": [
+   "333"
+  ]
+ },
+ {
+  "id": "NepLeeg2023",
+  "name": "Nep Leeg 2023",
+  "city": "Gouda",
+  "country_iso2": "NL",
+  "start_date": "2023-05-01",
+  "end_date": "2023-05-01",
+  "event_ids": [
+   "333"
+  ]
+ }
+]

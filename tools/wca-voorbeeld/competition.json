@@ -1,0 +1,15 @@
+{
+ "id": "NepOpen2024",
+ "name": "Nep Open 2024",
+ "city": "Utrecht",
+ "country_iso2": "NL",
+ "start_date": "2024-03-09",
+ "end_date": "2024-03-10",
+ "event_ids": [
+  "333",
+  "666",
+  "333bf",
+  "333fm"
+ ],
+ "url": "https://www.worldcubeassociation.org/competitions/NepOpen2024"
+}

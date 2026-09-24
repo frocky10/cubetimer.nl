@@ -33,7 +33,10 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Leerpagina met de beginnersmethode, F2L, en alle OLL- en PLL-algoritmes
 - Openbare, deelbare profielen op /profiel.php?u=naam
 - Volgen en vrienden, met een eigen vriendenranglijst
-- Toernooimodus: een simulatie van een WCA-competitie tegen bots
+- Toernooimodus: een simulatie van een WCA-competitie tegen bots, of een echte
+  afgelopen WCA-comp naspelen tegen de echte tijden van toen
+- Spelmodi: streak, speedrun, survival en ladder, met een record per modus, en
+  duels tegen vrienden op dezelfde scrambles
 - Bug-/ideeënknop die een GitHub-issue aanmaakt
 - Donker en licht thema, sessiegrafiek, confetti bij een PR
 
@@ -61,7 +64,8 @@ public_html/                   Precies wat er op de server komt te staan
     leaderboard.js             Ranglijsten
     challenges.js              Daily challenges en de scramble van de dag
     achievements.js            Achievements
-    tournament.js              Toernooimodus
+    tournament.js              Toernooimodus, ook historische WCA-comps
+    games.js                   Spelmodi en duels
     admin.js                   Beoordeelwachtrij (alleen voor de rol admin)
     smartcube.js               Smart cube: knop, venster, timer, analyse
     smartcube-protocols.js     Drivers per merk (pas geladen bij gebruik)
@@ -79,7 +83,7 @@ public_html/                   Precies wat er op de server komt te staan
                                SiteTime, Events, Averages, Records, Xp,
                                Leaderboard, Challenges, SolveFacts, Achievements,
                                PublicProfile, Follows, Tournaments, TournamentField,
-                               SolveAnalysis
+                               SolveAnalysis, Ranking, GameModes, Duels, Wca
     auth/                      register, login, logout, me
     sync/                      pull, push
     feedback/                  report
@@ -90,7 +94,9 @@ public_html/                   Precies wat er op de server komt te staan
     challenges/                today, submit, contribute
     achievements/              list
     follows/                   toggle, list
-    tournament/                state, start, solve, abandon
+    tournament/                state, start, solve, abandon, wca-search, wca-competition
+    games/                     overview, finish (spelmodi)
+    duels/                     create, solve, decline
     admin/                     flags
   Pictures/  Fonts/
 ```
@@ -125,7 +131,7 @@ find public_html/api -name '*.php' -exec php -l {} \;
 
 # JavaScript-syntax (de twee ES-modules kunnen hier niet doorheen)
 for f in ui script stats settings feedback account leaderboard challenges \
-         achievements tournament admin cube algorithms tutorials \
+         achievements tournament games admin cube algorithms tutorials \
          smartcube smartcube-protocols smartcube-engine; do
   node --check public_html/Script/$f.js
 done
@@ -138,8 +144,15 @@ node tools/algoritmes-controleren.js
 # hoofdstuk Smart cubes voor de vergelijking met gan-web-bluetooth.
 node tools/smartcube-testen.js
 
+# Het rekenwerk van de spelmodi, de rangschikking per format (Ao5, Mo3, best
+# of) en de omzetting van WCA-antwoorden. Geen database of netwerk nodig.
+php tools/spelmodi-en-wca-testen.php
+
 # De site lokaal draaien, inclusief werkende API
 php -S 127.0.0.1:8123 -t public_html
+
+# Een nagebootste WCA-API, voor de historische toernooien (zie Toernooimodus)
+php -S 127.0.0.1:8124 tools/nep-wca-server.php
 ```
 
 Voor een echte test van accounts en synchronisatie: zet een MySQL/MariaDB op,
@@ -191,6 +204,7 @@ namen liggen vast tenzij je het JS meeverandert:
 `#session-graph-canvas`, `#confetti-canvas`, `#theme-toggle` (+ `.moon` /
 `.sun` / `.toggle-knob`), `#session-select`, `#cube-select`, `#cube-display`,
 `.time-modal` (+ `.visible`), alle `#modal-*`, alle `#smartcube-*`,
+alle `#games-*` en `[data-close-games]`, alle `#tournament-*`,
 `[data-sc-view]` / `[data-sc-step]`, `.sc-move`,
 `[data-settings-tab]` / `[data-settings-panel]`.
 
@@ -215,12 +229,13 @@ smart-cubevenster opent). Wie ze niet nodig heeft, downloadt ze ook niet.
 | Object | Van wie | Waarvoor |
 |---|---|---|
 | `window.CubeTimerUI` | `ui.js` | `toast`, `ask`, `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
-| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, `startInspectionFromBluetooth`, `startTimerFromBluetooth`, `stopTimerFromBluetooth({ ms, analysis })` |
+| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture(handler, owner)`, `getSolveCaptureOwner`, `triggerConfetti`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, `startInspectionFromBluetooth`, `startTimerFromBluetooth`, `stopTimerFromBluetooth({ ms, analysis })` |
 | `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
 | `window.CubeTimerLeaderboard` | `leaderboard.js` | `open`, `reload` |
 | `window.CubeTimerChallenges` | `challenges.js` | `load`, `stopChallenge` |
 | `window.CubeTimerAchievements` | `achievements.js` | `load`, `announce` |
-| `window.CubeTimerTournament` | `tournament.js` | `load`, `stopCapture` |
+| `window.CubeTimerTournament` | `tournament.js` | `load`, `stopCapture`, `isActive` |
+| `window.CubeTimerGames` | `games.js` | `load`, `isRunning` |
 | `window.CubeTimerCube` | `cube.js` | `parse`, `invert`, `after`, `colorAt`, `slot`, `isSolved` — alleen op `leren.html` en bij het oefenen |
 | `window.CubeTimerAlgorithms` | `algorithms.js` | `all`, `byId`, `colorAt`, `pieceAt`, `groupLabel` |
 | `window.CubeTimerSmartCube` | `smartcube-protocols.js` | `connect`, `open`, `isSupported`, `requestOptions`, `brandFor`, `parseMac` |
@@ -243,6 +258,7 @@ niet bij de rest van de site en blokkeren de timer.
 | `cubetimer:synced` | synchronisatie geslaagd, server heeft herberekend | `challenges.js` |
 | `cubetimer:auth-change` | in- of uitgelogd, met de verse status erbij | `admin.js`, `challenges.js`, `leaderboard.js`, `achievements.js` |
 | `cubetimer:achievements-unlocked` | er zijn achievements behaald | `achievements.js` |
+| `cubetimer:scrambler-ready` | cubing.js is geladen en `window.generateScrambles(event, n)` bestaat | `games.js` |
 
 ### Waar de data staat
 
@@ -257,6 +273,7 @@ blijft de timer dus gewoon werken.
 | `cubetimer_stats_scope` | laatst gekozen periode in het statistiekenpaneel |
 | `cubetimer_removed_v1` | solve-id's die ook van het account af moeten, tot de volgende synchronisatie ze heeft doorgegeven |
 | `cubetimer_cube_macs` | per naam van een smart cube het MAC-adres dat werkte, zodat je het maar één keer hoeft in te vullen |
+| `cubetimer_game_v1` | `{ run, prefs }`: een lopende streak/survival/ladder (zodat herladen hem niet kost) en de laatst gekozen instellingen per modus |
 
 Een solve ziet er zo uit:
 
@@ -340,9 +357,16 @@ uit `lib/`.
 | `follows/toggle.php` | POST | Iemand volgen of ontvolgen |
 | `follows/list.php` | GET | Wie je volgt, wie jou volgt, wie je vrienden zijn |
 | `tournament/state.php` | GET | Lopend toernooi, keuzes, historie en samenvatting |
-| `tournament/start.php` | POST | Een toernooi beginnen |
+| `tournament/start.php` | POST | Een toernooi beginnen: `difficulty` voor gesimuleerd, `competitionId` voor een historische comp |
+| `tournament/wca-search.php` | GET | Afgelopen WCA-comps zoeken (`?q=`), zonder zoekterm de bekende kampioenschappen |
+| `tournament/wca-competition.php` | GET | Welke events er op een comp stonden, met rondes en deelnemers |
 | `tournament/solve.php` | POST | Een solve in het lopende toernooi |
 | `tournament/abandon.php` | POST | Stoppen met het lopende toernooi |
+| `games/overview.php` | GET | Spelregels, en ingelogd ook je records, laatste rondes en duels |
+| `games/finish.php` | POST | Een afgelopen ronde; de server telt de score zelf na |
+| `duels/create.php` | POST | Een vriend uitdagen, met de scrambles uit je browser |
+| `duels/solve.php` | POST | Een poging in een duel |
+| `duels/decline.php` | POST | Afwijzen, of intrekken zolang de ander niet begonnen is |
 | `admin/flags.php` | GET/POST | Beoordeelwachtrij (alleen rol `admin`) |
 
 ### Rate limiting
@@ -350,7 +374,9 @@ uit `lib/`.
 `RateLimiter` werkt op bestanden in `storage_path`, niet op de database, zodat
 de bug-knop ook werkt op een installatie zonder database. Huidige limieten
 (per IP): registreren 5/uur, inloggen 15 per kwartier per IP en 8 per kwartier
-per account, meldingen 5/uur. Zonder schrijfbare map wordt er niet gelimiteerd.
+per account, meldingen 5/uur. Per account: toernooien starten 20/uur,
+spelmodusrondes 120/uur, duels aanmaken 30/uur, WCA-comps zoeken 40 en ophalen
+30 per tien minuten. Zonder schrijfbare map wordt er niet gelimiteerd.
 
 ---
 
@@ -494,6 +520,91 @@ nergens in een deelnemersveld terecht.
 
 De tijden van je tegenstanders worden pas berekend als jij je ronde af hebt, in
 `Tournaments::scoreRound()`. Vooruitkijken kan dus niet.
+
+**Beste plek per soort.** `Tournaments::summary()` geeft naast de totalen ook
+`perType` (per moeilijkheidsgraad, plus "Historische comp") en `competitions`
+(per historische comp en event, met de veldgrootte). Een derde plek bij de
+beginners is iets anders dan een derde plek op WK-niveau.
+
+### Historische comps (v2)
+
+Een toernooi met `source = 'wca'` is een echte, afgelopen WCA-competitie. Het
+veld zijn de echte deelnemers (`kind = 'wca'`, met hun `wca_id`), met hun echte
+pogingen. Er wordt niets gesimuleerd.
+
+- **De rondes** komen uit de uitslagen: per event de rondetypes op volgorde
+  (1/d, 2/e, 3/g, c/f; kwalificatie en B-finale doen niet mee). Het format per
+  ronde (`a` Ao5, `m` Mo3, `1`/`2`/`3` best of) staat in `tournament_rounds`,
+  net als het aantal pogingen, de cutoff (in hoeveel pogingen) en of de
+  tijdslimiet cumulatief is. Cutoff en limiet komen uit de WCIF; oude comps
+  hebben die vaak niet, en dan speel je zonder.
+- **Rangschikken** gaat via `Ranking` (ook gebruikt door de duels): met
+  gemiddelde eerst op gemiddelde en dan op single, bij best of alleen de single.
+  Voor de echte deelnemers gebruiken we het gemiddelde en de single van de WCA
+  zelf; bij gelijke uitslag komt de speler achter de echte cuber.
+- **Doorgaan**: je gaat door als je plek binnen het aantal valt dat in het echt
+  in de volgende ronde stond. De volgende ronde is dan de echte ronde plus jij;
+  wie er door jouw komst eigenlijk uit had gemoeten, laten we staan.
+- **Cutoff** is op een echte comp strikt ("onder"); de gesimuleerde toernooien
+  rekenden altijd met "gelijk mag" en dat blijft zo.
+- **Cumulatieve limiet**: de som van je pogingen (een DNF telt met zijn tijd).
+  Is hij op, dan is die poging een DNF en de rest DNS.
+- **Scrambles**: kent de WCA ze, dan krijg je de echte scrambles van groep A
+  via `setScrambleOverride()`. Anders gewone scrambles.
+- **Waar de gegevens vandaan komen**: `lib/Wca.php` haalt bij de WCA-API
+  (`/competitions/{id}`, `/results`, `/wcif/public`, `/scrambles`) en bewaart het
+  verwerkte resultaat 30 dagen in `wca_cache`, zoekresultaten een dag. Is de WCA
+  onbereikbaar, dan gebruikt hij een verlopen kopie. Bij de start gaat alles
+  wat het toernooi nodig heeft in `tournaments.wca_snapshot`, zodat een lopend
+  toernooi nooit meer afhangt van de WCA of de cache.
+- **Bronvermelding**: de WCA vraagt erom; `Wca::attribution()` staat bij elk
+  historisch toernooi in beeld.
+- **Testen** zonder WCA: `tools/wca-voorbeeld/` bevat antwoorden in de vorm van
+  de echte API, `tools/nep-wca-server.php` serveert ze, en met
+  `'wca' => ['base_url' => 'http://127.0.0.1:8124/api/v0']` in je lokale config
+  praat de site ermee. `php tools/spelmodi-en-wca-testen.php` toetst de
+  omzetting los.
+
+## Spelmodi en duels
+
+Vijf modi in één venster (`games.js`). Records staan op je account en je
+profiel; er is **bewust geen ranglijst**.
+
+| Modus | Regel | Record per | Tiebreak |
+|---|---|---|---|
+| Streak | elke solve onder de doeltijd; de eerste erboven of een DNF stopt | event + doeltijd | gemiddelde van de geslaagde solves |
+| Survival | onder de limiet blijven; na elke geslaagde solve gaat er 0,5 s af (omgerekend per event met `speedFactor`) | event + startlimiet | idem |
+| Ladder | elke solve sneller dan de vorige; de eerste is gratis | event | de laatste (snelste) trede |
+| Speedrun | zoveel mogelijk cubes in vijf minuten, alles vooraf gescrambeld | event + aantal cubes | moment waarop de laatste cube klaar was |
+
+**De browser speelt, de server telt na.** Streak, survival en ladder lopen via
+de gewone timer met `setSolveCapture(handler, 'spelmodus')`; de solves komen
+dus niet in je sessie. Aan het eind stuurt de browser de solves (of bij de
+speedrun de rondetijden) naar `games/finish.php`, en `GameModes::evaluate()`
+rekent de score zelf uit. Wat na de breuk komt, wordt niet bewaard. Een tijd
+onder het wereldrecord maakt de hele ronde ongeldig. Zonder account kun je
+gewoon spelen; je ziet je score, maar er wordt niets bewaard.
+
+**De speedrun** heeft een eigen klok in het venster: de spatiebalk (of de grote
+knop) markeert een cube als klaar. De server controleert alleen of het kan (elke
+cube minstens het wereldrecord, niets na vijf minuten); een klok in de browser
+is niet te bewijzen. Daarom ook geen ranglijst.
+
+**Er kan maar één ding de solves opvangen.** `getSolveCaptureOwner()` zegt wie:
+`'toernooi'` of `'spelmodus'`. Een spelmodus start niet als er een toernooi
+loopt, en een toernooi niet als er een spelmodus loopt. `UI.closeModal()` haalt
+de focus van een knop in het venster af; anders negeert de timer de spatiebalk
+omdat die op een verborgen knop lijkt te vallen.
+
+**Duels** (`lib/Duels.php`) zijn alleen tussen vrienden. De uitdager kiest een
+event; zijn browser maakt de scrambles met `window.generateScrambles()` en de
+server controleert ze (zelfde controle als de scramble van de dag, waar het
+event die heeft). Het format volgt een comp: Ao5, Mo3 voor 6x6 en 7x7, best of
+3 bij blind. Elke poging wordt meteen opgeslagen, dus opnieuw proberen kan niet.
+Je ziet alleen de volgende scramble, en de tijden van de ander pas als jullie
+allebei klaar zijn. Na zeven dagen vervalt een duel (`Duels::expire()`, bij elk
+verzoek, zonder cronjob); wie dan wel klaar was, wint. Duelsolves tellen nergens
+voor mee: geen records, ranglijsten of XP.
 
 ## Volgen en vrienden
 
@@ -824,6 +935,23 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
 ---
 
 ## Bekende punten voor later
+
+- **De historische toernooien zijn niet getest tegen de echte WCA-API.** Die was
+  vanuit de ontwikkelomgeving niet bereikbaar. Alles is gebouwd op de
+  gedocumenteerde vorm en getest met `tools/wca-voorbeeld/`. Controleer na de
+  deploy: kies een comp in het toernooivenster, en kijk bij problemen in de
+  PHP-errorlog naar regels die met `[cubetimer] WCA` beginnen. Het zou kunnen
+  dat `/competitions/{id}/scrambles` niet bestaat; dan speel je met gewone
+  scrambles en werkt de rest gewoon.
+- De bekende kampioenschappen in het WCA-keuzescherm staan vast in
+  `Wca::FEATURED`. Een nieuw WK erbij is een regel.
+- Een WK heeft duizenden uitslagen. Het eerste ophalen kan daardoor een paar
+  seconden duren en een paar tientallen MB geheugen kosten; daarna komt het uit
+  de cache.
+- Spelmodi en duels leveren nog geen XP of achievements op. Dat kan via
+  `buildMetrics()` in `Achievements`, met `game_runs` als bron.
+- Solves uit een spelmodus komen niet in je sessie (net als bij toernooien).
+  Wil je ze wel in je statistieken, dan kan de capture-handler ze ook doorgeven.
 
 - Wachtwoord vergeten: de tabel `password_resets` staat er al, de e-mailflow
   nog niet.

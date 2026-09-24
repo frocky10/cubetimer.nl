@@ -11,6 +11,13 @@
  *
  * Alle uitslagen komen van de server. De tijden van je tegenstanders worden
  * pas berekend als jij je ronde af hebt, dus vooruitkijken kan niet.
+ *
+ * Twee soorten toernooi:
+ *   Gesimuleerd       bots en gesimuleerde gebruikers op een moeilijkheidsgraad
+ *   Historische comp  een echte, afgelopen WCA-competitie: de echte deelnemers
+ *                     met hun echte tijden, en de rondes met het echte format,
+ *                     de echte cutoff en limiet en (als de WCA ze kent) de
+ *                     echte scrambles. Zo zie je waar je daar was geëindigd.
  */
 (function () {
     'use strict';
@@ -36,6 +43,10 @@
     let data = null;
     let laden = false;
     let bezigMetInsturen = false;
+    let wcaBeschikbaar = false;
+    let startTab = 'sim';
+    let wca = { query: '', results: null, featured: true, zoeken: false, comp: null, compLaden: null, fout: null };
+    let eigenScramble = false;
 
     /* =====================================================================
      * Ophalen
@@ -95,6 +106,7 @@
 
     /** De tijd van een poging, met de straf erin verwerkt. */
     function pogingLabel(poging) {
+        if (poging && poging.penalty === 'dns') return 'DNS';
         if (!poging || poging.penalty === 'dnf' || poging.ms === null) return 'DNF';
         const basis = UI.formatTime(poging.ms + (poging.penalty === 'plus2' ? 2000 : 0));
         return poging.penalty === 'plus2' ? basis + '+' : basis;
@@ -115,7 +127,9 @@
         }
 
         if (data.tournament && data.tournament.status === 'active') {
-            subtitle.textContent = 'Vijf solves per ronde. Alleen de besten gaan door.';
+            subtitle.textContent = data.tournament.competition
+                ? 'De echte rondes, tegen de echte tijden van toen. Alleen de besten gaan door.'
+                : 'Vijf solves per ronde. Alleen de besten gaan door.';
             body.appendChild(renderActief(data.tournament));
             body.appendChild(renderStanden(data.tournament));
             return;
@@ -127,7 +141,9 @@
             return;
         }
 
-        subtitle.textContent = 'Vijf solves per ronde, cutoff en tijdslimiet, net als op een echte comp.';
+        subtitle.textContent = startTab === 'wca'
+            ? 'Speel een echte comp na, tegen de echte tijden van toen.'
+            : 'Vijf solves per ronde, cutoff en tijdslimiet, net als op een echte comp.';
         body.appendChild(renderStart());
         if (data.history.length) body.appendChild(renderHistorie());
     }
@@ -154,6 +170,33 @@
                 grid.appendChild(tegel);
             });
             wrap.appendChild(grid);
+            wrap.appendChild(renderPerSoort(s));
+        }
+
+        if (wcaBeschikbaar) {
+            const tabs = document.createElement('div');
+            tabs.className = 'segmented';
+            tabs.setAttribute('role', 'tablist');
+            [['sim', 'Gesimuleerd'], ['wca', 'Historische comp']].forEach(([id, label]) => {
+                const tab = document.createElement('button');
+                tab.type = 'button';
+                tab.className = 'segmented__item' + (startTab === id ? ' is-active' : '');
+                tab.setAttribute('role', 'tab');
+                tab.setAttribute('aria-selected', String(startTab === id));
+                tab.textContent = label;
+                tab.addEventListener('click', () => {
+                    startTab = id;
+                    render();
+                    if (id === 'wca' && wca.results === null) zoekWca('');
+                });
+                tabs.appendChild(tab);
+            });
+            wrap.appendChild(tabs);
+        }
+
+        if (startTab === 'wca' && wcaBeschikbaar) {
+            wrap.appendChild(renderWca());
+            return wrap;
         }
 
         const rij = document.createElement('div');
@@ -218,6 +261,241 @@
         return wrap;
     }
 
+    /** Beste plek per soort toernooi, en per historische comp. */
+    function renderPerSoort(s) {
+        const host = document.createElement('div');
+        host.className = 'tournament-types';
+
+        const soorten = s.perType || [];
+        if (soorten.length) {
+            host.appendChild(kleineTabel('Per soort toernooi', ['Soort', 'Gespeeld', 'Podiums', 'Beste plek'],
+                soorten.map(soort => [
+                    soort.label, String(soort.played), String(soort.podiums),
+                    soort.bestPosition ? soort.bestPosition + 'e' : '--'
+                ])));
+        }
+
+        const comps = s.competitions || [];
+        if (comps.length) {
+            host.appendChild(kleineTabel('Historische comps', ['Comp', 'Event', 'Beste plek'],
+                comps.map(comp => [
+                    comp.name || comp.competitionId, comp.eventLabel,
+                    comp.bestPosition ? `${comp.bestPosition}e van ${comp.fieldSize}` : '--'
+                ])));
+        }
+        return host;
+    }
+
+    function kleineTabel(kopTekst, koppen, rijen) {
+        const groep = document.createElement('section');
+        groep.className = 'achievement-group';
+        const kop = document.createElement('h3');
+        kop.className = 'achievement-group__name';
+        kop.textContent = kopTekst;
+        groep.appendChild(kop);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'board-wrap';
+        const tabel = document.createElement('table');
+        tabel.className = 'board-table board-table--compact';
+        const thead = document.createElement('thead');
+        const kopRij = document.createElement('tr');
+        koppen.forEach(tekst => {
+            const th = document.createElement('th');
+            th.textContent = tekst;
+            kopRij.appendChild(th);
+        });
+        thead.appendChild(kopRij);
+        tabel.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        rijen.forEach(cellen => {
+            const rij = document.createElement('tr');
+            cellen.forEach((tekst, index) => {
+                const td = document.createElement('td');
+                if (index === cellen.length - 1) td.className = 'board-time';
+                td.textContent = tekst;
+                rij.appendChild(td);
+            });
+            tbody.appendChild(rij);
+        });
+        tabel.appendChild(tbody);
+        wrap.appendChild(tabel);
+        groep.appendChild(wrap);
+        return groep;
+    }
+
+    /* --- Historische comp kiezen ---------------------------------------- */
+
+    function renderWca() {
+        const wrap = document.createElement('div');
+        wrap.className = 'wca-picker';
+
+        if (wca.comp) {
+            wrap.appendChild(renderWcaComp(wca.comp));
+            return wrap;
+        }
+
+        const formulier = document.createElement('form');
+        formulier.className = 'wca-search';
+        const invoer = document.createElement('input');
+        invoer.className = 'input';
+        invoer.type = 'search';
+        invoer.id = 'wca-search-input';
+        invoer.placeholder = 'Zoek een comp, bijvoorbeeld "Dutch" of "Euro"';
+        invoer.value = wca.query;
+        invoer.setAttribute('aria-label', 'Zoek een WCA-competitie');
+        const knop = document.createElement('button');
+        knop.className = 'btn btn--primary';
+        knop.type = 'submit';
+        knop.textContent = wca.zoeken ? 'Zoeken…' : 'Zoeken';
+        knop.disabled = wca.zoeken;
+        formulier.appendChild(invoer);
+        formulier.appendChild(knop);
+        formulier.addEventListener('submit', event => {
+            event.preventDefault();
+            zoekWca(invoer.value.trim());
+        });
+        wrap.appendChild(formulier);
+
+        if (wca.fout) {
+            const fout = document.createElement('p');
+            fout.className = 'notice';
+            fout.textContent = wca.fout;
+            wrap.appendChild(fout);
+        }
+
+        if (wca.results !== null) {
+            const kop = document.createElement('p');
+            kop.className = 'field__label';
+            kop.textContent = wca.featured ? 'Kampioenschappen' : (wca.results.length ? 'Gevonden' : 'Niets gevonden');
+            wrap.appendChild(kop);
+
+            const lijst = document.createElement('div');
+            lijst.className = 'wca-list';
+            wca.results.forEach(comp => {
+                const kaart = document.createElement('button');
+                kaart.type = 'button';
+                kaart.className = 'wca-comp';
+                kaart.disabled = wca.compLaden !== null;
+
+                const naam = document.createElement('span');
+                naam.className = 'wca-comp__name';
+                naam.textContent = comp.name;
+                const meta = document.createElement('span');
+                meta.className = 'wca-comp__meta';
+                meta.textContent = wca.compLaden === comp.id
+                    ? 'Uitslagen ophalen bij de WCA…'
+                    : [comp.city, comp.country ? UI.countryName(comp.country) : '', (comp.startDate || '').slice(0, 10)]
+                        .filter(Boolean).join(' · ');
+                kaart.appendChild(naam);
+                kaart.appendChild(meta);
+                kaart.addEventListener('click', () => kiesWca(comp.id));
+                lijst.appendChild(kaart);
+            });
+            wrap.appendChild(lijst);
+        }
+
+        const uitleg = document.createElement('p');
+        uitleg.className = 'notice';
+        uitleg.textContent = 'Je speelt de rondes van een echte comp, met het echte format, de echte cutoff en tijdslimiet, '
+            + 'tegen de echte tijden van toen. Eindig je hoog genoeg om bij het aantal te horen dat in het echt doorging, '
+            + 'dan ga jij ook door. Zo zie je waar je op die comp was geëindigd.';
+        wrap.appendChild(uitleg);
+        return wrap;
+    }
+
+    function renderWcaComp(comp) {
+        const wrap = document.createElement('div');
+        wrap.className = 'tournament-start';
+
+        const kop = document.createElement('div');
+        kop.className = 'tournament-header';
+        kop.innerHTML = '<div><p class="tournament-header__title"></p><p class="tournament-header__sub"></p></div>';
+        kop.querySelector('.tournament-header__title').textContent = comp.name;
+        kop.querySelector('.tournament-header__sub').textContent =
+            [comp.city, comp.country ? UI.countryName(comp.country) : '', comp.startDate].filter(Boolean).join(' · ');
+        const terug = document.createElement('button');
+        terug.className = 'btn btn--sm';
+        terug.type = 'button';
+        terug.textContent = 'Andere comp';
+        terug.addEventListener('click', () => {
+            wca.comp = null;
+            render();
+        });
+        kop.appendChild(terug);
+        wrap.appendChild(kop);
+
+        const label = document.createElement('p');
+        label.className = 'field__label';
+        label.textContent = 'Kies een event';
+        wrap.appendChild(label);
+
+        const kaarten = document.createElement('div');
+        kaarten.className = 'difficulty-grid';
+        comp.events.forEach(event => {
+            const kaart = document.createElement('button');
+            kaart.className = 'difficulty-card';
+            kaart.type = 'button';
+
+            const naam = document.createElement('span');
+            naam.className = 'difficulty-card__name';
+            naam.textContent = event.label;
+            const omschrijving = document.createElement('span');
+            omschrijving.className = 'difficulty-card__description';
+            omschrijving.textContent = `${event.competitors} deelnemers · ${event.rounds} ${event.rounds === 1 ? 'ronde' : 'rondes'} · ${event.format}`
+                + (event.winner ? `. Gewonnen door ${event.winner.name}` + (event.winner.resultMs ? ` met ${UI.formatTime(event.winner.resultMs)}` : '') + '.' : '');
+            const meta = document.createElement('span');
+            meta.className = 'difficulty-card__meta';
+            meta.textContent = event.officialScrambles ? 'Met de echte scrambles' : 'Met nieuwe scrambles';
+
+            kaart.appendChild(naam);
+            kaart.appendChild(omschrijving);
+            kaart.appendChild(meta);
+            kaart.addEventListener('click', () => start(event.id, null, kaart, comp.id));
+            kaarten.appendChild(kaart);
+        });
+        wrap.appendChild(kaarten);
+
+        const bron = document.createElement('p');
+        bron.className = 'field__hint';
+        bron.textContent = comp.attribution;
+        wrap.appendChild(bron);
+        return wrap;
+    }
+
+    async function zoekWca(query) {
+        wca.query = query;
+        wca.zoeken = true;
+        wca.fout = null;
+        render();
+        try {
+            const antwoord = await UI.api('tournament/wca-search.php' + (query ? '?q=' + encodeURIComponent(query) : ''));
+            wca.results = antwoord.competitions;
+            wca.featured = antwoord.featured;
+        } catch (err) {
+            wca.fout = err.message || 'Zoeken is niet gelukt.';
+        } finally {
+            wca.zoeken = false;
+            if (startTab === 'wca') render();
+        }
+    }
+
+    async function kiesWca(id) {
+        wca.compLaden = id;
+        wca.fout = null;
+        render();
+        try {
+            const antwoord = await UI.api('tournament/wca-competition.php?id=' + encodeURIComponent(id));
+            wca.comp = antwoord.competition;
+        } catch (err) {
+            wca.fout = err.message || 'Deze comp kon niet opgehaald worden.';
+        } finally {
+            wca.compLaden = null;
+            if (startTab === 'wca') render();
+        }
+    }
+
     function renderHistorie() {
         const groep = document.createElement('section');
         groep.className = 'achievement-group';
@@ -241,7 +519,7 @@
             plek.textContent = item.position === null ? '--' : item.position + 'e';
 
             const wat = document.createElement('td');
-            wat.textContent = `${item.eventLabel} · ${item.difficultyLabel}`
+            wat.textContent = `${item.eventLabel} · ${item.competitionName || item.difficultyLabel}`
                 + (item.status === 'abandoned' ? ' (gestopt)' : ` · veld van ${item.fieldSize}`);
 
             const resultaat = document.createElement('td');
@@ -271,7 +549,7 @@
         kop.innerHTML = '<div><p class="tournament-header__title"></p>'
                       + '<p class="tournament-header__sub"></p></div>';
         kop.querySelector('.tournament-header__title').textContent =
-            `${toernooi.eventLabel} · ${toernooi.difficultyLabel}`;
+            `${toernooi.eventLabel} · ${toernooi.competition ? toernooi.competition.name : toernooi.difficultyLabel}`;
         kop.querySelector('.tournament-header__sub').textContent =
             `Veld van ${toernooi.fieldSize} · ronde ${toernooi.currentRound} van ${toernooi.totalRounds}`;
 
@@ -289,12 +567,14 @@
         const rondeKop = document.createElement('p');
         rondeKop.className = 'tournament-round__name';
         rondeKop.textContent = `${ronde.name} — ${ronde.entrants} deelnemers`
-            + (ronde.advancing > 0 ? `, ${ronde.advancing} gaan door` : ', dit is de finale');
+            + (ronde.advancing > 0 ? `, ${ronde.advancing} gaan door` : ', dit is de finale')
+            + (ronde.formatLabel && ronde.formatLabel !== 'Ao5' ? ` · ${ronde.formatLabel}` : '');
         wrap.appendChild(rondeKop);
 
         // De vijf pogingen
         const pogingen = document.createElement('div');
         pogingen.className = 'attempt-row';
+        pogingen.style.setProperty('--attempts', String(ronde.attemptsTotal));
         for (let i = 0; i < ronde.attemptsTotal; i++) {
             const solve = ronde.solves[i];
             const vak = document.createElement('div');
@@ -316,10 +596,17 @@
         regels.className = 'field__hint';
         const delen = [];
         if (ronde.cutoffMs) {
-            delen.push(`Cutoff ${UI.formatTime(ronde.cutoffMs)}: haal je die niet in twee solves, dan stopt je ronde daar.`);
+            const binnen = ronde.cutoffAttempts === 1 ? 'je eerste solve' : `${ronde.cutoffAttempts || 2} solves`;
+            delen.push(`Cutoff ${UI.formatTime(ronde.cutoffMs)}: haal je die niet in ${binnen}, dan stopt je ronde daar.`);
         }
-        if (ronde.timeLimitMs) {
+        if (ronde.timeLimitMs && ronde.limitCumulative) {
+            const over = Math.max(0, ronde.timeLimitMs - (ronde.limitUsedMs || 0));
+            delen.push(`Tijdslimiet ${UI.formatTime(ronde.timeLimitMs)} voor alle pogingen samen; je hebt nog ${UI.formatTime(over)}.`);
+        } else if (ronde.timeLimitMs) {
             delen.push(`Tijdslimiet ${UI.formatTime(ronde.timeLimitMs)}: daarboven is het een DNF.`);
+        }
+        if (ronde.scramble) {
+            delen.push('Je krijgt de echte scrambles van deze ronde.');
         }
         regels.textContent = delen.join(' ');
         wrap.appendChild(regels);
@@ -350,6 +637,10 @@
         tekst.className = 'tournament-result__text';
         if (toernooi.status === 'abandoned') {
             tekst.textContent = 'Je bent met dit toernooi gestopt.';
+        } else if (toernooi.competition) {
+            tekst.textContent = toernooi.finalPosition === 1
+                ? `Je had ${toernooi.competition.name} gewonnen!`
+                : `Op ${toernooi.competition.name} was je ${toernooi.finalPosition}e geworden van ${toernooi.fieldSize}.`;
         } else if (toernooi.finalPosition === 1) {
             tekst.textContent = `Gewonnen! Eerste van ${toernooi.fieldSize} op ${toernooi.difficultyLabel}.`;
         } else if (toernooi.finalPosition <= 3) {
@@ -366,6 +657,13 @@
             gemiddelde.className = 'field__hint';
             gemiddelde.textContent = `Je gemiddelde in de laatste ronde: ${UI.formatTime(toernooi.finalAo5Ms)}`;
             wrap.appendChild(gemiddelde);
+        }
+
+        if (toernooi.competition) {
+            const bron = document.createElement('p');
+            bron.className = 'field__hint';
+            bron.textContent = toernooi.competition.attribution;
+            wrap.appendChild(bron);
         }
 
         const opnieuw = document.createElement('button');
@@ -402,8 +700,11 @@
             const tabel = document.createElement('table');
             tabel.className = 'board-table';
 
+            // Bij best of telt alleen de single; dan is er geen kolom voor een gemiddelde.
+            const metGemiddelde = !ronde.format || ronde.format === 'a' || ronde.format === 'm';
             const thead = document.createElement('thead');
-            thead.innerHTML = '<tr><th>#</th><th>Cuber</th><th>Ao5</th><th>Beste</th></tr>';
+            thead.innerHTML = '<tr><th>#</th><th>Cuber</th>' + (metGemiddelde ? '<th></th>' : '') + '<th>Beste</th></tr>';
+            if (metGemiddelde) thead.querySelectorAll('th')[2].textContent = ronde.formatLabel || 'Ao5';
             tabel.appendChild(thead);
 
             const tbody = document.createElement('tbody');
@@ -419,9 +720,15 @@
                 const naam = document.createElement('td');
                 const wrapNaam = document.createElement('div');
                 wrapNaam.className = 'board-cuber';
-                const tekst = document.createElement('span');
+                const tekst = document.createElement(resultaat.wcaId ? 'a' : 'span');
                 tekst.className = 'board-cuber__name';
                 tekst.textContent = resultaat.name;
+                if (resultaat.wcaId) {
+                    tekst.href = 'https://www.worldcubeassociation.org/persons/' + encodeURIComponent(resultaat.wcaId);
+                    tekst.target = '_blank';
+                    tekst.rel = 'noopener noreferrer';
+                    tekst.title = 'WCA-profiel van ' + resultaat.name;
+                }
                 wrapNaam.appendChild(tekst);
 
                 if (resultaat.kind === 'user') {
@@ -451,7 +758,7 @@
 
                 rij.appendChild(plek);
                 rij.appendChild(naam);
-                rij.appendChild(gemiddelde);
+                if (metGemiddelde) rij.appendChild(gemiddelde);
                 rij.appendChild(beste);
                 tbody.appendChild(rij);
             });
@@ -469,10 +776,15 @@
      * Acties
      * ================================================================== */
 
-    async function start(event, difficulty, knop) {
+    async function start(event, difficulty, knop, competitionId) {
+        if (window.CubeTimerGames?.isRunning?.()) {
+            UI.toast('Maak eerst je spelmodus of duel af.', { type: 'warning' });
+            return;
+        }
         knop.disabled = true;
         try {
-            const response = await UI.api('tournament/start.php', { body: { event, difficulty } });
+            const verzoek = competitionId ? { event, competitionId } : { event, difficulty };
+            const response = await UI.api('tournament/start.php', { body: verzoek });
             data.tournament = response.tournament;
 
             // De scrambles moeten bij het juiste event horen.
@@ -523,6 +835,20 @@
      * ================================================================== */
 
     function startCapture() {
+        // Loopt er een spelmodus, dan wacht het toernooi tot die klaar is.
+        if (api.getSolveCaptureOwner?.() === 'spelmodus') return;
+
+        // De echte scramble van deze poging, bij een historische comp.
+        const scramble = data?.tournament?.round?.scramble || null;
+        if (scramble) {
+            window.CubeTimerChallenges?.stopChallenge?.();
+            api.setScrambleOverride(scramble);
+            eigenScramble = true;
+        } else if (eigenScramble) {
+            api.setScrambleOverride(null);
+            eigenScramble = false;
+        }
+
         api.setSolveCapture(async entry => {
             if (bezigMetInsturen) return;
             bezigMetInsturen = true;
@@ -538,6 +864,9 @@
                 });
 
                 data.tournament = response.tournament;
+                // Meteen de volgende echte scramble klaarzetten.
+                const volgende = response.tournament?.round?.scramble;
+                if (volgende && eigenScramble) api.setScrambleOverride(volgende);
 
                 if (response.roundScored) {
                     stopCapture();
@@ -559,11 +888,15 @@
             } finally {
                 bezigMetInsturen = false;
             }
-        });
+        }, 'toernooi');
     }
 
     function stopCapture() {
-        api.setSolveCapture(null);
+        if (api.getSolveCaptureOwner?.() === 'toernooi') api.setSolveCapture(null);
+        if (eigenScramble) {
+            api.setScrambleOverride(null);
+            eigenScramble = false;
+        }
     }
 
     /** Toont of verbergt de balk boven de timer. */
@@ -619,8 +952,13 @@
             return;
         }
         openButton.hidden = false;
+        wcaBeschikbaar = status.features?.wcaTournaments === true;
         if (status.authenticated) load(false);
     });
 
-    window.CubeTimerTournament = { load, stopCapture };
+    window.CubeTimerTournament = {
+        load,
+        stopCapture,
+        isActive: () => Boolean(data && data.tournament && data.tournament.status === 'active')
+    };
 })();

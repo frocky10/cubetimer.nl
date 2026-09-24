@@ -46,6 +46,23 @@ async function generateScramble(eventType) {
 
 window.generateScramble = generateScramble;
 
+/**
+ * Meerdere scrambles tegelijk, zonder het scramblevak aan te raken. Voor de
+ * speedrun (alle cubes vooraf scramblen) en voor een duel (dezelfde scrambles
+ * voor allebei).
+ */
+async function generateScrambles(eventType, aantal) {
+    const lijst = [];
+    for (let i = 0; i < aantal; i++) {
+        const scramble = await randomScrambleForEvent(eventType);
+        lijst.push(typeof scramble === "string" ? scramble : scramble?.toString?.() || "");
+    }
+    return lijst;
+}
+
+window.generateScrambles = generateScrambles;
+window.dispatchEvent(new Event("cubetimer:scrambler-ready"));
+
 const initialEvent = window.pendingScrambleEvent || "333";
 generateScramble(initialEvent);
 window.pendingScrambleEvent = null;

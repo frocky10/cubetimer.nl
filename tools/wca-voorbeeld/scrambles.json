@@ -1,0 +1,162 @@
+[
+ {
+  "id": 1,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "B",
+  "is_extra": false,
+  "scramble_num": 1,
+  "scramble": "L' D' L R F R2 F L2 R' D R' B' L2 F B2 U' B' D' L D2"
+ },
+ {
+  "id": 2,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "B",
+  "is_extra": false,
+  "scramble_num": 2,
+  "scramble": "D R F' R D2 U R2 F2 U' B U B' R2 D' B' D U' L' D' U"
+ },
+ {
+  "id": 3,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "B",
+  "is_extra": false,
+  "scramble_num": 3,
+  "scramble": "U2 D2 F' R2 U B' R2 B L' U2 D2 F D B2 L' R2 F L2 R B'"
+ },
+ {
+  "id": 4,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "B",
+  "is_extra": false,
+  "scramble_num": 4,
+  "scramble": "F2 U D' F B' D2 F' U R L F L2 B D2 F2 U2 R' F' R' D"
+ },
+ {
+  "id": 5,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "B",
+  "is_extra": false,
+  "scramble_num": 5,
+  "scramble": "B' D' U2 F R F2 L2 R2 B' F B2 R U2 R2 F' R U' F' B L'"
+ },
+ {
+  "id": 6,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 1,
+  "scramble": "F2 L U2 D' B2 D2 R2 F2 B D B R F' B2 U2 R' B2 L' U2 R"
+ },
+ {
+  "id": 7,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 2,
+  "scramble": "R' U B' L U' D2 B2 L F' B2 D2 R2 B' L D L D' F R' U"
+ },
+ {
+  "id": 8,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 3,
+  "scramble": "B' U D F L U' L R L2 D' L F' U2 D F2 L' U' D2 B' L"
+ },
+ {
+  "id": 9,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 4,
+  "scramble": "U R D' U D L2 F' R2 B2 D2 F D R' U' R2 U' R2 F D L"
+ },
+ {
+  "id": 10,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 5,
+  "scramble": "F2 L' B U2 F R' U F' D2 R' L2 R' D F U B2 R2 L D L2"
+ },
+ {
+  "id": 11,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "1",
+  "group_id": "A",
+  "is_extra": true,
+  "scramble_num": 1,
+  "scramble": "D2 L2 F2 R D R' D R U2 D' R U2 L2 F2 R2 D L R' L F'"
+ },
+ {
+  "id": 12,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "f",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 1,
+  "scramble": "F2 D U' F' R D' U' D2 R B U' R L2 U' R' D2 R B2 R2 B'"
+ },
+ {
+  "id": 13,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "f",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 2,
+  "scramble": "F2 L F2 B2 R B2 D2 B L2 B L2 R U F2 D L' B U2 B2 R'"
+ },
+ {
+  "id": 14,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "f",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 3,
+  "scramble": "F L B2 U2 B D' U' F2 R L' D L2 F B2 R B F' D2 B U'"
+ },
+ {
+  "id": 15,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "f",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 4,
+  "scramble": "U' D2 U2 F2 L' B' D' L B F L F' U2 L' D R B R2 B' F"
+ },
+ {
+  "id": 16,
+  "competition_id": "NepOpen2024",
+  "event_id": "333",
+  "round_type_id": "f",
+  "group_id": "A",
+  "is_extra": false,
+  "scramble_num": 5,
+  "scramble": "L2 B' U2 D L' D R L2 D' F2 R' D' F D F' L R2 U2 D' F"
+ }
+]
