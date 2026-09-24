@@ -31,6 +31,7 @@ database/<nummer>_<wat_het_doet>.sql
 | 006    | `006_toernooien_en_volgen.sql` | `user_follows`, plus de zes toernooitabellen |
 | 007    | `007_losse_tijden_en_algoritmes.sql` | `solves.timer_session_id` mag leeg zijn (losse tijden), sleutel naar `ON DELETE SET NULL`, en `user_algorithms` |
 | 008    | `008_smartcube_analyse.sql` | `solves.details`: analyse van een smart-cubesolve (JSON, door de server gecontroleerd) |
+| 009    | `009_spelmodi_duels_en_wca.sql` | `game_runs`, `duels`, `duel_attempts`, `wca_cache`, plus kolommen voor historische WCA-toernooien op `tournaments`, `tournament_rounds` en `tournament_competitors` |
 
 ## Eenmalige setup in DirectAdmin
 
@@ -43,12 +44,12 @@ database/<nummer>_<wat_het_doet>.sql
    zijn. Staat er nog `latin1`, pas dat dan aan in phpMyAdmin → *Operations*.
 3. **Migraties importeren** — phpMyAdmin → kies de database → tabblad
    *Importeren* → `001_initial_schema.sql` kiezen → *Start*. Daarna hetzelfde
-   voor `002` tot en met `006`, in die volgorde.
+   voor `002` tot en met `009`, in die volgorde.
 4. **Controleren** — draai in phpMyAdmin → *SQL*:
    ```sql
    SELECT * FROM schema_migrations ORDER BY version;
    ```
-   Je hoort nu rijen `001` tot en met `006` te zien.
+   Je hoort nu rijen `001` tot en met `009` te zien.
 5. **Configuratie invullen** — kopieer `public_html/api/config.example.php` naar
    `~/cubetimer_config.php` (dus één map **boven** `public_html`) en vul je
    database- en GitHub-gegevens in. Zie de sectie *Configuratie* hieronder.

@@ -270,6 +270,33 @@ $CATEGORIE_LABELS = [
                     </div>
                 </div>
 
+                <?php if (!empty($profiel['tournaments']['perType'])): ?>
+                <div class="board-wrap">
+                    <table class="board-table board-table--compact">
+                        <thead><tr><th>Soort</th><th>Gespeeld</th><th>Podiums</th><th>Beste plek</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($profiel['tournaments']['perType'] as $soort): ?>
+                            <tr>
+                                <td><?= e($soort['label']) ?></td>
+                                <td><?= (int) $soort['played'] ?></td>
+                                <td><?= (int) $soort['podiums'] ?></td>
+                                <td class="board-time"><?= $soort['bestPosition'] === null ? '--' : (int) $soort['bestPosition'] . 'e' ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <?php foreach ($profiel['tournaments']['competitions'] ?? [] as $comp): ?>
+                            <tr>
+                                <td><?= e(($comp['name'] ?? $comp['competitionId']) . ' · ' . $comp['eventLabel']) ?></td>
+                                <td><?= (int) $comp['played'] ?></td>
+                                <td></td>
+                                <td class="board-time"><?= $comp['bestPosition'] === null ? '--'
+                                    : (int) $comp['bestPosition'] . 'e van ' . (int) $comp['fieldSize'] ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+
                 <?php if ($profiel['tournaments']['events']): ?>
                 <div class="records-table">
                     <?php foreach ($profiel['tournaments']['events'] as $event): ?>
@@ -288,6 +315,52 @@ $CATEGORIE_LABELS = [
                     <?php endforeach; ?>
                 </div>
                 <p class="field__hint">Toernooitijden staan los van de records hierboven.</p>
+                <?php endif; ?>
+            </div>
+        </section>
+        <?php endif; ?>
+
+        <!-- Spelmodi: records per modus, en hoe de duels gingen. Geen ranglijst. -->
+        <?php
+        $duels = $profiel['games']['duels'];
+        $duelsGespeeld = $duels['won'] + $duels['lost'] + $duels['drawn'];
+        ?>
+        <?php if ($profiel['games']['records'] || $duelsGespeeld > 0): ?>
+        <section class="panel">
+            <div class="panel__head"><h2 class="panel__title">Spelmodi</h2></div>
+            <div class="panel__body">
+                <?php if ($duelsGespeeld > 0): ?>
+                <div class="stat-grid">
+                    <div class="stat stat--success">
+                        <span class="stat__label">Duels gewonnen</span>
+                        <span class="stat__value"><?= (int) $duels['won'] ?></span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat__label">Verloren</span>
+                        <span class="stat__value"><?= (int) $duels['lost'] ?></span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat__label">Gelijk</span>
+                        <span class="stat__value"><?= (int) $duels['drawn'] ?></span>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($profiel['games']['records']): ?>
+                <div class="board-wrap">
+                    <table class="board-table board-table--compact">
+                        <thead><tr><th>Modus</th><th>Event</th><th>Record</th></tr></thead>
+                        <tbody>
+                        <?php foreach ($profiel['games']['records'] as $record): ?>
+                            <tr>
+                                <td><?= e($record['modeLabel'] . ($record['variantLabel'] !== '' ? ' · ' . $record['variantLabel'] : '')) ?></td>
+                                <td><?= e($record['eventLabel']) ?></td>
+                                <td class="board-time"><?= e($record['scoreLabel']) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
                 <?php endif; ?>
             </div>
         </section>

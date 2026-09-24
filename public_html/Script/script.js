@@ -839,13 +839,18 @@ function registerDNF() {
 
 /**
  * Zolang dit gevuld is, gaan afgeronde solves hierheen in plaats van naar de
- * actieve sessie. Gebruikt door de toernooimodus: die staat helemaal los van
- * je sessies en houdt zijn eigen tijden bij.
+ * actieve sessie. Gebruikt door de toernooimodus en de spelmodi: die staan
+ * helemaal los van je sessies en houden hun eigen tijden bij.
+ *
+ * Er kan er maar een tegelijk vangen. `owner` zegt wie ('toernooi',
+ * 'spelmodus'), zodat de een de ander niet ongemerkt overschrijft.
  */
 let solveCapture = null;
+let solveCaptureOwner = null;
 
-function setSolveCapture(handler) {
+function setSolveCapture(handler, owner = null) {
     solveCapture = typeof handler === 'function' ? handler : null;
+    solveCaptureOwner = solveCapture ? owner : null;
 }
 
 function saveTime(ms, penalty = null, metadata = {}) {
@@ -1558,8 +1563,13 @@ window.cubeTimerApi = {
     /** Wisselt het event van de actieve sessie. */
     setActiveSessionEvent,
 
-    /** Stuurt afgeronde solves naar een andere plek dan de sessie (toernooimodus). */
+    /** Stuurt afgeronde solves naar een andere plek dan de sessie (toernooi, spelmodus). */
     setSolveCapture,
+    /** Wie de solves nu opvangt, of null. */
+    getSolveCaptureOwner: () => solveCaptureOwner,
+
+    /** Confetti, als de gebruiker dat aan heeft staan (een record in een spelmodus). */
+    triggerConfetti,
 
     /** Laat de laatste solve uit de actieve sessie weer verdwijnen. */
     removeLastSolve: deleteLastSolve,

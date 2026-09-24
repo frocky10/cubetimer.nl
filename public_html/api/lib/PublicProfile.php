@@ -94,7 +94,10 @@ final class PublicProfile
             'isSelf'     => $viewerId !== null && $viewerId === $userId,
             'tournaments' => Database::hasTable('tournaments')
                 ? Tournaments::summary($userId)
-                : ['played' => 0, 'won' => 0, 'podiums' => 0, 'bestPosition' => null, 'events' => []],
+                : ['played' => 0, 'won' => 0, 'podiums' => 0, 'bestPosition' => null, 'perType' => [], 'competitions' => [], 'events' => []],
+            'games' => Database::hasTable('game_runs')
+                ? ['records' => GameModes::records($userId), 'duels' => Duels::totals($userId)]
+                : ['records' => [], 'duels' => ['won' => 0, 'lost' => 0, 'drawn' => 0]],
         ];
     }
 

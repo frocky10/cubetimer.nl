@@ -6,6 +6,8 @@ require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/Averages.php';
 require_once __DIR__ . '/TournamentField.php';
 require_once __DIR__ . '/Xp.php';
+require_once __DIR__ . '/Ranking.php';
+require_once __DIR__ . '/Wca.php';
 
 /**
  * Toernooimodus: een simulatie van een echte WCA-competitie.
@@ -25,6 +27,18 @@ require_once __DIR__ . '/Xp.php';
  * `tournament_records`, met een eigen blok op je profiel. Een toernooitijd komt
  * onder heel andere omstandigheden tot stand en hoort niet door je
  * oefengemiddelden heen te lopen.
+ *
+ * Twee soorten (kolom `source`):
+ *   sim  Het veld bestaat uit bots en gesimuleerde gebruikers, op een
+ *        moeilijkheidsgraad naar keuze. De opzet hierboven.
+ *   wca  Een echte, afgelopen WCA-competitie. Het veld zijn de echte
+ *        deelnemers met hun echte tijden, en de rondes hebben het echte format
+ *        (Ao5, Mo3, best of), de echte cutoff en de echte tijdslimiet. Je gaat
+ *        door als je hoog genoeg eindigt om bij het aantal cubers te horen dat
+ *        in het echt doorging. Zo zie je waar je op die comp was geëindigd.
+ *        De gegevens komen uit lib/Wca.php en worden bij de start in
+ *        `wca_snapshot` vastgelegd, zodat een lopend toernooi niet afhangt van
+ *        de WCA of de cache.
  */
 final class Tournaments
 {
@@ -64,6 +78,17 @@ final class Tournaments
             'description' => 'Alles door elkaar, van beginner tot wereldtop, in een veld van 64. Dertigste worden hoort erbij.',
         ],
     ];
+
+    /** Het type van een historisch toernooi in de kolom `difficulty`. */
+    public const WCA_TYPE = 'wca';
+
+    public static function typeLabel(string $type): string
+    {
+        if ($type === self::WCA_TYPE) {
+            return 'Historische comp';
+        }
+        return self::DIFFICULTIES[$type]['label'] ?? $type;
+    }
 
     /** Rondeopzet: hoeveel er doorgaan naar de volgende ronde. */
     private const ROUND_NAMES = [1 => 'Kwalificatie', 2 => 'Halve finale', 3 => 'Finale'];
@@ -134,6 +159,115 @@ final class Tournaments
         }
 
         return ['ok' => true, 'tournament' => self::state($tournamentId, $userId)];
+    }
+
+    /**
+     * Een toernooi op een echte, afgelopen WCA-competitie.
+     *
+     * @return array{ok:bool,message?:string,tournament?:array<string,mixed>}
+     */
+    public static function startWca(int $userId, string $competitionId, string $event): array
+    {
+        if (!Wca::isReady()) {
+            return ['ok' => false, 'message' => 'Historische toernooien zijn op deze server niet beschikbaar.'];
+        }
+        if (self::activeId($userId) !== null) {
+            return ['ok' => false, 'message' => 'Je hebt al een toernooi lopen. Maak dat eerst af of stop ermee.'];
+        }
+
+        $ophalen = Wca::competition($competitionId);
+        if (!$ophalen['ok']) {
+            return ['ok' => false, 'message' => $ophalen['message']];
+        }
+        $comp = $ophalen['competition'];
+        $rondes = $comp['events'][$event]['rounds'] ?? null;
+        if (!is_array($rondes) || !$rondes) {
+            return ['ok' => false, 'message' => 'Dit event stond niet op deze comp.'];
+        }
+        $eersteRonde = $rondes[0]['results'];
+        if (count($eersteRonde) < 2) {
+            return ['ok' => false, 'message' => 'Er deden te weinig cubers mee aan dit event.'];
+        }
+
+        // Het niveau van het veld: de mediaan van de eerste ronde. Alleen voor
+        // de volledigheid; een echt veld hoeft niet gesimuleerd te worden.
+        $waardes = array_values(array_filter(array_map(
+            static fn (array $r): ?int => $r['a'] ?? $r['b'] ?? null, $eersteRonde
+        )));
+        sort($waardes);
+        $referentie = $waardes ? (int) $waardes[intdiv(count($waardes), 2)]
+            : (int) round(30000 * Events::speedFactor($event));
+
+        $momentopname = json_encode([
+            'competition' => [
+                'id' => $comp['id'], 'name' => $comp['name'], 'city' => $comp['city'],
+                'country' => $comp['country'], 'startDate' => $comp['startDate'],
+                'endDate' => $comp['endDate'], 'fetchedAt' => $comp['fetchedAt'],
+            ],
+            'rounds' => $rondes,
+        ], JSON_UNESCAPED_UNICODE);
+
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            Database::run(
+                'INSERT INTO tournaments
+                    (user_id, event, difficulty, source, wca_competition_id, wca_name, wca_snapshot,
+                     field_size, total_rounds, reference_ms)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [
+                    $userId, $event, self::WCA_TYPE, 'wca', $comp['id'], mb_substr((string) $comp['name'], 0, 128),
+                    $momentopname, count($eersteRonde) + 1, count($rondes), $referentie,
+                ]
+            );
+            $tournamentId = (int) $pdo->lastInsertId();
+
+            $insert = $pdo->prepare(
+                "INSERT INTO tournament_competitors
+                    (tournament_id, kind, name, country_code, wca_id, skill_ms, consistency, form)
+                 VALUES (?, 'wca', ?, ?, ?, ?, 0, 0)"
+            );
+            foreach ($eersteRonde as $r) {
+                $insert->execute([
+                    $tournamentId, $r['n'], $r['c'], $r['w'], (int) ($r['a'] ?? $r['b'] ?? $referentie),
+                ]);
+            }
+
+            self::createWcaRound($tournamentId, 1, $rondes);
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('[cubetimer] historisch toernooi starten mislukt: ' . $e->getMessage());
+            return ['ok' => false, 'message' => 'Het toernooi kon niet gestart worden.'];
+        }
+
+        return ['ok' => true, 'tournament' => self::state($tournamentId, $userId)];
+    }
+
+    /** Een ronde van een echte comp, met het echte format, de cutoff en de limiet. */
+    private static function createWcaRound(int $tournamentId, int $roundNumber, array $rondes): void
+    {
+        $ronde = $rondes[$roundNumber - 1];
+        $volgende = $rondes[$roundNumber] ?? null;
+
+        Database::run(
+            'INSERT INTO tournament_rounds
+                (tournament_id, round_number, name, entrants, advancing, format, attempts,
+                 cutoff_ms, cutoff_attempts, time_limit_ms, limit_cumulative)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [
+                $tournamentId, $roundNumber, $ronde['name'],
+                count($ronde['results']) + 1,
+                // In het echt gingen er zoveel door als er in de volgende ronde stonden.
+                $volgende === null ? 0 : count($volgende['results']),
+                $ronde['format'], (int) $ronde['attempts'],
+                $ronde['cutoff']['ms'] ?? null, (int) ($ronde['cutoff']['attempts'] ?? self::CUTOFF_ATTEMPTS),
+                $ronde['limit']['ms'] ?? null, !empty($ronde['limit']['cumulative']) ? 1 : 0,
+            ]
+        );
     }
 
     /**
@@ -222,8 +356,9 @@ final class Tournaments
             return ['ok' => false, 'message' => 'Er loopt geen ronde.'];
         }
 
+        $pogingen = self::attemptsOf($ronde);
         $gedaan = self::playerSolves($tournamentId, (int) $ronde['round_number']);
-        if (count($gedaan) >= self::ATTEMPTS_PER_ROUND) {
+        if (count($gedaan) >= $pogingen) {
             return ['ok' => false, 'message' => 'Deze ronde zit er al op.'];
         }
 
@@ -236,10 +371,20 @@ final class Tournaments
         }
 
         // Boven de tijdslimiet is een solve een DNF, net als op een echte comp.
+        // Bij een cumulatieve limiet (blind, 6x6 en 7x7 op veel comps) telt de
+        // som van alle pogingen, en is de ronde voorbij zodra die op is.
         $limiet = $ronde['time_limit_ms'] === null ? null : (int) $ronde['time_limit_ms'];
-        $effectief = self::effective($timeMs, $penalty);
-        if ($limiet !== null && $effectief !== null && $effectief > $limiet) {
-            $penalty = 'dnf';
+        $limietOp = false;
+        if ($limiet !== null && self::isCumulative($ronde)) {
+            if (self::cumulativeUsed($gedaan) + self::cumulativePart($timeMs, $penalty) > $limiet) {
+                $penalty = 'dnf';
+                $limietOp = true;
+            }
+        } else {
+            $effectief = self::effective($timeMs, $penalty);
+            if ($limiet !== null && $effectief !== null && $effectief > $limiet) {
+                $penalty = 'dnf';
+            }
         }
 
         $poging = count($gedaan) + 1;
@@ -254,7 +399,8 @@ final class Tournaments
         );
 
         $gedaan = self::playerSolves($tournamentId, (int) $ronde['round_number']);
-        $klaar = count($gedaan) >= self::ATTEMPTS_PER_ROUND || self::isCutOff($ronde, $gedaan);
+        $strikt = ($toernooi['source'] ?? 'sim') === 'wca';
+        $klaar = count($gedaan) >= $pogingen || self::isCutOff($ronde, $gedaan, $strikt) || $limietOp;
 
         if ($klaar) {
             self::scoreRound($tournamentId, $userId, $ronde);
@@ -267,11 +413,18 @@ final class Tournaments
         ];
     }
 
-    /** Is de speler op de cutoff gestrand? Alleen mogelijk na precies twee solves. */
-    private static function isCutOff(array $ronde, array $solves): bool
+    /**
+     * Is de speler op de cutoff gestrand? Alleen mogelijk na precies het
+     * aantal pogingen van de cutoff (meestal twee).
+     *
+     * Op een echte comp moet je er strikt onder zitten ($strikt); de
+     * gesimuleerde toernooien rekenden altijd met "gelijk mag" en dat blijft zo.
+     */
+    private static function isCutOff(array $ronde, array $solves, bool $strikt = false): bool
     {
         $cutoff = $ronde['cutoff_ms'] === null ? null : (int) $ronde['cutoff_ms'];
-        if ($cutoff === null || count($solves) !== self::CUTOFF_ATTEMPTS) {
+        $binnen = (int) ($ronde['cutoff_attempts'] ?? self::CUTOFF_ATTEMPTS);
+        if ($cutoff === null || count($solves) !== $binnen) {
             return false;
         }
 
@@ -280,11 +433,41 @@ final class Tournaments
                 $solve['raw_ms'] === null ? null : (int) $solve['raw_ms'],
                 (string) $solve['penalty']
             );
-            if ($effectief !== null && $effectief <= $cutoff) {
+            if ($effectief !== null && ($strikt ? $effectief < $cutoff : $effectief <= $cutoff)) {
                 return false; // cutoff gehaald, je mag door
             }
         }
         return true;
+    }
+
+    /** Pogingen in deze ronde. Rondes van voor migratie 009 hebben er altijd vijf. */
+    private static function attemptsOf(array $ronde): int
+    {
+        return (int) ($ronde['attempts'] ?? self::ATTEMPTS_PER_ROUND);
+    }
+
+    private static function isCumulative(array $ronde): bool
+    {
+        return (int) ($ronde['limit_cumulative'] ?? 0) === 1;
+    }
+
+    /**
+     * Wat een poging van een cumulatieve limiet opmaakt: de gemeten tijd plus
+     * een eventuele +2. Een DNF telt met de tijd die hij duurde.
+     */
+    private static function cumulativePart(?int $ms, string $penalty): int
+    {
+        return ($ms ?? 0) + ($penalty === 'plus2' ? 2000 : 0);
+    }
+
+    /** @param list<array<string,mixed>> $solves */
+    private static function cumulativeUsed(array $solves): int
+    {
+        $som = 0;
+        foreach ($solves as $solve) {
+            $som += self::cumulativePart($solve['raw_ms'] === null ? null : (int) $solve['raw_ms'], (string) $solve['penalty']);
+        }
+        return $som;
     }
 
     /* =====================================================================
@@ -293,6 +476,12 @@ final class Tournaments
 
     private static function scoreRound(int $tournamentId, int $userId, array $ronde): void
     {
+        $toernooi = self::load($tournamentId, $userId);
+        if (($toernooi['source'] ?? 'sim') === 'wca') {
+            self::scoreWcaRound($toernooi, $userId, $ronde);
+            return;
+        }
+
         $rondeNummer = (int) $ronde['round_number'];
         $limiet = $ronde['time_limit_ms'] === null ? null : (int) $ronde['time_limit_ms'];
         $cutoff = $ronde['cutoff_ms'] === null ? null : (int) $ronde['cutoff_ms'];
@@ -422,6 +611,150 @@ final class Tournaments
         }
 
         self::finish($tournamentId, $userId, $eigenPositie, $rondeNummer);
+    }
+
+    /**
+     * Een ronde van een echte comp uitrekenen. Hier wordt niets gesimuleerd:
+     * het veld zijn de echte deelnemers van die ronde met hun echte pogingen,
+     * en de speler wordt ertussen gezet.
+     *
+     * Door ga je als je plek binnen het aantal valt dat in het echt doorging.
+     * De echte cubers die doorgingen doen in de volgende ronde allemaal weer
+     * mee; wie er door jouw komst eigenlijk uit had gemoeten, laten we staan.
+     * Zo blijft de volgende ronde precies de echte ronde, plus jij.
+     */
+    private static function scoreWcaRound(array $toernooi, int $userId, array $ronde): void
+    {
+        $tournamentId = (int) $toernooi['id'];
+        $rondeNummer = (int) $ronde['round_number'];
+        $format = (string) ($ronde['format'] ?? 'a');
+        $pogingen = self::attemptsOf($ronde);
+
+        $momentopname = json_decode((string) $toernooi['wca_snapshot'], true);
+        $rondes = is_array($momentopname['rounds'] ?? null) ? $momentopname['rounds'] : [];
+        $echt = $rondes[$rondeNummer - 1]['results'] ?? [];
+        $volgende = $rondes[$rondeNummer]['results'] ?? null;
+
+        // --- de speler ----------------------------------------------------
+        $eigen = self::playerSolves($tournamentId, $rondeNummer);
+        $gestrand = self::isCutOff($ronde, $eigen, true);
+        $eigenTijden = array_map(static fn (array $r): array => [
+            'ms'      => $r['raw_ms'] === null ? null : (int) $r['raw_ms'],
+            'penalty' => (string) $r['penalty'],
+        ], $eigen);
+        // Op door een cumulatieve limiet: de rest van de pogingen is DNS.
+        while (!$gestrand && count($eigenTijden) < $pogingen) {
+            $eigenTijden[] = ['ms' => null, 'penalty' => 'dns'];
+        }
+        $eigenUitslag = Ranking::result($format, array_map(
+            static fn (array $t): ?int => Ranking::effective($t['ms'], $t['penalty']), $eigenTijden
+        ));
+
+        $deelnemers = [[
+            'competitor_id' => null,
+            'times'   => $eigenTijden,
+            'average' => $eigenUitslag['average'],
+            'best'    => $eigenUitslag['best'],
+            'cut'     => $gestrand,
+            'key'     => null,
+        ]];
+
+        // --- het echte veld -------------------------------------------------
+        $ids = [];
+        foreach (Database::all(
+            'SELECT id, name, wca_id FROM tournament_competitors WHERE tournament_id = ?',
+            [$tournamentId]
+        ) as $rij) {
+            $ids[self::wcaKey($rij['wca_id'], (string) $rij['name'])] = (int) $rij['id'];
+        }
+
+        $heeftCutoff = $ronde['cutoff_ms'] !== null;
+        foreach ($echt as $r) {
+            $sleutel = self::wcaKey($r['w'] ?? null, (string) $r['n']);
+            if (!isset($ids[$sleutel])) {
+                // Stond niet in de eerste ronde (komt voor bij vreemde data): alsnog toevoegen.
+                Database::run(
+                    "INSERT INTO tournament_competitors
+                        (tournament_id, kind, name, country_code, wca_id, skill_ms, consistency, form)
+                     VALUES (?, 'wca', ?, ?, ?, ?, 0, 0)",
+                    [$tournamentId, $r['n'], $r['c'], $r['w'], (int) ($r['a'] ?? $r['b'] ?? $toernooi['reference_ms'])]
+                );
+                $ids[$sleutel] = (int) Database::connection()->lastInsertId();
+            }
+
+            $tijden = array_map(static fn ($t): array => match (true) {
+                is_int($t) => ['ms' => $t, 'penalty' => 'none'],
+                $t === 'dns' => ['ms' => null, 'penalty' => 'dns'],
+                default => ['ms' => null, 'penalty' => 'dnf'],
+            }, is_array($r['t'] ?? null) ? $r['t'] : []);
+
+            $deelnemers[] = [
+                'competitor_id' => $ids[$sleutel],
+                'times'   => $tijden,
+                'average' => $r['a'] ?? null,
+                'best'    => $r['b'] ?? null,
+                'cut'     => $heeftCutoff && count($tijden) < $pogingen,
+                'key'     => $sleutel,
+            ];
+        }
+
+        // Stabiel sorteren: gelijke uitslagen houden de echte volgorde, en de
+        // speler komt achter wie precies hetzelfde deed.
+        $eigenRij = array_shift($deelnemers);
+        $deelnemers[] = $eigenRij;
+        usort($deelnemers, static fn (array $a, array $b): int => Ranking::compare($format, $a, $b));
+
+        // --- wegschrijven ---------------------------------------------------
+        $doorNaarVolgende = (int) $ronde['advancing'];
+        $echtDoor = [];
+        foreach ($volgende ?? [] as $r) {
+            $echtDoor[self::wcaKey($r['w'] ?? null, (string) $r['n'])] = true;
+        }
+
+        $insert = Database::connection()->prepare(
+            'INSERT INTO tournament_results
+                (tournament_id, round_number, competitor_id, times_json, ao5_ms, best_ms, position, advanced, cut)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+
+        $eigenPositie = 0;
+        $eigenDoor = false;
+        foreach ($deelnemers as $index => $deelnemer) {
+            $positie = $index + 1;
+            if ($deelnemer['competitor_id'] === null) {
+                $gaatDoor = $doorNaarVolgende > 0 && $positie <= $doorNaarVolgende;
+                $eigenPositie = $positie;
+                $eigenDoor = $gaatDoor;
+            } else {
+                $gaatDoor = isset($echtDoor[$deelnemer['key']]);
+            }
+
+            $insert->execute([
+                $tournamentId, $rondeNummer, $deelnemer['competitor_id'],
+                json_encode($deelnemer['times']), $deelnemer['average'], $deelnemer['best'],
+                $positie, $gaatDoor ? 1 : 0, $deelnemer['cut'] ? 1 : 0,
+            ]);
+        }
+
+        Database::run(
+            "UPDATE tournament_rounds SET status = 'done', finished_at = UTC_TIMESTAMP()
+             WHERE tournament_id = ? AND round_number = ?",
+            [$tournamentId, $rondeNummer]
+        );
+
+        if ($eigenDoor && $volgende !== null) {
+            self::createWcaRound($tournamentId, $rondeNummer + 1, $rondes);
+            Database::run('UPDATE tournaments SET current_round = ? WHERE id = ?', [$rondeNummer + 1, $tournamentId]);
+            return;
+        }
+
+        self::finish($tournamentId, $userId, $eigenPositie, $rondeNummer);
+    }
+
+    /** Hoe we een echte cuber herkennen tussen de rondes: zijn WCA-id, anders zijn naam. */
+    private static function wcaKey(?string $wcaId, string $naam): string
+    {
+        return $wcaId !== null && $wcaId !== '' ? 'id:' . $wcaId : 'naam:' . $naam;
     }
 
     /**
@@ -623,13 +956,24 @@ final class Tournaments
 
         $event = (string) $toernooi['event'];
         $moeilijkheid = (string) $toernooi['difficulty'];
+        $isWca = ($toernooi['source'] ?? 'sim') === 'wca';
+        $momentopname = $isWca ? json_decode((string) $toernooi['wca_snapshot'], true) : null;
 
         $uit = [
             'id'              => (int) $toernooi['id'],
             'event'           => $event,
             'eventLabel'      => Events::label($event),
             'difficulty'      => $moeilijkheid,
-            'difficultyLabel' => self::DIFFICULTIES[$moeilijkheid]['label'] ?? $moeilijkheid,
+            'difficultyLabel' => self::typeLabel($moeilijkheid),
+            'source'          => $isWca ? 'wca' : 'sim',
+            'competition'     => $isWca && is_array($momentopname['competition'] ?? null) ? [
+                'id'          => $momentopname['competition']['id'],
+                'name'        => $momentopname['competition']['name'],
+                'city'        => $momentopname['competition']['city'],
+                'country'     => $momentopname['competition']['country'],
+                'startDate'   => $momentopname['competition']['startDate'],
+                'attribution' => Wca::attribution(substr((string) $momentopname['competition']['fetchedAt'], 0, 10)),
+            ] : null,
             'status'          => $toernooi['status'],
             'fieldSize'       => (int) $toernooi['field_size'],
             'totalRounds'     => (int) $toernooi['total_rounds'],
@@ -644,15 +988,24 @@ final class Tournaments
         $ronde = self::currentRound($tournamentId);
         if ($ronde !== null) {
             $solves = self::playerSolves($tournamentId, (int) $ronde['round_number']);
+            $format = (string) ($ronde['format'] ?? 'a');
+            // De echte scramble van deze poging, als de WCA die kent.
+            $scrambles = $momentopname['rounds'][(int) $ronde['round_number'] - 1]['scrambles'] ?? null;
             $uit['round'] = [
                 'number'       => (int) $ronde['round_number'],
                 'name'         => $ronde['name'],
                 'entrants'     => (int) $ronde['entrants'],
                 'advancing'    => (int) $ronde['advancing'],
+                'format'       => $format,
+                'formatLabel'  => Ranking::label($format),
                 'cutoffMs'     => $ronde['cutoff_ms'] === null ? null : (int) $ronde['cutoff_ms'],
+                'cutoffAttempts' => (int) ($ronde['cutoff_attempts'] ?? self::CUTOFF_ATTEMPTS),
                 'timeLimitMs'  => $ronde['time_limit_ms'] === null ? null : (int) $ronde['time_limit_ms'],
+                'limitCumulative' => self::isCumulative($ronde),
+                'limitUsedMs'  => self::isCumulative($ronde) ? self::cumulativeUsed($solves) : null,
+                'scramble'     => is_array($scrambles) ? ($scrambles[count($solves)] ?? null) : null,
                 'attemptsDone' => count($solves),
-                'attemptsTotal' => self::ATTEMPTS_PER_ROUND,
+                'attemptsTotal' => self::attemptsOf($ronde),
                 'solves'       => array_map(static fn (array $r): array => [
                     'attempt' => (int) $r['attempt_number'],
                     'ms'      => $r['raw_ms'] === null ? null : (int) $r['raw_ms'],
@@ -683,8 +1036,9 @@ final class Tournaments
             return [];
         }
 
+        $wcaKolom = self::hasWcaColumns() ? ', c.wca_id' : '';
         $uitslagen = Database::all(
-            'SELECT r.*, c.name, c.kind, c.country_code
+            'SELECT r.*, c.name, c.kind, c.country_code' . $wcaKolom . '
              FROM tournament_results r
              LEFT JOIN tournament_competitors c ON c.id = r.competitor_id
              WHERE r.tournament_id = ?
@@ -701,6 +1055,7 @@ final class Tournaments
                 'name'     => $rij['competitor_id'] === null ? 'Jij' : (string) $rij['name'],
                 'kind'     => $rij['competitor_id'] === null ? 'player' : (string) $rij['kind'],
                 'country'  => $rij['country_code'],
+                'wcaId'    => $rij['wca_id'] ?? null,
                 'isYou'    => $rij['competitor_id'] === null,
                 'times'    => is_array($tijden) ? $tijden : [],
                 'ao5Ms'    => $rij['ao5_ms'] === null ? null : (int) $rij['ao5_ms'],
@@ -718,6 +1073,8 @@ final class Tournaments
                 'name'        => $ronde['name'],
                 'entrants'    => (int) $ronde['entrants'],
                 'advancing'   => (int) $ronde['advancing'],
+                'format'      => (string) ($ronde['format'] ?? 'a'),
+                'formatLabel' => Ranking::label((string) ($ronde['format'] ?? 'a')),
                 'cutoffMs'    => $ronde['cutoff_ms'] === null ? null : (int) $ronde['cutoff_ms'],
                 'timeLimitMs' => $ronde['time_limit_ms'] === null ? null : (int) $ronde['time_limit_ms'],
                 'results'     => $perRonde[$nummer] ?? [],
@@ -734,8 +1091,9 @@ final class Tournaments
     public static function history(int $userId, int $limit = 20): array
     {
         $limit = max(1, min($limit, 100));
+        $wcaKolom = self::hasWcaColumns() ? ', wca_name' : '';
         $rows = Database::all(
-            "SELECT id, event, difficulty, status, field_size, final_position, final_ao5_ms, finished_at
+            "SELECT id, event, difficulty, status, field_size, final_position, final_ao5_ms, finished_at{$wcaKolom}
              FROM tournaments
              WHERE user_id = ? AND status <> 'active'
              ORDER BY id DESC LIMIT " . $limit,
@@ -749,7 +1107,8 @@ final class Tournaments
                 'event'           => $row['event'],
                 'eventLabel'      => Events::label((string) $row['event']),
                 'difficulty'      => $moeilijkheid,
-                'difficultyLabel' => self::DIFFICULTIES[$moeilijkheid]['label'] ?? $moeilijkheid,
+                'difficultyLabel' => self::typeLabel($moeilijkheid),
+                'competitionName' => $row['wca_name'] ?? null,
                 'status'          => $row['status'],
                 'fieldSize'       => (int) $row['field_size'],
                 'position'        => $row['final_position'] === null ? null : (int) $row['final_position'],
@@ -779,6 +1138,56 @@ final class Tournaments
             [$userId]
         );
 
+        // Per soort toernooi: een derde plek op WK-niveau is iets anders dan
+        // een derde plek bij de beginners.
+        $perSoort = Database::all(
+            "SELECT
+                difficulty,
+                COUNT(*) AS gespeeld,
+                SUM(CASE WHEN final_position = 1 THEN 1 ELSE 0 END) AS gewonnen,
+                SUM(CASE WHEN final_position <= 3 THEN 1 ELSE 0 END) AS podiums,
+                MIN(final_position) AS beste
+             FROM tournaments
+             WHERE user_id = ? AND status = 'finished'
+             GROUP BY difficulty",
+            [$userId]
+        );
+        $volgorde = array_merge(array_keys(self::DIFFICULTIES), [self::WCA_TYPE]);
+        $plaats = static fn (string $soort): int => ($i = array_search($soort, $volgorde, true)) === false ? 99 : $i;
+        usort($perSoort, static fn (array $a, array $b): int =>
+            $plaats((string) $a['difficulty']) <=> $plaats((string) $b['difficulty']));
+        $soorten = array_map(static fn (array $rij): array => [
+            'type'         => (string) $rij['difficulty'],
+            'label'        => self::typeLabel((string) $rij['difficulty']),
+            'played'       => (int) $rij['gespeeld'],
+            'won'          => (int) $rij['gewonnen'],
+            'podiums'      => (int) $rij['podiums'],
+            'bestPosition' => $rij['beste'] === null ? null : (int) $rij['beste'],
+        ], $perSoort);
+
+        // Bij historische comps is elke comp (en elk event) een eigen toernooi.
+        $comps = [];
+        if (self::hasWcaColumns()) {
+            $comps = array_map(static fn (array $rij): array => [
+                'competitionId' => $rij['wca_competition_id'],
+                'name'          => $rij['wca_name'],
+                'event'         => $rij['event'],
+                'eventLabel'    => Events::label((string) $rij['event']),
+                'played'        => (int) $rij['gespeeld'],
+                'bestPosition'  => $rij['beste'] === null ? null : (int) $rij['beste'],
+                'fieldSize'     => (int) $rij['veld'],
+            ], Database::all(
+                "SELECT wca_competition_id, MAX(wca_name) AS wca_name, event, COUNT(*) AS gespeeld,
+                        MIN(final_position) AS beste, MAX(field_size) AS veld
+                 FROM tournaments
+                 WHERE user_id = ? AND status = 'finished' AND source = 'wca'
+                 GROUP BY wca_competition_id, event
+                 ORDER BY MAX(finished_at) DESC
+                 LIMIT 30",
+                [$userId]
+            ));
+        }
+
         $records = Database::all(
             'SELECT event, category, value_ms, achieved_at FROM tournament_records
              WHERE user_id = ? ORDER BY event, category',
@@ -798,8 +1207,17 @@ final class Tournaments
             'won'          => (int) ($totalen['gewonnen'] ?? 0),
             'podiums'      => (int) ($totalen['podiums'] ?? 0),
             'bestPosition' => $totalen['beste'] === null ? null : (int) $totalen['beste'],
+            'perType'      => $soorten,
+            'competitions' => $comps,
             'events'       => array_values($perEvent),
         ];
+    }
+
+    /** Staan de kolommen van migratie 009 er al? Eén keer per verzoek nagevraagd. */
+    private static function hasWcaColumns(): bool
+    {
+        static $aanwezig = null;
+        return $aanwezig ??= Database::hasColumn('tournaments', 'wca_name');
     }
 
     /** De moeilijkheidsgraden voor het keuzescherm. */

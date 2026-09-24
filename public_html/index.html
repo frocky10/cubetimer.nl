@@ -42,6 +42,7 @@
     <script src="Script/challenges.js" defer></script>
     <script src="Script/achievements.js" defer></script>
     <script src="Script/tournament.js" defer></script>
+    <script src="Script/games.js" defer></script>
     <script src="Script/admin.js" defer></script>
     <script src="Script/smartcube.js" defer></script>
     <script src="Script/account.js" defer></script>
@@ -224,6 +225,12 @@
                         <span class="btn-icon__badge" id="tournament-badge" hidden>!</span>
                     </button>
 
+                    <button id="games-open" class="btn-icon btn-icon--badged" type="button" title="Spelmodi" aria-label="Spelmodi">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h11a4 4 0 0 1 3.9 3.1l1 4.6a2.6 2.6 0 0 1-4.6 2.1L16 14.5H8l-1.8 2.3a2.6 2.6 0 0 1-4.6-2.1l1-4.6A4 4 0 0 1 6.5 7Z" /><path d="M7.5 9.5v3M6 11h3" /><path d="M15.5 10h.01M17.5 12h.01" /></svg>
+                        <span class="btn-icon__label">Spelmodi</span>
+                        <span class="btn-icon__badge" id="games-badge" hidden>0</span>
+                    </button>
+
                     <button id="achievements-open" class="btn-icon btn-icon--badged" type="button" title="Achievements" aria-label="Achievements" hidden>
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6" /><path d="M8.5 14.5 7 22l5-2.5 5 2.5-1.5-7.5" /></svg>
                         <span class="btn-icon__label">Achievements</span>
@@ -282,6 +289,19 @@
                         <span id="tournament-banner-hint">Je volgende solve telt.</span>
                     </span>
                     <button class="btn btn--sm" type="button" id="tournament-banner-open">Stand</button>
+                </div>
+
+                <!-- Een lopende spelmodus of duel. -->
+                <div class="challenge-banner challenge-banner--game" id="games-banner" hidden>
+                    <span class="challenge-banner__dot" aria-hidden="true"></span>
+                    <span class="challenge-banner__text">
+                        <strong id="games-banner-title">Spelmodus</strong>
+                        <span id="games-banner-hint">Je solves tellen niet mee voor je sessie.</span>
+                    </span>
+                    <span class="challenge-banner__actions">
+                        <button class="btn btn--sm" type="button" id="games-banner-open">Menu</button>
+                        <button class="btn btn--sm" type="button" id="games-banner-stop">Stoppen</button>
+                    </span>
                 </div>
 
                 <div class="challenge-banner" id="challenge-banner" hidden>
@@ -869,6 +889,29 @@
     </div>
 
 
+
+    <!-- ====================================================================
+         Modal: spelmodi en duels
+         ==================================================================== -->
+    <div id="games-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="games-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-games aria-label="Sluiten">&times;</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Spelmodi</p>
+                <h2 class="modal__title" id="games-title">Spelmodi</h2>
+                <p class="modal__subtitle" id="games-subtitle">Een andere manier van timen, met een eigen record per modus.</p>
+            </div>
+
+            <div class="modal__body" id="games-body">
+                <p class="table-empty">Laden…</p>
+            </div>
+
+            <div class="time-modal__footer">
+                <span class="field__hint" id="games-footnote"></span>
+                <button class="btn" type="button" data-close-games>Sluiten</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ====================================================================
          Modal: toernooimodus

@@ -82,6 +82,22 @@ return [
     'site_timezone' => 'Europe/Amsterdam',
 
     /* ---------------------------------------------------------------------
+     * WCA - voor de historische toernooien
+     *
+     * De server haalt de uitslagen van afgelopen competities op bij de
+     * openbare API van de World Cube Association en bewaart ze in de database.
+     * Daar is geen sleutel voor nodig; wel moet de server naar buiten kunnen
+     * (curl, of allow_url_fopen). Zet 'enabled' op false om de historische
+     * toernooien uit te zetten; de gesimuleerde blijven dan gewoon werken.
+     *
+     * 'base_url' alleen aanpassen om te testen met tools/nep-wca-server.php.
+     * ------------------------------------------------------------------ */
+    'wca' => [
+        'enabled'  => true,
+        'base_url' => 'https://www.worldcubeassociation.org/api/v0',
+    ],
+
+    /* ---------------------------------------------------------------------
      * Opslagmap voor rate limiting en logbestanden.
      * Moet schrijfbaar zijn voor PHP en BUITEN public_html staan.
      * Laat leeg om de systeem-tempmap te gebruiken.
