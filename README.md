@@ -5,7 +5,7 @@
 **Een rustige, snelle speedcubing-timer voor in je browser.**
 
 Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cubes
-· ranglijsten · toernooien · achievements · profielen
+· ranglijsten · toernooien · spelmodi · achievements · profielen
 
 [**cubetimer.nl**](https://cubetimer.nl) · [Roadmap](https://github.com/frocky10/cubetimer.nl/issues) · [Werkafspraken](CLAUDE.md)
 
@@ -182,6 +182,30 @@ terug te zien.
 - [x] Veertig verzonnen tegenstanders met een eigen niveau en dagvorm
 - [x] Aangevuld met echte cubers van de site, gesimuleerd op hun eigen niveau
 - [x] Staat los van je sessies; toernooitijden krijgen een eigen blok op je profiel
+- [x] Beste plek per soort toernooi, en per historische comp
+
+**Toernooien v2: historische comps** — [#14](https://github.com/frocky10/cubetimer.nl/issues/14)
+
+- [x] Kies een echte, afgelopen WCA-competitie: bekende kampioenschappen, of zoeken
+- [x] Alleen de events die op die comp stonden, met het aantal deelnemers en de winnaar
+- [x] Het echte veld: de echte deelnemers met hun echte tijden van toen
+- [x] De echte rondes, met het echte format (Ao5, Mo3, best of 3), cutoff en tijdslimiet
+- [x] Ook cumulatieve tijdslimieten, zoals bij blind en 6x6
+- [x] De echte scrambles, als de WCA die heeft
+- [x] Door naar de volgende ronde als je bij het aantal hoort dat in het echt doorging
+- [x] Aan het eind: waar je op die comp was geëindigd
+- [x] De server haalt de gegevens op bij de WCA en bewaart ze; de browser praat nooit zelf met de WCA
+
+**Spelmodi** — [#31](https://github.com/frocky10/cubetimer.nl/issues/31)
+
+- [x] Streak: zet een doel (sub X) en kijk hoe vaak je dat achter elkaar haalt
+- [x] Speedrun: zoveel mogelijk cubes in vijf minuten, met al je cubes vooraf gescrambeld
+- [x] Survival: een limiet die na elke geslaagde solve een stukje krimpt
+- [x] Ladder: elke solve moet sneller zijn dan de vorige
+- [x] Duel: daag een vriend uit op dezelfde scrambles, ieder speelt wanneer het uitkomt
+- [x] Records per modus op je account en je profiel; bewust geen ranglijst
+- [x] De server telt de score zelf na uit je solves
+- [x] Spelen kan ook zonder account; een lopende ronde overleeft het herladen van de pagina
 
 **Volgen en vrienden**
 
@@ -218,14 +242,11 @@ terug te zien.
 
 ### Nog te doen
 
-**Account uitbouwen**
-
-- [ ] Tournament mode v2: kiezen uit echte historische competities — [#14](https://github.com/frocky10/cubetimer.nl/issues/14)
-
 **Nieuwe manieren om te oefenen**
 
 - [ ] Training tools — [#30](https://github.com/frocky10/cubetimer.nl/issues/30)
-- [ ] Special gamemodes — [#31](https://github.com/frocky10/cubetimer.nl/issues/31)
+- [ ] Historische toernooien testen tegen de echte WCA-API (in de ontwikkelomgeving
+      was die niet bereikbaar; gebouwd en getest op voorbeeldantwoorden in dezelfde vorm)
 
 **Techniek**
 
@@ -235,7 +256,7 @@ terug te zien.
 - [ ] Paginering op de ranglijsten (de server kan het al, de interface nog niet)
 - [ ] Scramble van de dag ook voor Megaminx, Square-1 en Clock (lastige notatie)
 - [ ] Echte vlaggen in plaats van landcodes (vraagt meegeleverde SVG-bestanden)
-- [ ] `bluetoothCube.js` opschonen; is bij de restyling met rust gelaten
+- [x] ~~`bluetoothCube.js` opschonen~~ — vervangen door de nieuwe smart-cubedrivers
 - [ ] Losse tijden per stuk kunnen bekijken (nu alleen als aantal)
 - [ ] F2L-gevallen ook gespiegeld tonen voor de sleuf linksvoor
 - [ ] Smart cube automatisch opnieuw verbinden als de verbinding wegvalt
@@ -276,7 +297,7 @@ PHP 8.1 en MySQL.
 1. **Bestanden** — zet de inhoud van `public_html/` in je webroot. Of laat de
    GitHub Action het doen: push naar de branch `Release` en vul de secrets
    `FTP_HOST`, `FTP_USER`, `FTP_PASS` en `FTP_PORT` in.
-2. **Database** — maak een database aan en importeer de twee bestanden uit
+2. **Database** — maak een database aan en importeer de bestanden uit
    `database/` op volgorde. Uitgebreide stappen staan in
    [`database/README.md`](database/README.md).
 3. **Configuratie** — kopieer `public_html/api/config.example.php` naar
@@ -309,7 +330,9 @@ meteen zien wat het doet.
 | `.github/workflows/` | FTP-deploy naar DirectAdmin |
 
 **Externe afhankelijkheden:** [cubing.js](https://cubing.net) voor de scrambles
-en Inter van Google Fonts. De smart-cubedrivers en AES (aes-js, MIT) staan
+en Inter van Google Fonts. De historische toernooien gebruiken de openbare API van
+de [World Cube Association](https://www.worldcubeassociation.org); dat doet de
+server, niet de browser. De smart-cubedrivers en AES (aes-js, MIT) staan
 lokaal in de repo. Verder niets.
 
 [`CLAUDE.md`](CLAUDE.md) beschrijft de werkafspraken, de laadvolgorde van de

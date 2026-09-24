@@ -15,8 +15,9 @@
     11. Ranglijsten, XP en challenges
     12. Achievements
     13. Landcode, openbaar profiel en het mobiele menu
-    14. Toernooien
+    14. Toernooien (ook historische WCA-comps)
     15. Leerpagina (leren.html)
+    16. Spelmodi en duels
    ========================================================================== */
 
 /* ==========================================================================
@@ -3657,10 +3658,10 @@ body.profile-page {
     color: var(--accent-text);
 }
 
-/* De vijf pogingen van een ronde. */
+/* De pogingen van een ronde: vijf, of drie bij Mo3 en best of 3. */
 .attempt-row {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--attempts, 5), minmax(0, 1fr));
     gap: var(--space-2);
 }
 
@@ -3745,6 +3746,88 @@ body.profile-page {
     box-shadow: 0 0 10px var(--brand-400);
 }
 
+/* --- Beste plek per soort ------------------------------------------------- */
+
+.tournament-types {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.board-table--compact td,
+.board-table--compact th {
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+}
+
+/* --- Historische comp kiezen ---------------------------------------------- */
+
+.wca-picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.wca-search {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.wca-search .input {
+    flex: 1;
+    min-width: 0;
+}
+
+.wca-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: var(--space-2);
+}
+
+.wca-comp {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+
+.wca-comp:hover:not(:disabled) {
+    background: var(--surface-3);
+    border-color: var(--brand-500);
+}
+
+.wca-comp:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+.wca-comp__name {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.wca-comp__meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+a.board-cuber__name {
+    color: inherit;
+    text-decoration: none;
+}
+
+a.board-cuber__name:hover {
+    color: var(--accent-text);
+    text-decoration: underline;
+}
+
 /* --- Knoppen op het profiel ----------------------------------------------- */
 
 .profile-hero__actions {
@@ -3755,7 +3838,6 @@ body.profile-page {
 
 @media (max-width: 600px) {
     .attempt-row {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: var(--space-1);
     }
 
@@ -3987,5 +4069,210 @@ body.profile-page {
     .cube-face {
         width: 5.5rem;
         height: 5.5rem;
+    }
+}
+
+/* ==========================================================================
+   16. Spelmodi en duels
+   --------------------------------------------------------------------------
+   Het venster met de modi, de balk boven de timer tijdens een ronde, de
+   speedrunklok en de duelkaarten. De kaarten van de modi zijn dezelfde als
+   de moeilijkheidsgraden van een toernooi (.difficulty-card).
+   ========================================================================== */
+
+.games {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.games__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}
+
+.game-record {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--success);
+}
+
+/* De balk tijdens een spelmodus is groen: de timer vangt je solves op. */
+.challenge-banner--game {
+    background: rgba(var(--success-rgb), 0.12);
+    border-color: rgba(var(--success-rgb), 0.35);
+}
+
+.challenge-banner--game .challenge-banner__dot {
+    background: var(--success);
+    box-shadow: 0 0 10px var(--success);
+}
+
+.challenge-banner__actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-left: auto;
+}
+
+/* --- Speedrun ------------------------------------------------------------- */
+
+.speedrun__clock {
+    font-family: var(--font-timer);
+    font-size: clamp(3rem, 12vw, 5.5rem);
+    line-height: 1;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+.speedrun__clock.is-urgent {
+    color: var(--danger);
+}
+
+.speedrun__lap-button {
+    min-height: 4.5rem;
+    font-size: 1.15rem;
+}
+
+.speedrun__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.speedrun__item {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.speedrun__item.is-current {
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 1px var(--brand-500);
+}
+
+.speedrun__item.is-done {
+    opacity: 0.55;
+}
+
+.speedrun__item.is-done .speedrun__number {
+    color: var(--success);
+}
+
+.speedrun__number {
+    font-weight: 800;
+    color: var(--text-subtle);
+    text-align: center;
+}
+
+.speedrun__scramble {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.speedrun__lap {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+}
+
+/* --- Duels ---------------------------------------------------------------- */
+
+.duel-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.duel-form__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+}
+
+.duel-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.duel-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.duel-card[data-result="win"] {
+    box-shadow: inset 3px 0 0 var(--success);
+}
+
+.duel-card[data-result="loss"] {
+    box-shadow: inset 3px 0 0 var(--danger);
+}
+
+.duel-card__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: 0.85rem;
+}
+
+.duel-card__text span {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.duel-card__actions {
+    display: flex;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .wca-search {
+        flex-direction: column;
+    }
+
+    .duel-form__row {
+        grid-template-columns: 1fr;
+    }
+
+    .duel-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .challenge-banner__actions {
+        flex-direction: column;
+    }
+
+    .speedrun__item {
+        grid-template-columns: 1.5rem minmax(0, 1fr);
+    }
+
+    .speedrun__lap {
+        grid-column: 2;
     }
 }

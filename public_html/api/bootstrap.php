@@ -26,6 +26,10 @@ require_once __DIR__ . '/lib/TournamentField.php';
 require_once __DIR__ . '/lib/Tournaments.php';
 require_once __DIR__ . '/lib/PublicProfile.php';
 require_once __DIR__ . '/lib/SolveAnalysis.php';
+require_once __DIR__ . '/lib/Ranking.php';
+require_once __DIR__ . '/lib/GameModes.php';
+require_once __DIR__ . '/lib/Duels.php';
+require_once __DIR__ . '/lib/Wca.php';
 
 $debug = Config::get('debug', false) === true;
 

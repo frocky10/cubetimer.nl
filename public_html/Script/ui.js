@@ -35,6 +35,10 @@
 
     function closeModal(modal) {
         if (!modal || !modal.classList.contains('visible')) return;
+        // Stond de focus op een knop in de modal, dan blijft die daar ook als
+        // de modal weg is; de timer ziet de spatiebalk dan als een klik op een
+        // knop en negeert hem. Dus de focus eraf.
+        if (modal.contains(document.activeElement)) document.activeElement.blur();
         modal.classList.remove('visible');
         modal.setAttribute('aria-hidden', 'true');
         const index = openModals.indexOf(modal);

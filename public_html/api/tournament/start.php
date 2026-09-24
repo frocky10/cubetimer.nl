@@ -5,7 +5,8 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * POST /api/tournament/start.php
- * Body: { event, difficulty }
+ * Body: { event, difficulty }                 een gesimuleerd toernooi
+ *       { event, competitionId }              een historische WCA-comp
  */
 Http::requireMethod('POST');
 Http::requireAjaxHeader();
@@ -18,11 +19,11 @@ if (!$limiet['allowed']) {
     Http::fail('rate_limited', 'Je hebt de afgelopen tijd wel heel veel toernooien gestart.', 429);
 }
 
-$resultaat = Tournaments::start(
-    $userId,
-    Http::stringInput('event', '333'),
-    Http::stringInput('difficulty', 'club')
-);
+$competitionId = Http::stringInput('competitionId');
+
+$resultaat = $competitionId !== ''
+    ? Tournaments::startWca($userId, $competitionId, Http::stringInput('event', '333'))
+    : Tournaments::start($userId, Http::stringInput('event', '333'), Http::stringInput('difficulty', 'club'));
 
 if (!$resultaat['ok']) {
     Http::fail('start_failed', $resultaat['message'], 409);
