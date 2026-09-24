@@ -1,0 +1,4 @@
+# Wie advertenties op cubetimer.nl mag verkopen. Beide AdSense-accounts
+# staan erin; f08c47fec0942fa0 is de vaste id van Google zelf.
+google.com, pub-7865142075636059, DIRECT, f08c47fec0942fa0
+google.com, pub-9889350952616788, DIRECT, f08c47fec0942fa0

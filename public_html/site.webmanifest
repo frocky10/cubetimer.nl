@@ -1,0 +1,15 @@
+{
+    "name": "CubeTimer",
+    "short_name": "CubeTimer",
+    "description": "Online speedcubing-timer met officiële WCA-scrambles, inspectie en statistieken.",
+    "lang": "nl",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#060911",
+    "theme_color": "#060911",
+    "icons": [
+        { "src": "/Pictures/favicon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "/Pictures/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+    ]
+}

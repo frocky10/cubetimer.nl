@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    De pagina's die in Google horen. Profielen staan er bewust niet in: die
+    hebben noindex. Een nieuwe openbare pagina hoort hier bij, met hetzelfde
+    adres als in zijn canonical-tag.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://cubetimer.nl/</loc>
+        <lastmod>2026-09-24</lastmod>
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/leren.html</loc>
+        <lastmod>2026-09-24</lastmod>
+    </url>
+</urlset>

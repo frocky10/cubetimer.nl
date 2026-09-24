@@ -5,12 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
-    <meta name="description" content="CubeTimer keeps your cubing practice relaxed and fun with a simple timer, inspection mode, scrambles, smart cube support and easy session tracking." />
-    <meta name="keywords" content="timer, cubetimer, rubiks cube timer, online timer, webtimer, speedcube, cubeing, wca, wcatimer, speedcubetimer, cube record, stopwatch" />
+    <title>CubeTimer – online speedcubing-timer met WCA-scrambles</title>
+    <meta name="description" content="Gratis online timer voor de Rubik's kubus: officiële WCA-scrambles, inspectietijd, Ao5 en Ao12, statistieken en smart cubes. Direct in je browser." />
+    <meta name="keywords" content="cubetimer, rubiks kubus timer, speedcubing timer, online cube timer, wca scrambles, speedcube, ao5, ao12, smart cube" />
     <meta name="google-adsense-account" content="ca-pub-9889350952616788" />
-    <title>CubeTimer</title>
 
-    <link rel="icon" type="image/png" href="Pictures/CubeTimerFavicon_V2.png" />
+    <!-- SEO: het ene echte adres van deze pagina (zie CLAUDE.md, SEO). -->
+    <link rel="canonical" href="https://cubetimer.nl/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <!-- Het voorbeeldje bij een gedeelde link. Adressen moeten volledig zijn. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="nl_NL" />
+    <meta property="og:url" content="https://cubetimer.nl/" />
+    <meta property="og:title" content="CubeTimer – online speedcubing-timer" />
+    <meta property="og:description" content="Officiële WCA-scrambles, inspectietijd, statistieken en smart cubes. Gratis, in je browser, ook zonder account." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Het logo van CubeTimer met de tekst: online speedcubing-timer" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Structured data: vertelt Google dat dit een gratis webapp is, van wie
+         hij is en welk logo erbij hoort. -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/#website",
+                "url": "https://cubetimer.nl/",
+                "name": "CubeTimer",
+                "inLanguage": "nl-NL",
+                "publisher": { "@id": "https://cubetimer.nl/#organisatie" }
+            },
+            {
+                "@type": "Organization",
+                "@id": "https://cubetimer.nl/#organisatie",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/",
+                "logo": "https://cubetimer.nl/Pictures/favicon-192.png"
+            },
+            {
+                "@type": "WebApplication",
+                "@id": "https://cubetimer.nl/#timer",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/",
+                "description": "Gratis online timer voor speedcubers, met officiële WCA-scrambles, inspectietijd, statistieken, smart cubes, ranglijsten en toernooien.",
+                "image": "https://cubetimer.nl/Pictures/og-image.png",
+                "applicationCategory": "SportsApplication",
+                "operatingSystem": "Elke moderne browser",
+                "inLanguage": "nl-NL",
+                "isAccessibleForFree": true,
+                "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+                "featureList": [
+                    "Officiële WCA-scrambles voor 19 events",
+                    "WCA-inspectie van 15 seconden",
+                    "Ao5, Ao12, Ao50 en Ao100",
+                    "Statistieken per sessie, dag en week",
+                    "Smart cubes via Bluetooth",
+                    "Ranglijsten, toernooien en spelmodi"
+                ],
+                "isPartOf": { "@id": "https://cubetimer.nl/#website" }
+            }
+        ]
+    }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -67,7 +134,7 @@
              ================================================================ -->
         <aside class="sidebar">
             <div class="sidebar__brand">
-                <img id="logo-sidebar" src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" />
+                <img id="logo-sidebar" src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
             </div>
 
             <div class="sidebar__scroll">
@@ -200,9 +267,12 @@
              Hoofdgebied: timer
              ================================================================ -->
         <main class="main">
+            <!-- De kop van de pagina voor zoekmachines en schermlezers. Zichtbaar
+                 staat het logo er al; een tweede kop zou de timer in de weg zitten. -->
+            <h1 class="visually-hidden">CubeTimer: online speedcubing-timer met WCA-scrambles</h1>
             <header class="topbar">
                 <div class="topbar__brand">
-                    <img id="logo-header" src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" />
+                    <img id="logo-header" src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
                 </div>
 
                 <div class="topbar__actions">

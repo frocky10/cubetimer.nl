@@ -52,7 +52,11 @@ public_html/                   Precies wat er op de server komt te staan
   index.html                   De timer
   leren.html                   Leerpagina: beginner, F2L, OLL, PLL
   profiel.php                  Openbaar profiel, serverside gerenderd
-  .htaccess                    Rewrite van /u/naam naar profiel.php
+  404.html                     Eigen foutpagina (noindex, paden vanaf de root)
+  .htaccess                    Eén adres (https, zonder www), /u/naam, 404, caching
+  robots.txt, sitemap.xml      Voor zoekmachines, zie het hoofdstuk SEO
+  ads.txt                      Welke AdSense-accounts advertenties mogen tonen
+  site.webmanifest, favicon.ico  Icoon en naam voor browsers en telefoons
   Style/style.css              Eén design system, met tokens bovenaan
   Script/
     ui.js                      Toasts, modals, ask(), api(), opslag  ← laadt eerst
@@ -147,6 +151,10 @@ node tools/smartcube-testen.js
 # Het rekenwerk van de spelmodi, de rangschikking per format (Ao5, Mo3, best
 # of) en de omzetting van WCA-antwoorden. Geen database of netwerk nodig.
 php tools/spelmodi-en-wca-testen.php
+
+# SEO: titels, omschrijvingen, canonicals, sitemap, robots.txt, noindex op
+# profielen, og:image, JSON-LD, ads.txt. Draai na elke wijziging aan een <head>.
+php tools/seo-controleren.php
 
 # De site lokaal draaien, inclusief werkende API
 php -S 127.0.0.1:8123 -t public_html
@@ -622,9 +630,14 @@ een `scope`: `all` of `friends`, waarbij `friends` beperkt tot
 ## Openbare profielen
 
 `/profiel.php?u=naam` is een **serverside gerenderde** pagina, geen JavaScript
-dat een leeg scherm vult. Reden: een gedeelde link moet in WhatsApp, Discord en
-Google meteen laten zien om wie het gaat, en dat werkt alleen als de titel en
-de omschrijving al in de HTML staan. De og-tags worden per cuber ingevuld.
+dat een leeg scherm vult. Reden: een gedeelde link moet in WhatsApp en Discord
+meteen laten zien om wie het gaat, en dat werkt alleen als de titel en de
+omschrijving al in de HTML staan. De og-tags worden per cuber ingevuld.
+
+Profielen staan **niet in Google** (`noindex`, als meta-tag en als
+`X-Robots-Tag`). Delen werkt gewoon; zie het hoofdstuk SEO. Omdat de pagina
+ook onder `/u/naam` verschijnt, beginnen alle paden erin bij de root
+(`/Style/style.css`); met relatieve paden kwamen CSS en logo onder `/u/` uit.
 
 `.htaccess` in `public_html` maakt er `/u/naam` van. Staat mod_rewrite uit, dan
 blijft `/profiel.php?u=naam` gewoon werken; de site verwijst overal naar die
@@ -638,6 +651,34 @@ heeft). Daar staat dus de enige plek waar bepaald wordt wat openbaar is.
 ranglijsten. Zet hij die schakelaar uit, dan geeft zowel de pagina als de API
 een 404 en verdwijnt hij ook van de ranglijsten. Er staat nooit een
 e-mailadres op een profiel.
+
+## SEO
+
+Het doel: de timer en de leerpagina goed vindbaar, de rest niet. Alles staat
+op één adres, **`https://cubetimer.nl`**, zonder www.
+
+| Wat | Waar | Waarom |
+|---|---|---|
+| Eén adres | `.htaccess` | `www.` en `http://` gaan met een 301 naar `https://cubetimer.nl`, `/index.html` naar `/`. Anders ziet Google drie sites met dezelfde inhoud. Controleert `X-Forwarded-Proto`, zodat een proxy geen lus geeft |
+| Canonical | `<link rel="canonical">` op elke indexeerbare pagina | Precies het adres uit de sitemap, ook als iemand `?oefen=...` of `/index.html` deelt |
+| Sitemap | `sitemap.xml` | Alleen `/` en `/leren.html`. Een nieuwe openbare pagina hoort erin, met hetzelfde adres als in zijn canonical |
+| robots.txt | `robots.txt` | Blokkeert alleen `/api/`. Profielen bewust **niet**: een geblokkeerde pagina leest Google niet, dus dan ziet hij de noindex niet en kan de kale URL alsnog in de resultaten komen |
+| Niet in Google | `profiel.php`, `404.html` | `noindex, follow` als meta-tag en als `X-Robots-Tag`-header. De 404-pagina geeft ook echt een 404 |
+| Titel en omschrijving | `<head>` | Nederlands, titel ≤ 60 tekens, omschrijving 70-160 tekens |
+| Kop | `index.html` | Een `<h1>` met `.visually-hidden`: het logo staat er al, een zichtbare kop zou de timer in de weg zitten. Er is bewust geen verborgen lap tekst voor zoekmachines; dat ziet Google als misleiding |
+| Delen | `og:*` en `twitter:card` | `Pictures/og-image.png` (1200x630), altijd als volledig adres; een relatief pad toont in WhatsApp niets |
+| Structured data | JSON-LD in de `<head>` | Timer: `WebSite`, `Organization` (met logo) en `WebApplication` (gratis). Leren: `WebPage`/`LearningResource` met een kruimelpad |
+| Iconen | `favicon.ico`, `Pictures/favicon-*.png`, `apple-touch-icon.png`, `site.webmanifest` | Google toont een favicon vanaf 48px. Gemaakt met `php tools/seo-afbeeldingen.php`; opnieuw draaien als het logo verandert |
+| Snelheid | `.htaccess` | gzip, plaatjes en lettertypes een maand in de cache. CSS, JS en HTML niet: er zit geen versienummer in de bestandsnamen, dus na een release moet de browser het nieuwe bestand ophalen |
+| Advertenties | `ads.txt` | Beide AdSense-accounts (`pub-7865…` en `pub-9889…`) staan erin. `tools/seo-controleren.php` controleert dat elk id uit `index.html` er ook in staat |
+
+`php tools/seo-controleren.php` loopt dit allemaal na. De `.htaccess` is
+getest op een echte Apache (redirects, 404, headers, gzip); `php -S` leest geen
+`.htaccess`.
+
+**Na de deploy**: meld de site aan in Google Search Console (eigendom bewijzen
+via DNS of een HTML-bestand), stuur daar `https://cubetimer.nl/sitemap.xml` in,
+en controleer met de Rich Results Test dat de structured data gelezen wordt.
 
 ## Landen
 
