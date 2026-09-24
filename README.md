@@ -217,6 +217,7 @@ terug te zien.
 
 - [x] Openbaar profiel op `/profiel.php?u=naam`, ook bereikbaar via `/u/naam`
 - [x] Deelbaar: de link laat in WhatsApp en Discord meteen zien om wie het gaat
+- [x] Bewust niet in Google; `/u/naam` laadt nu ook de opmaak goed
 - [x] Te openen door op een naam in de ranglijst te klikken
 - [x] Landcode naast je naam op de ranglijst en op je profiel
 - [x] Uit te zetten: geen ranglijst betekent ook geen profiel
@@ -239,6 +240,20 @@ terug te zien.
 - [x] Werkt op telefoon, tablet en desktop
 - [x] Instellingenpaneel
 - [x] Bug- en ideeënknop die een GitHub-issue aanmaakt — [#16](https://github.com/frocky10/cubetimer.nl/issues/16)
+
+**Vindbaarheid (SEO)** — [#77](https://github.com/frocky10/cubetimer.nl/issues/77)
+
+- [x] Eén adres: `https://cubetimer.nl`; `www.`, `http://` en `/index.html` sturen door
+- [x] `robots.txt` en `sitemap.xml`
+- [x] Nederlandse titels en omschrijvingen, canonical op elke pagina
+- [x] Voorbeeldplaatje bij een gedeelde link (WhatsApp, Discord, X)
+- [x] Structured data voor de timer en de leerpagina
+- [x] Favicons voor Google, telefoons en browsers, plus een webmanifest
+- [x] Eigen 404-pagina die ook echt een 404 geeft
+- [x] Profielen staan niet in Google, maar zijn wel te delen
+- [x] `ads.txt` met beide AdSense-accounts
+- [x] gzip en caching voor plaatjes en lettertypes
+- [x] Controlescript (`tools/seo-controleren.php`)
 
 ### Nog te doen
 
@@ -265,6 +280,7 @@ terug te zien.
 
 **Beheer**
 
+- [ ] Site aanmelden in Google Search Console en de sitemap insturen
 - [ ] Google Ads goed instellen — [#15](https://github.com/frocky10/cubetimer.nl/issues/15)
 
 ---

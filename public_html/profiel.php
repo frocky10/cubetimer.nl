@@ -22,6 +22,14 @@ if ($profiel === null) {
     http_response_code(404);
 }
 
+// Profielen horen niet in zoekmachines (zie CLAUDE.md, SEO). De header werkt
+// ook voor crawlers die de HTML niet lezen; de meta-tag hieronder zegt hetzelfde.
+header('X-Robots-Tag: noindex, follow');
+
+// Delen via WhatsApp en Discord werkt wel; die hebben een volledig adres nodig.
+$siteUrl = 'https://cubetimer.nl';
+$profielUrl = $profiel === null ? $siteUrl . '/' : $siteUrl . '/u/' . rawurlencode($profiel['username']);
+
 /** Korte hulpfunctie: alles wat de pagina in gaat wordt ge-escaped. */
 function e(?string $tekst): string
 {
@@ -84,22 +92,30 @@ $CATEGORIE_LABELS = [
     <title><?= e($titel) ?></title>
     <meta name="description" content="<?= e($omschrijving) ?>" />
 
-    <!-- Voor het voorbeeldje in WhatsApp, Discord en op social media -->
+    <!-- Niet in zoekmachines, wel volgbaar naar de rest van de site. -->
+    <meta name="robots" content="noindex, follow" />
+
+    <!-- Voor het voorbeeldje in WhatsApp, Discord en op social media. Een
+         og:image moet een volledig adres zijn, anders tonen ze niets. -->
     <meta property="og:type" content="profile" />
     <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="nl_NL" />
+    <meta property="og:url" content="<?= e($profielUrl) ?>" />
     <meta property="og:title" content="<?= e($titel) ?>" />
     <meta property="og:description" content="<?= e($omschrijving) ?>" />
-    <meta property="og:image" content="Pictures/CubeTimerLogo_V2.png" />
-    <meta name="twitter:card" content="summary" />
-    <?php if ($profiel === null): ?>
-    <meta name="robots" content="noindex" />
-    <?php endif; ?>
+    <meta property="og:image" content="<?= e($siteUrl) ?>/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-    <link rel="icon" type="image/png" href="Pictures/CubeTimerFavicon_V2.png" />
+    <!-- Paden vanaf de root: via /u/naam zou "Style/..." onder /u/ uitkomen. -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="Style/style.css" />
+    <link rel="stylesheet" href="/Style/style.css" />
 
     <script>
         (function () {
@@ -115,10 +131,10 @@ $CATEGORIE_LABELS = [
 </head>
 <body class="profile-page">
     <header class="profile-topbar">
-        <a class="profile-topbar__brand" href="index.html" aria-label="Naar de timer">
-            <img src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" />
+        <a class="profile-topbar__brand" href="/" aria-label="Naar de timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
         </a>
-        <a class="btn btn--primary" href="index.html">Zelf timen</a>
+        <a class="btn btn--primary" href="/">Zelf timen</a>
     </header>
 
 <?php if ($profiel === null): ?>
@@ -129,7 +145,7 @@ $CATEGORIE_LABELS = [
                 <p class="modal__subtitle">
                     Deze cuber bestaat niet, of heeft ervoor gekozen zijn profiel niet te delen.
                 </p>
-                <a class="btn btn--primary" href="index.html">Naar de timer</a>
+                <a class="btn btn--primary" href="/">Naar de timer</a>
             </div>
         </section>
     </main>
@@ -388,7 +404,7 @@ $CATEGORIE_LABELS = [
 <?php endif; ?>
 
     <footer class="profile-footer">
-        <a href="index.html">CubeTimer</a>
+        <a href="/">CubeTimer</a>
     </footer>
 
     <div class="toast-host" id="toast-host" role="status" aria-live="polite"></div>
@@ -399,7 +415,7 @@ $CATEGORIE_LABELS = [
             var volgen = knop.dataset.following !== '1';
             knop.disabled = true;
             try {
-                var response = await fetch('api/follows/toggle.php', {
+                var response = await fetch('/api/follows/toggle.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     credentials: 'same-origin',
