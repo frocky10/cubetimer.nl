@@ -939,6 +939,41 @@ textarea.input {
     border-bottom: none;
 }
 
+/* Bovenaan de tabel: oudere solves erbij laden (de tabel toont er per keer 100). */
+.solves-table tbody tr.solves-more {
+    cursor: default;
+}
+
+.solves-table tbody tr.solves-more:hover {
+    background: none;
+}
+
+.solves-table tbody tr.solves-more td {
+    padding: var(--space-2) 0.45rem;
+    text-overflow: clip;
+}
+
+.solves-more__button {
+    width: 100%;
+    padding: var(--space-2);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-text);
+    background: var(--surface-2);
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.solves-more__button:hover {
+    background: var(--surface-3);
+}
+
+.solves-more__button span {
+    font-weight: 400;
+    color: var(--text-subtle);
+}
+
 .solves-table .col-index {
     color: var(--text-subtle);
     font-size: 0.76rem;
@@ -1326,12 +1361,20 @@ body.is-timing #timer {
     -webkit-backdrop-filter: blur(6px);
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--dur) var(--ease);
+    /* Echt verborgen, niet alleen doorzichtig. Anders liggen er een stuk of
+       twaalf onzichtbare vensters met een blur over het hele scherm, en die
+       rekent Chrome elke frame opnieuw uit: tijdens het timen zakte de site
+       daardoor naar een handvol frames per seconde. De visibility springt pas
+       om als het vervagen klaar is. */
+    visibility: hidden;
+    transition: opacity var(--dur) var(--ease), visibility 0s linear var(--dur);
 }
 
 .time-modal.visible {
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
+    transition: opacity var(--dur) var(--ease), visibility 0s;
 }
 
 .time-modal__dialog {

@@ -115,16 +115,41 @@
     <script src="Script/account.js" defer></script>
     <script type="module" src="Script/scrambleScript.js"></script>
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7865142075636059" crossorigin="anonymous"></script>
-
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DNL5446N18"></script>
+    <!-- Google AdSense en Analytics, pas als de pagina klaar is.
+         Ze laden allebei flink wat script; bij het openen van de site ging dat
+         af van de tijd die de timer nodig had om te starten. gtag() werkt
+         meteen: wat erin gaat, wacht in dataLayer tot het script er is. -->
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-DNL5446N18');
+
+        (function () {
+            function laad(src, crossOrigin) {
+                var script = document.createElement('script');
+                script.async = true;
+                script.src = src;
+                if (crossOrigin) script.crossOrigin = 'anonymous';
+                document.head.appendChild(script);
+            }
+            function start() {
+                laad('https://www.googletagmanager.com/gtag/js?id=G-DNL5446N18', false);
+                laad('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7865142075636059', true);
+            }
+            function zodraRustig() {
+                if ('requestIdleCallback' in window) {
+                    window.requestIdleCallback(start, { timeout: 4000 });
+                } else {
+                    window.setTimeout(start, 1500);
+                }
+            }
+            if (document.readyState === 'complete') {
+                zodraRustig();
+            } else {
+                window.addEventListener('load', zodraRustig, { once: true });
+            }
+        })();
     </script>
 </head>
 <body>
