@@ -6,8 +6,8 @@
  *   Scramble van de dag  Iedereen dezelfde scramble, een poging, eigen
  *                        dagranglijst.
  *   Blijf oefenen        Doe vandaag een X aantal solves.
- *   Sneller dan jezelf   Doe een solve die X% sneller is dan je gewoonlijk
- *                        bent op je hoofd-event.
+ *   Sneller dan jezelf   Doe een solve onder je eigen doeltijd (de server
+ *                        rekent die uit en zet hem in de omschrijving).
  *
  * De twee laatste worden serverside bijgehouden bij elke synchronisatie; daar
  * hoeft dit bestand niets voor te doen behalve de stand tonen.

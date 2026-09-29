@@ -210,6 +210,61 @@ function averageOf(entries) {
     return trimmed.reduce((sum, value) => sum + value, 0) / trimmed.length;
 }
 
+/**
+ * Het beste gemiddelde over elk aaneengesloten blok van `count` solves, met
+ * precies dezelfde regels als averageOf(): beste en slechtste vallen weg, een
+ * DNF telt als slechtste, twee DNF's maken het blok ongeldig.
+ *
+ * Alleen sneller: averageOf() sorteert elk blok opnieuw, en voor een Ao100
+ * over duizenden solves was dat een tiende seconde per keer. Hier gaat het in
+ * één doorloop, met twee monotone wachtrijen voor het minimum en maximum van
+ * het schuivende blok, net als Averages.php op de server.
+ */
+function bestAverageOf(entries, count) {
+    if (!entries || count < 3 || entries.length < count) return null;
+    const values = entries.map(getEffectiveTime);
+
+    let best = null;
+    let sum = 0;        // som van de geldige tijden in het blok
+    let dnf = 0;        // aantal DNF's in het blok
+    const minQueue = [];  // indexen, oplopend in waarde
+    const maxQueue = [];  // indexen, aflopend in waarde
+    let minHead = 0;
+    let maxHead = 0;
+
+    for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        if (value === null) {
+            dnf++;
+        } else {
+            sum += value;
+            while (minQueue.length > minHead && values[minQueue[minQueue.length - 1]] >= value) minQueue.pop();
+            minQueue.push(i);
+            while (maxQueue.length > maxHead && values[maxQueue[maxQueue.length - 1]] <= value) maxQueue.pop();
+            maxQueue.push(i);
+        }
+
+        const start = i - count + 1;
+        if (start > 0) {
+            const eruit = values[start - 1];
+            if (eruit === null) dnf--;
+            else sum -= eruit;
+        }
+        while (minHead < minQueue.length && minQueue[minHead] < start) minHead++;
+        while (maxHead < maxQueue.length && maxQueue[maxHead] < start) maxHead++;
+
+        if (start < 0 || dnf > 1) continue;
+
+        const min = values[minQueue[minHead]];
+        // Met één DNF valt die weg als slechtste; anders de langzaamste tijd.
+        const average = dnf === 1
+            ? (sum - min) / (count - 2)
+            : (sum - min - values[maxQueue[maxHead]]) / (count - 2);
+        if (best === null || average < best) best = average;
+    }
+    return best;
+}
+
 /** Het lopende gemiddelde over de laatste `count` solves, als tekst. */
 function calculateAverage(list, count) {
     if (list.length < count) return '--';
@@ -769,38 +824,62 @@ async function deleteActiveSession() {
     generateScrambleForActiveEvent();
 }
 
+/**
+ * De tabel toont de laatste solves, niet allemaal: bij een sessie met
+ * duizenden tijden kostte het opbouwen en opmeten van de hele tabel bij elke
+ * solve meer dan een seconde. Met de knop bovenaan komen er steeds
+ * TABLE_PAGE bij. Statistieken en gemiddelden rekenen gewoon over alles.
+ */
+const TABLE_PAGE = 100;
+let tableLimit = TABLE_PAGE;
+let tableSessionId = null;
+
 function renderTimes() {
     if (!tableBody) return;
-    tableBody.innerHTML = '';
+
+    // Een andere sessie begint weer bij de laatste TABLE_PAGE.
+    if (tableSessionId !== activeSessionId) {
+        tableSessionId = activeSessionId;
+        tableLimit = TABLE_PAGE;
+    }
 
     // De snelste geldige tijd krijgt een PB-markering in de tabel.
-    const validTimes = times.map(getEffectiveTime).filter(value => value !== null);
-    const best = validTimes.length ? Math.min(...validTimes) : null;
-    let bestMarked = false;
-
+    let best = null;
+    let bestIndex = -1;
     times.forEach((entry, index) => {
-        const row = document.createElement('tr');
-        row.dataset.index = index;
-
         const effective = getEffectiveTime(entry);
+        if (effective !== null && (best === null || effective < best)) {
+            best = effective;
+            bestIndex = index;
+        }
+    });
+
+    const start = Math.max(0, times.length - tableLimit);
+    const rows = [];
+
+    if (start > 0) {
+        const extra = Math.min(TABLE_PAGE, start);
+        rows.push(`<tr class="solves-more"><td colspan="4">
+            <button type="button" class="solves-more__button" data-more-times>
+                Toon er ${extra} meer <span>(nog ${start} ouder)</span>
+            </button></td></tr>`);
+    }
+
+    // Gemiddelden per rij uit een venster van 5 of 12, niet uit de hele lijst
+    // tot die rij: dat laatste was kwadratisch in het aantal solves.
+    for (let index = start; index < times.length; index++) {
+        const entry = times[index];
         const timeClass = entry.penalty === 'dnf' || entry.raw === null
             ? 'time-dnf'
             : entry.penalty === 'plus2' ? 'time-plus2' : '';
-
-        if (!bestMarked && best !== null && effective === best) {
-            row.classList.add('is-best');
-            bestMarked = true;
-        }
-
-        const upto = times.slice(0, index + 1);
-        row.innerHTML = `
+        rows.push(`<tr data-index="${index}"${index === bestIndex ? ' class="is-best"' : ''}>
             <td class="col-index">${index + 1}</td>
             <td class="time-cell ${timeClass}">${getDisplayLabel(entry)}</td>
-            <td class="avg-cell">${calculateAverage(upto, 5)}</td>
-            <td class="avg-cell">${calculateAverage(upto, 12)}</td>
-        `;
-        tableBody.appendChild(row);
-    });
+            <td class="avg-cell">${calculateAverage(times.slice(Math.max(0, index - 4), index + 1), 5)}</td>
+            <td class="avg-cell">${calculateAverage(times.slice(Math.max(0, index - 11), index + 1), 12)}</td>
+        </tr>`);
+    }
+    tableBody.innerHTML = rows.join('');
 
     if (timesEmpty) timesEmpty.hidden = times.length > 0;
     if (timesCount) timesCount.textContent = String(times.length);
@@ -808,6 +887,16 @@ function renderTimes() {
     renderGraph();
     renderSessionPr();
     notifyDataChange();
+}
+
+/** Toont TABLE_PAGE oudere solves, zonder dat de tabel onder je wegspringt. */
+function showMoreTimes() {
+    const container = tableBody.closest('.table-container');
+    const hoogteVoor = container ? container.scrollHeight : 0;
+    const scrollVoor = container ? container.scrollTop : 0;
+    tableLimit += TABLE_PAGE;
+    renderTimes();
+    if (container) container.scrollTop = scrollVoor + (container.scrollHeight - hoogteVoor);
 }
 
 /** Laat de rest van de app (statistieken, synchronisatie) weten dat er data wijzigde. */
@@ -1229,17 +1318,40 @@ function deleteLastSolve() {
     persistSessions();
 }
 
+/**
+ * De breedte van de grafiek, bijgehouden door een ResizeObserver. Vroeger
+ * werd clientWidth opgevraagd direct nadat de tijdentabel was vernieuwd; dat
+ * dwong Chrome om meteen de hele pagina op te meten, en dat was het grootste
+ * deel van de hapering na een solve.
+ */
+let graphCssWidth = 0;
+if (sessionGraphCanvas && 'ResizeObserver' in window) {
+    new ResizeObserver(entries => {
+        const breedte = Math.round(entries[0].contentRect.width);
+        if (breedte && breedte !== graphCssWidth) {
+            graphCssWidth = breedte;
+            renderGraph();
+        }
+    }).observe(sessionGraphCanvas);
+}
+
 /** Zet de canvasgrootte gelijk aan de CSS-grootte, zodat de lijn scherp blijft. */
 function resizeGraphCanvas() {
     if (!sessionGraphCanvas || !sessionGraphCtx) return { width: 0, height: 0 };
 
     const ratio = window.devicePixelRatio || 1;
-    const cssWidth = sessionGraphCanvas.clientWidth || 260;
+    const cssWidth = graphCssWidth || 260;
     const cssHeight = Math.round(cssWidth * 0.54);
 
-    sessionGraphCanvas.width = Math.round(cssWidth * ratio);
-    sessionGraphCanvas.height = Math.round(cssHeight * ratio);
-    sessionGraphCanvas.style.height = cssHeight + 'px';
+    // Alleen aanpassen als het nodig is: een nieuwe canvasgrootte wist en
+    // alloceert het hele canvas opnieuw.
+    const pixelWidth = Math.round(cssWidth * ratio);
+    const pixelHeight = Math.round(cssHeight * ratio);
+    if (sessionGraphCanvas.width !== pixelWidth || sessionGraphCanvas.height !== pixelHeight) {
+        sessionGraphCanvas.width = pixelWidth;
+        sessionGraphCanvas.height = pixelHeight;
+        sessionGraphCanvas.style.height = cssHeight + 'px';
+    }
 
     sessionGraphCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
     return { width: cssWidth, height: cssHeight };
@@ -1361,6 +1473,10 @@ function renderSessionPr() {
 
 if (tableBody) {
     tableBody.addEventListener('click', e => {
+        if (e.target.closest('[data-more-times]')) {
+            showMoreTimes();
+            return;
+        }
         const row = e.target.closest('tr');
         if (!row || row.dataset.index === undefined) return;
         openEditModal(Number(row.dataset.index));
@@ -1502,6 +1618,7 @@ startPracticeFromUrl();
 window.cubeTimerApi = {
     formatTime,
     averageOf,
+    bestAverageOf,
     getEffectiveTime,
     getEventLabel,
     getEventOptions: () => EVENT_OPTIONS.map(option => ({ ...option })),
