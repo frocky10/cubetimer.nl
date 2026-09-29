@@ -213,7 +213,7 @@ namen liggen vast tenzij je het JS meeverandert:
 `.sun` / `.toggle-knob`), `#session-select`, `#cube-select`, `#cube-display`,
 `.time-modal` (+ `.visible`), alle `#modal-*`, alle `#smartcube-*`,
 alle `#games-*` en `[data-close-games]`, alle `#tournament-*`,
-`[data-sc-view]` / `[data-sc-step]`, `.sc-move`,
+`[data-sc-view]` / `[data-sc-step]`, `.sc-move`, `[data-more-times]`,
 `[data-settings-tab]` / `[data-settings-panel]`.
 
 De klasse `.time-modal` is een historische naam en wordt door **alle** modals
@@ -237,7 +237,7 @@ smart-cubevenster opent). Wie ze niet nodig heeft, downloadt ze ook niet.
 | Object | Van wie | Waarvoor |
 |---|---|---|
 | `window.CubeTimerUI` | `ui.js` | `toast`, `ask`, `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
-| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture(handler, owner)`, `getSolveCaptureOwner`, `triggerConfetti`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, `startInspectionFromBluetooth`, `startTimerFromBluetooth`, `stopTimerFromBluetooth({ ms, analysis })` |
+| `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `bestAverageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture(handler, owner)`, `getSolveCaptureOwner`, `triggerConfetti`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, `startInspectionFromBluetooth`, `startTimerFromBluetooth`, `stopTimerFromBluetooth({ ms, analysis })` |
 | `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
 | `window.CubeTimerLeaderboard` | `leaderboard.js` | `open`, `reload` |
 | `window.CubeTimerChallenges` | `challenges.js` | `load`, `stopChallenge` |
@@ -307,8 +307,14 @@ de slechtste vallen weg, één DNF telt als slechtste en mag dus, vanaf twee
 DNF's is het gemiddelde zelf een DNF. Gebruik altijd deze functie — niet zelf
 een gemiddelde uitrekenen.
 
-`stats.js` gebruikt hem voor het *beste* Ao5/Ao12 over een periode (alle
-aaneengesloten blokken), `script.js` voor het *lopende* gemiddelde in de tabel.
+`bestAverageOf(entries, count)` ernaast geeft het *beste* gemiddelde over alle
+aaneengesloten blokken, met precies dezelfde regels, maar in één doorloop (twee
+monotone wachtrijen, net als `Averages.php`). `stats.js` gebruikt die voor de
+beste Ao5 t/m Ao100; `averageOf()` sorteerde elk blok opnieuw en kostte bij een
+Ao100 over 10.000 solves 105 ms per keer, nu 0,2 ms. Op 12.000 willekeurige
+reeksen met DNF's en +2's geven ze hetzelfde antwoord. Pas je de regels aan,
+doe dat dan in allebei. `script.js` gebruikt `averageOf()` voor het *lopende*
+gemiddelde in de tabel.
 
 ---
 
@@ -477,6 +483,15 @@ willekeurig een uit, en alleen uit scrambles die er minstens 24 uur in staan.
 Zo kan niemand een makkelijke scramble insturen en die zelf krijgen.
 `Challenges::looksLikeScramble()` weigert alles wat geen 16 tot 25 geldige
 zetten is zonder herhaald vlak.
+
+**"Sneller dan jezelf"** heeft een percentage in de database (voor iedereen
+hetzelfde), maar in beeld staat een **tijd**: "Doe vandaag een solve onder
+00:13:903 op 3x3x3". `Challenges::today()` rekent die per gebruiker uit met
+`beatAverageTarget()`: het gemiddelde van zijn laatste 50 solves op zijn
+hoofd-event van vóór vandaag, min het percentage. Daardoor ligt de doeltijd de
+hele dag vast. "Onder" is strikt: precies de getoonde tijd telt niet. Met
+minder dan 12 solves staat er hoeveel er nog nodig zijn; een gast krijgt de
+uitnodiging om in te loggen.
 
 Loopt de voorraad leeg, dan is er die dag simpelweg geen scramble van de dag;
 de twee andere opdrachten staan er wel. Dat is bewust: liever geen opdracht dan
@@ -651,6 +666,37 @@ heeft). Daar staat dus de enige plek waar bepaald wordt wat openbaar is.
 ranglijsten. Zet hij die schakelaar uit, dan geeft zowel de pagina als de API
 een 404 en verdwijnt hij ook van de ranglijsten. Er staat nooit een
 e-mailadres op een profiel.
+
+## Snelheid in de browser
+
+Gemeten in Chromium met een zware gebruiker (3000 solves in de sessie, 10.000
+in totaal). Oud → nieuw: tijdens het timen 13 → 60 frames per seconde, van de
+stop-toets tot je tijd in beeld 1023 → 105 ms, langste blokkade bij het laden
+643 → 145 ms. Regels die daaruit volgen:
+
+- **Geen `backdrop-filter` op iets wat onzichtbaar over het scherm ligt.** De
+  vensters (`.time-modal`) staan allemaal in de pagina, met een blur. Met alleen
+  `opacity: 0` rekent Chrome die twaalf blurs elke frame uit; daarom krijgen ze
+  `visibility: hidden` als ze dicht zijn. Dat was de hapering tijdens het timen.
+- **De tijdentabel toont de laatste 100 solves** (`TABLE_PAGE`), met bovenaan een
+  knop voor 100 meer. De hele tabel opnieuw opbouwen bij elke solve kostte bij
+  duizenden tijden meer dan een seconde. Een andere sessie begint weer bij 100.
+- **Geen maten opvragen direct na een DOM-wijziging.** De grafiek vroeg
+  `clientWidth` op vlak nadat de tabel vernieuwd was, en dwong Chrome zo om
+  meteen alles op te meten. De breedte komt nu uit een `ResizeObserver`.
+- **Rekenwerk dat niet meteen in beeld hoeft, wacht.** `stats.js` rekent na een
+  solve pas in `requestIdleCallback`, zodat hij niet tussen de stop-toets en je
+  tijd in zit.
+- **AdSense en Analytics laden pas na `load` + idle**, niet in de `<head>`.
+  `gtag()` werkt meteen; wat erin gaat wacht in `dataLayer`.
+- **De gloed om de timercijfers** (`filter: drop-shadow`) kost tekenwerk bij elke
+  frame. Hij blijft staan (keuze van de eigenaar); met de vensterfix haalt de
+  timer toch 60 fps. `will-change` erop verlaagde het tekenwerk maar drukte in
+  de meting de framerate, dus die staat er bewust niet.
+
+Meten gaat met Playwright en de Chrome DevTools-protocol-metrics
+(`Performance.getMetrics`, tracing, `Profiler`); zie de geschiedenis van
+[#81](https://github.com/frocky10/cubetimer.nl/issues/81).
 
 ## SEO
 

@@ -111,10 +111,15 @@
      * Rekenwerk
      * ------------------------------------------------------------------ */
 
-    /** Het beste gemiddelde over elk aaneengesloten blok van `count` solves. */
+    /**
+     * Het beste gemiddelde over elk aaneengesloten blok van `count` solves.
+     * bestAverageOf() in script.js doet dat in één doorloop met dezelfde
+     * regels als averageOf(); de lus hieronder is alleen nog een vangnet.
+     */
     function bestRollingAverage(entries, count) {
         const api = window.cubeTimerApi;
         if (!api || entries.length < count) return null;
+        if (typeof api.bestAverageOf === 'function') return api.bestAverageOf(entries, count);
 
         let best = null;
         for (let start = 0; start + count <= entries.length; start += 1) {
@@ -235,8 +240,29 @@
         button.addEventListener('click', () => setScope(button.dataset.statsScope));
     });
 
-    window.addEventListener('cubetimer:data-change', render);
-    window.addEventListener('cubetimer:event-change', render);
+    /**
+     * Na een solve pas rekenen als de browser even niets te doen heeft. Over
+     * duizenden solves kost dat al snel een tiende seconde, en dat hoort niet
+     * tussen het stoppen van de timer en het tonen van je tijd in te zitten.
+     * Meerdere wijzigingen vlak na elkaar worden één keer rekenen.
+     */
+    let renderGepland = false;
+    function planRender() {
+        if (renderGepland) return;
+        renderGepland = true;
+        const uitvoeren = () => {
+            renderGepland = false;
+            render();
+        };
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(uitvoeren, { timeout: 800 });
+        } else {
+            window.setTimeout(uitvoeren, 120);
+        }
+    }
+
+    window.addEventListener('cubetimer:data-change', planRender);
+    window.addEventListener('cubetimer:event-change', planRender);
 
     // Rond middernacht klopt "vandaag" niet meer; elke minuut een goedkope check.
     let lastDayStart = startOfToday();

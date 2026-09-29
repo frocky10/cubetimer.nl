@@ -15,8 +15,9 @@ require_once __DIR__ . '/Xp.php';
  *   scramble_of_the_day  Iedereen krijgt dezelfde scramble en heeft een
  *                        poging. Met een eigen dagranglijst.
  *   solve_count          Doe vandaag X solves.
- *   beat_average         Doe een solve die X% sneller is dan je gewoonlijk
- *                        bent op je hoofd-event.
+ *   beat_average         Doe een solve onder je eigen doeltijd: X% sneller
+ *                        dan je gewoonlijk bent op je hoofd-event. In beeld
+ *                        staat de tijd zelf, niet het percentage.
  *
  * De opdrachten worden gemaakt zodra de eerste bezoeker die dag om de
  * challenges vraagt. Welke aantallen en percentages het worden, hangt af van
@@ -108,6 +109,24 @@ final class Challenges
                 'valueMs'     => $entry !== null && $entry['value_ms'] !== null ? (int) $entry['value_ms'] : null,
             ];
 
+            if ($row['type'] === 'beat_average') {
+                // Een tijd zegt meer dan een percentage: "onder 00:14:230" in
+                // plaats van "5% sneller dan je gebruikelijke tijd".
+                $challenge['targetMs'] = null;
+                if ($userId === null) {
+                    $challenge['description'] = 'Log in, dan krijg je een eigen doeltijd op basis van je laatste solves.';
+                } else {
+                    $doel = self::beatAverageTarget($userId, (int) ($payload['percent'] ?? 5), SiteTime::utcStartOfDay($date));
+                    $challenge['event'] = $doel['event'];
+                    $challenge['eventLabel'] = Events::label($doel['event']);
+                    $challenge['targetMs'] = $doel['targetMs'];
+                    $challenge['description'] = $doel['targetMs'] !== null
+                        ? sprintf('Doe vandaag een solve onder %s op %s.', self::formatMs($doel['targetMs']), Events::label($doel['event']))
+                        : sprintf('Doe eerst nog %d %s op %s; dan krijg je een doeltijd.',
+                            $doel['missing'], $doel['missing'] === 1 ? 'solve' : 'solves', Events::label($doel['event']));
+                }
+            }
+
             if ($row['type'] === 'scramble_of_the_day') {
                 $challenge['scramble'] = (string) ($payload['scramble'] ?? '');
                 $challenge['attempted'] = $entry !== null;
@@ -166,8 +185,10 @@ final class Challenges
 
         if (!in_array('beat_average', $aanwezig, true)) {
             $percent = self::BEAT_AVERAGE_PERCENTS[intdiv($zaad, 7) % count(self::BEAT_AVERAGE_PERCENTS)];
+            // De omschrijving is voor iedereen anders (een eigen doeltijd) en wordt
+            // daarom per gebruiker ingevuld in today(); dit is de algemene tekst.
             self::insert($date, 'beat_average', '', 'Sneller dan jezelf',
-                sprintf('Doe een solve die minstens %d%% sneller is dan je gebruikelijke tijd.', $percent),
+                'Doe een solve onder je eigen doeltijd voor vandaag.',
                 ['percent' => $percent], self::XP_BEAT_AVERAGE, 4);
         }
 
@@ -378,14 +399,18 @@ final class Challenges
     }
 
     /**
-     * Heeft de gebruiker vandaag een solve gedaan die het gevraagde percentage
-     * sneller is dan zijn gebruikelijke tijd?
+     * De doeltijd van deze gebruiker voor vandaag: het gevraagde percentage
+     * sneller dan zijn gebruikelijke tijd.
      *
      * "Gebruikelijk" is het gemiddelde van de laatste 50 solves op het
      * hoofd-event van voor vandaag. Niet zijn record, want dan zou de opdracht
-     * alleen te halen zijn door meteen een nieuw record te draaien.
+     * alleen te halen zijn door meteen een nieuw record te draaien. Omdat alleen
+     * solves van voor vandaag meetellen, ligt de doeltijd de hele dag vast.
+     *
+     * @return array{event:string,targetMs:?int,missing:int} `missing` is hoeveel
+     *         solves er nog nodig zijn voordat er een doeltijd is
      */
-    private static function beatAverageProgress(int $userId, int $percent, string $dagStart): bool
+    private static function beatAverageTarget(int $userId, int $percent, string $dagStart): array
     {
         $profiel = Database::first('SELECT main_event FROM user_profiles WHERE user_id = ?', [$userId]);
         $event = (string) ($profiel['main_event'] ?? '333');
@@ -401,12 +426,22 @@ final class Challenges
         );
 
         if (count($eerder) < self::REFERENCE_MINIMUM) {
-            return false;
+            return ['event' => $event, 'targetMs' => null, 'missing' => self::REFERENCE_MINIMUM - count($eerder)];
         }
 
         $waardes = array_map(static fn ($r) => (int) $r['effectief'], $eerder);
         $gebruikelijk = array_sum($waardes) / count($waardes);
-        $doel = $gebruikelijk * (1 - $percent / 100);
+        return ['event' => $event, 'targetMs' => (int) floor($gebruikelijk * (1 - $percent / 100)), 'missing' => 0];
+    }
+
+    /** Heeft de gebruiker vandaag een solve onder zijn doeltijd gedaan? */
+    private static function beatAverageProgress(int $userId, int $percent, string $dagStart): bool
+    {
+        $doel = self::beatAverageTarget($userId, $percent, $dagStart);
+        if ($doel['targetMs'] === null) {
+            return false;
+        }
+        $event = $doel['event'];
 
         $beste = Database::first(
             "SELECT MIN(CASE WHEN penalty = 'plus2' THEN raw_ms + 2000 ELSE raw_ms END) AS snelste
@@ -422,7 +457,13 @@ final class Challenges
         );
 
         $snelste = $beste['snelste'] ?? null;
-        return $snelste !== null && (int) $snelste <= $doel;
+        return $snelste !== null && (int) $snelste < $doel['targetMs'];
+    }
+
+    /** Milliseconden als mm:ss:mmm, net als de timer. */
+    private static function formatMs(int $ms): string
+    {
+        return sprintf('%02d:%02d:%03d', intdiv($ms, 60000), intdiv($ms % 60000, 1000), $ms % 1000);
     }
 
     /** Slaat de voortgang op en kent XP toe zodra de opdracht af is. */

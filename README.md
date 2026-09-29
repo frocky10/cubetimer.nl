@@ -156,7 +156,7 @@ terug te zien.
 - [x] Scramble van de dag: iedereen dezelfde scramble, één poging, eigen dagranglijst
 - [x] Elke dag 3x3 plus een roulerend event, in een cyclus van acht dagen
 - [x] Dagopdracht "doe X solves vandaag"
-- [x] Dagopdracht "doe een solve die X% sneller is dan je gebruikelijke tijd"
+- [x] Dagopdracht "doe een solve onder je eigen doeltijd", met die tijd in beeld in plaats van een percentage — [#80](https://github.com/frocky10/cubetimer.nl/issues/80)
 
 **Achievements** — [#27](https://github.com/frocky10/cubetimer.nl/issues/27)
 
@@ -240,6 +240,7 @@ terug te zien.
 - [x] Werkt op telefoon, tablet en desktop
 - [x] Instellingenpaneel
 - [x] Bug- en ideeënknop die een GitHub-issue aanmaakt — [#16](https://github.com/frocky10/cubetimer.nl/issues/16)
+- [x] Vlot in Chrome, ook met duizenden solves: 60 fps tijdens het timen, tabel toont de laatste 100 — [#81](https://github.com/frocky10/cubetimer.nl/issues/81)
 
 **Vindbaarheid (SEO)** — [#77](https://github.com/frocky10/cubetimer.nl/issues/77)
 
