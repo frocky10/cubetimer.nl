@@ -62,7 +62,7 @@ final class Auth
 
         try {
             $row = Database::first(
-                'SELECT u.id, u.public_id, u.username, u.email, u.role, u.created_at,
+                'SELECT u.id, u.public_id, u.username, u.email, u.email_verified_at, u.role, u.created_at,
                         p.display_name, p.country_code, p.main_event, p.xp, p.level,
                         s.id AS session_id, s.expires_at
                  FROM user_sessions s
@@ -181,6 +181,7 @@ final class Auth
             'id'          => $row['public_id'] ?? null,
             'username'    => $row['username'] ?? null,
             'email'       => $row['email'] ?? null,
+            'emailVerified' => !empty($row['email_verified_at']),
             'displayName' => $row['display_name'] ?? ($row['username'] ?? null),
             'role'        => $row['role'] ?? 'user',
             'country'     => $row['country_code'] ?? null,

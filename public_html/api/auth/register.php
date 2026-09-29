@@ -93,11 +93,20 @@ try {
 Auth::startSession($userId);
 
 $row = Database::first(
-    'SELECT u.id, u.public_id, u.username, u.email, u.role, u.created_at,
+    'SELECT u.id, u.public_id, u.username, u.email, u.email_verified_at, u.role, u.created_at,
             p.display_name, p.country_code, p.main_event, p.xp, p.level
      FROM users u LEFT JOIN user_profiles p ON p.user_id = u.id
      WHERE u.id = ?',
     [$userId]
 );
 
-Http::ok(['user' => Auth::publicUser($row ?? [])], 201);
+// Een bevestigingsmail, als mail aanstaat. Mislukt dat, dan is het account
+// er gewoon; in het accountvenster kun je hem opnieuw laten sturen.
+$verstuurd = false;
+try {
+    $verstuurd = AccountMail::sendVerification($userId);
+} catch (Throwable $e) {
+    error_log('[cubetimer] bevestigingsmail mislukt: ' . $e->getMessage());
+}
+
+Http::ok(['user' => Auth::publicUser($row ?? []), 'verificationSent' => $verstuurd], 201);

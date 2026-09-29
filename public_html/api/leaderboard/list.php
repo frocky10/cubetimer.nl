@@ -45,8 +45,11 @@ if ($scope === 'friends') {
 $board = Leaderboard::top($event, $category, $period, $limit, $offset, $kring);
 
 $me = null;
+$myIndex = null;
 if ($user !== null) {
     $me = Leaderboard::positionFor((int) $user['id'], $event, $category, $period);
+    // Waar je in déze lijst staat (ook de vriendenlijst), voor "Naar mijn plek".
+    $myIndex = Leaderboard::indexFor((int) $user['id'], $event, $category, $period, $kring);
 }
 
 Http::ok([
@@ -59,6 +62,9 @@ Http::ok([
     'timezone'    => SiteTime::zoneName(),
     'entries'     => $board['entries'],
     'total'       => $board['total'],
+    'offset'      => max(0, min($offset, 10000)),
+    'limit'       => max(1, min($limit, Leaderboard::MAX_LIMIT)),
+    'myIndex'     => $myIndex,
     'me'          => $me,
     'events'      => Leaderboard::activeEvents(),
 ]);

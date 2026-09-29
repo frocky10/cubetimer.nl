@@ -756,6 +756,38 @@
                     </div>
                     <p class="form-error" id="login-error" role="alert"></p>
                     <button class="btn btn--primary btn--block" type="submit" id="login-submit">Inloggen</button>
+                    <button class="btn btn--ghost btn--sm auth-link" type="button" id="forgot-open" hidden>Wachtwoord vergeten?</button>
+                </form>
+
+                <!-- Wachtwoord vergeten: een herstellink per mail -->
+                <form id="forgot-form" class="modal__body" novalidate hidden>
+                    <p class="field__hint">
+                        Vul je e-mailadres of gebruikersnaam in. Je krijgt een mail met een link om een nieuw
+                        wachtwoord te kiezen.
+                    </p>
+                    <div class="field">
+                        <label class="field__label" for="forgot-identifier">E-mailadres of gebruikersnaam</label>
+                        <input class="input" type="text" id="forgot-identifier" autocomplete="username" required />
+                    </div>
+                    <p class="form-error" id="forgot-error" role="alert"></p>
+                    <p class="notice" id="forgot-done" hidden></p>
+                    <button class="btn btn--primary btn--block" type="submit" id="forgot-submit">Stuur de link</button>
+                    <button class="btn btn--ghost btn--sm auth-link" type="button" data-auth-back>Terug naar inloggen</button>
+                </form>
+
+                <!-- Nieuw wachtwoord kiezen, via de link uit de mail (#herstel=...) -->
+                <form id="reset-form" class="modal__body" novalidate hidden>
+                    <div class="field">
+                        <label class="field__label" for="reset-password">Nieuw wachtwoord</label>
+                        <input class="input" type="password" id="reset-password" autocomplete="new-password" required minlength="8" />
+                        <span class="field__hint">Minstens 8 tekens. Je wordt daarna op al je andere apparaten uitgelogd.</span>
+                    </div>
+                    <div class="field">
+                        <label class="field__label" for="reset-password-repeat">Nog een keer</label>
+                        <input class="input" type="password" id="reset-password-repeat" autocomplete="new-password" required minlength="8" />
+                    </div>
+                    <p class="form-error" id="reset-error" role="alert"></p>
+                    <button class="btn btn--primary btn--block" type="submit" id="reset-submit">Wachtwoord opslaan</button>
                 </form>
 
                 <form id="register-form" class="modal__body" novalidate hidden>
@@ -782,6 +814,12 @@
 
             <!-- Ingelogd -->
             <div class="modal__body" id="account-user" hidden>
+                <!-- Adres nog niet bevestigd. Niet verplicht, wel handig voor als je je wachtwoord vergeet. -->
+                <div class="notice notice--warning account-verify" id="account-verify" hidden>
+                    <span id="account-verify-text"></span>
+                    <button class="btn btn--sm" type="button" id="account-verify-resend">Stuur de mail opnieuw</button>
+                </div>
+
                 <div class="account-summary">
                     <span class="rank-badge" id="account-summary-badge" data-tier="brons">
                         <span class="rank-badge__value" id="account-summary-rank">--</span>
@@ -975,6 +1013,14 @@
                 </table>
                 <p class="table-empty" id="leaderboard-empty" hidden>Hier staat nog niemand. Wees de eerste.</p>
             </div>
+
+            <!-- Bladeren: per 50, en in één klik naar de pagina waar jij staat. -->
+            <nav class="board-pager" id="leaderboard-pager" aria-label="Pagina's van de ranglijst" hidden>
+                <button class="btn btn--sm" type="button" id="leaderboard-prev" aria-label="Vorige pagina">‹ Vorige</button>
+                <span class="board-pager__label" id="leaderboard-page-label">Pagina 1 van 1</span>
+                <button class="btn btn--sm" type="button" id="leaderboard-next" aria-label="Volgende pagina">Volgende ›</button>
+                <button class="btn btn--sm btn--primary" type="button" id="leaderboard-mine" hidden>Naar mijn plek</button>
+            </nav>
 
             <div class="time-modal__footer">
                 <span class="field__hint" id="leaderboard-count"></span>

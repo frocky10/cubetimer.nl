@@ -82,6 +82,41 @@ return [
     'site_timezone' => 'Europe/Amsterdam',
 
     /* ---------------------------------------------------------------------
+     * Het adres van de site, voor de links in mails. Zonder / aan het eind.
+     * ------------------------------------------------------------------ */
+    'site_url' => 'https://cubetimer.nl',
+
+    /* ---------------------------------------------------------------------
+     * Mail - voor "wachtwoord vergeten" en het bevestigen van je e-mailadres
+     *
+     * Maak in DirectAdmin een mailbox aan: E-mail Manager > E-mail Accounts >
+     * Create Account, bijvoorbeeld noreply@cubetimer.nl met een sterk
+     * wachtwoord. De gegevens van de mailserver staan in DirectAdmin onder
+     * E-mail Accounts (vaak mail.cubetimer.nl, of de naam van de server).
+     *
+     *   encryption 'ssl'  met port 465   (aanbevolen)
+     *   encryption 'tls'  met port 587   (STARTTLS)
+     *   encryption 'none' alleen voor lokaal testen met tools/nep-smtp-server.php
+     *
+     * Laat 'host' leeg om mail uit te zetten: "wachtwoord vergeten" verdwijnt
+     * dan uit het inlogvenster en de site vraagt niet om je adres te bevestigen.
+     *
+     * Tip tegen de spam: zet in DirectAdmin bij je domein SPF en DKIM aan
+     * (DNS Management, vaak al standaard aan). Dan weten Gmail en Outlook dat
+     * de mail echt van cubetimer.nl komt.
+     * ------------------------------------------------------------------ */
+    'mail' => [
+        'host'        => '',                     // bijv. 'mail.cubetimer.nl'
+        'port'        => 465,
+        'encryption'  => 'ssl',                  // ssl | tls | none
+        'username'    => 'noreply@cubetimer.nl', // meestal het hele adres
+        'password'    => '',                     // het wachtwoord van die mailbox
+        'from'        => 'noreply@cubetimer.nl', // hetzelfde adres als de mailbox
+        'from_name'   => 'CubeTimer',
+        'verify_peer' => true,                   // certificaat controleren; laat aan
+    ],
+
+    /* ---------------------------------------------------------------------
      * WCA - voor de historische toernooien
      *
      * De server haalt de uitslagen van afgelopen competities op bij de

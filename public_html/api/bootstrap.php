@@ -30,6 +30,8 @@ require_once __DIR__ . '/lib/Ranking.php';
 require_once __DIR__ . '/lib/GameModes.php';
 require_once __DIR__ . '/lib/Duels.php';
 require_once __DIR__ . '/lib/Wca.php';
+require_once __DIR__ . '/lib/Mailer.php';
+require_once __DIR__ . '/lib/AccountMail.php';
 
 $debug = Config::get('debug', false) === true;
 

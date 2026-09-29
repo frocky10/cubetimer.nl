@@ -86,9 +86,22 @@
 
     const SYNC_DEBOUNCE_MS = 2500;
 
+    const forgotOpen = document.getElementById('forgot-open');
+    const forgotForm = document.getElementById('forgot-form');
+    const forgotError = document.getElementById('forgot-error');
+    const forgotDone = document.getElementById('forgot-done');
+    const resetForm = document.getElementById('reset-form');
+    const resetError = document.getElementById('reset-error');
+    const verifyBox = document.getElementById('account-verify');
+    const verifyText = document.getElementById('account-verify-text');
+    const verifyResend = document.getElementById('account-verify-resend');
+
     let currentUser = null;
     let profile = null;
     let accountsAvailable = false;
+    let mailAvailable = false;          // wachtwoord vergeten kan
+    let verificationAvailable = false;  // adres bevestigen kan
+    let resetToken = null;              // uit een #herstel=-link, zolang het formulier openstaat
     let syncTimer = null;
     let syncing = false;
     let pendingChanges = false;
@@ -125,19 +138,33 @@
             chipBadgeValue.textContent = profile.rank.label;
         }
 
-        guestPanel.hidden = loggedIn || !accountsAvailable;
-        userPanel.hidden = !loggedIn;
+        // Een herstellink uit de mail gaat voor: dan staat het formulier voor
+        // een nieuw wachtwoord in beeld, ook als je al ingelogd bent.
+        const herstellen = resetToken !== null && accountsAvailable;
+        guestPanel.hidden = herstellen ? false : (loggedIn || !accountsAvailable);
+        userPanel.hidden = herstellen || !loggedIn;
         unavailablePanel.hidden = accountsAvailable;
+        if (forgotOpen) forgotOpen.hidden = !mailAvailable;
 
-        modalTitle.textContent = loggedIn ? 'Je account' : 'Inloggen';
-        modalSubtitle.textContent = loggedIn
-            ? 'Je tijden staan veilig op de server.'
-            : 'Bewaar je tijden en neem ze mee naar elk apparaat.';
+        modalTitle.textContent = herstellen ? 'Nieuw wachtwoord' : (loggedIn ? 'Je account' : 'Inloggen');
+        modalSubtitle.textContent = herstellen
+            ? 'Kies een nieuw wachtwoord voor je account.'
+            : loggedIn
+                ? 'Je tijden staan veilig op de server.'
+                : 'Bewaar je tijden en neem ze mee naar elk apparaat.';
 
         if (loggedIn) {
             summaryName.textContent = currentUser.displayName || currentUser.username;
             summaryEmail.textContent = currentUser.email || '';
             renderCounts();
+        }
+
+        // Adres nog niet bevestigd: vragen, niet eisen.
+        const onbevestigd = loggedIn && verificationAvailable && currentUser.emailVerified === false;
+        if (verifyBox) verifyBox.hidden = !onbevestigd;
+        if (onbevestigd && verifyText) {
+            verifyText.textContent = `Bevestig je e-mailadres (${currentUser.email}); dan kunnen we je helpen als je `
+                + 'ooit je wachtwoord vergeet.';
         }
     }
 
@@ -483,18 +510,157 @@
     });
     UI.registerModal(modal);
 
+    /** login | register | forgot | reset */
     function setAuthTab(tab) {
         authTabs.forEach(button => {
             const isActive = button.dataset.authTab === tab;
             button.classList.toggle('is-active', isActive);
             button.setAttribute('aria-selected', isActive ? 'true' : 'false');
         });
+        const tabsBalk = authTabs[0]?.parentElement;
+        if (tabsBalk) tabsBalk.hidden = tab === 'forgot' || tab === 'reset';
         loginForm.hidden = tab !== 'login';
         registerForm.hidden = tab !== 'register';
+        if (forgotForm) forgotForm.hidden = tab !== 'forgot';
+        if (resetForm) resetForm.hidden = tab !== 'reset';
     }
 
     authTabs.forEach(button => {
         button.addEventListener('click', () => setAuthTab(button.dataset.authTab));
+    });
+
+    /* =====================================================================
+     * Wachtwoord vergeten, nieuw wachtwoord, adres bevestigen
+     *
+     * De links in de mails zetten het token achter een hekje (/#herstel=...,
+     * /#bevestig=...). Dat stuurt de browser nooit naar een server of naar
+     * Google Analytics; we lezen het hier uit en halen het meteen uit de
+     * adresbalk.
+     * ================================================================== */
+
+    forgotOpen?.addEventListener('click', () => {
+        const ingevuld = document.getElementById('login-identifier').value.trim();
+        const veld = document.getElementById('forgot-identifier');
+        if (ingevuld && !veld.value) veld.value = ingevuld;
+        forgotError.textContent = '';
+        forgotDone.hidden = true;
+        setAuthTab('forgot');
+        veld.focus();
+    });
+
+    document.querySelectorAll('[data-auth-back]').forEach(button => {
+        button.addEventListener('click', () => setAuthTab('login'));
+    });
+
+    forgotForm?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const identifier = document.getElementById('forgot-identifier').value.trim();
+        const knop = document.getElementById('forgot-submit');
+        forgotError.textContent = '';
+        forgotDone.hidden = true;
+        if (!identifier) {
+            forgotError.textContent = 'Vul je e-mailadres of gebruikersnaam in.';
+            return;
+        }
+        knop.disabled = true;
+        try {
+            const antwoord = await UI.api('auth/forgot-password.php', { body: { identifier } });
+            forgotDone.textContent = antwoord.message;
+            forgotDone.hidden = false;
+        } catch (err) {
+            forgotError.textContent = err.message;
+        } finally {
+            knop.disabled = false;
+        }
+    });
+
+    resetForm?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const password = document.getElementById('reset-password').value;
+        const herhaling = document.getElementById('reset-password-repeat').value;
+        resetError.textContent = '';
+        if (password.length < 8) {
+            resetError.textContent = 'Je wachtwoord moet minstens 8 tekens lang zijn.';
+            return;
+        }
+        if (password !== herhaling) {
+            resetError.textContent = 'De twee wachtwoorden zijn niet hetzelfde.';
+            return;
+        }
+
+        const knop = document.getElementById('reset-submit');
+        knop.disabled = true;
+        try {
+            const antwoord = await UI.api('auth/reset-password.php', { body: { token: resetToken, password } });
+            resetToken = null;
+            resetForm.reset();
+            setAuthTab('login');
+            currentUser = antwoord.user;
+            renderAccount();
+            UI.closeModal(modal);
+            UI.toast(antwoord.message, { type: 'success' });
+            await announceAuthChange();
+            await syncAfterLogin();
+        } catch (err) {
+            resetError.textContent = err.message;
+        } finally {
+            knop.disabled = false;
+        }
+    });
+
+    verifyResend?.addEventListener('click', async () => {
+        verifyResend.disabled = true;
+        try {
+            const antwoord = await UI.api('auth/resend-verification.php', { body: {} });
+            if (antwoord.alreadyVerified && currentUser) {
+                currentUser.emailVerified = true;
+                renderAccount();
+            }
+            UI.toast(antwoord.message, { type: 'success' });
+        } catch (err) {
+            UI.toast(err.message, { type: 'error' });
+        } finally {
+            verifyResend.disabled = false;
+        }
+    });
+
+    /** Leest #bevestig= of #herstel= uit de adresbalk, en haalt het er meteen weer uit. */
+    async function handleMailLink() {
+        const match = window.location.hash.match(/^#(bevestig|herstel)=([a-f0-9]{64})$/);
+        if (!match) return;
+        if (window.history.replaceState) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        const [, soort, token] = match;
+
+        if (soort === 'herstel') {
+            resetToken = token;
+            setAuthTab('reset');
+            renderAccount();
+            UI.openModal(modal);
+            return;
+        }
+
+        try {
+            const antwoord = await UI.api('auth/verify-email.php', { body: { token } });
+            if (currentUser) {
+                currentUser.emailVerified = true;
+                renderAccount();
+            }
+            UI.toast(antwoord.message, { type: 'success' });
+        } catch (err) {
+            UI.toast(err.message || 'Deze link werkt niet (meer).', { type: 'error', duration: 8000 });
+        }
+    }
+
+    // Sluit je het venster zonder een nieuw wachtwoord te kiezen, dan is de
+    // herstellink voor deze keer klaar; het account zelf verandert niet.
+    modal.addEventListener('transitionend', () => {
+        if (!modal.classList.contains('visible') && resetToken !== null) {
+            resetToken = null;
+            setAuthTab('login');
+            renderAccount();
+        }
     });
 
     /* =====================================================================
@@ -658,6 +824,9 @@
             renderAccount();
             UI.closeModal(modal);
             form.reset();
+            if (response.verificationSent) {
+                UI.toast(`We stuurden een mail naar ${currentUser.email} om je adres te bevestigen.`, { type: 'info', duration: 7000 });
+            }
             await announceAuthChange();
             await syncAfterLogin();
         } catch (err) {
@@ -704,7 +873,7 @@
     document.getElementById('account-logout')?.addEventListener('click', async () => {
         const confirmed = await UI.ask({
             title: 'Uitloggen?',
-            message: 'Je tijden blijven in deze browser staan en worden bij de volgende login weer samengevoegd.',
+            message: 'Je tijden blijven in deze browser staan. Bij de volgende login komen ze weer van je account.',
             confirmLabel: 'Uitloggen',
             danger: true
         });
@@ -745,8 +914,14 @@
 
     UI.status().then(async status => {
         accountsAvailable = status.features?.accounts === true;
+        mailAvailable = status.features?.mail === true;
+        verificationAvailable = status.features?.emailVerification === true;
         renderAccount();
         if (!accountsAvailable) return;
+        handleMailLink();
+        // Staat de site al open en plak je de link erin, dan verandert alleen
+        // het stuk na het hekje en laadt de pagina niet opnieuw.
+        window.addEventListener('hashchange', handleMailLink);
 
         if (status.authenticated) {
             try {

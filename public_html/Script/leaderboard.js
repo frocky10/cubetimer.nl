@@ -31,7 +31,17 @@
     const meRank = document.getElementById('leaderboard-me-rank');
     const meText = document.getElementById('leaderboard-me-text');
 
+    const pager = document.getElementById('leaderboard-pager');
+    const prevButton = document.getElementById('leaderboard-prev');
+    const nextButton = document.getElementById('leaderboard-next');
+    const mineButton = document.getElementById('leaderboard-mine');
+    const pageLabel = document.getElementById('leaderboard-page-label');
+
     const STATE_KEY = 'cubetimer_board_state';
+    /** Regels per pagina. De server geeft er hooguit 100 per keer. */
+    const PAGE_SIZE = 50;
+    /** De server bladert tot offset 10000; verder heeft geen zin. */
+    const MAX_OFFSET = 10000;
 
     let state = Object.assign(
         { event: '333', category: 'single', period: 'all', scope: 'all' },
@@ -39,6 +49,9 @@
     );
     let eventsLoaded = false;
     let laatsteAanvraag = 0;
+    // De pagina hoort niet bij de opgeslagen keuzes: je begint altijd bovenaan.
+    let offset = 0;
+    let myIndex = null;
 
     /* ---------------------------------------------------------------------
      * Keuzelijsten
@@ -173,6 +186,29 @@
         ));
     }
 
+    function renderPager(data) {
+        const laatste = Math.min(MAX_OFFSET, Math.max(0, data.total - 1));
+        const paginas = Math.floor(laatste / PAGE_SIZE) + 1;
+        const pagina = Math.floor(offset / PAGE_SIZE) + 1;
+
+        pager.hidden = data.total <= PAGE_SIZE && myIndex === null;
+        prevButton.disabled = offset === 0;
+        nextButton.disabled = offset + PAGE_SIZE > laatste;
+        prevButton.hidden = nextButton.hidden = data.total <= PAGE_SIZE;
+        pageLabel.hidden = data.total <= PAGE_SIZE;
+        pageLabel.textContent = `Pagina ${pagina} van ${paginas}`;
+
+        // "Naar mijn plek" alleen als je ergens anders staat dan hier.
+        const mijnPagina = myIndex === null ? null : Math.floor(myIndex / PAGE_SIZE);
+        mineButton.hidden = mijnPagina === null || mijnPagina === pagina - 1 || myIndex > MAX_OFFSET;
+        if (!mineButton.hidden) mineButton.textContent = `Naar mijn plek (#${myIndex + 1})`;
+    }
+
+    function goToOffset(nieuw) {
+        offset = Math.max(0, Math.min(MAX_OFFSET, nieuw));
+        load();
+    }
+
     async function load() {
         const aanvraag = ++laatsteAanvraag;
         body.innerHTML = '';
@@ -184,7 +220,8 @@
             category: state.category,
             period: state.period,
             scope: state.scope,
-            limit: '100'
+            limit: String(PAGE_SIZE),
+            offset: String(offset)
         });
 
         try {
@@ -199,6 +236,10 @@
             const mij = window.CubeTimerAccount?.currentUsername?.() || null;
             renderRows(data, mij);
             renderMe(data);
+            myIndex = typeof data.myIndex === 'number' ? data.myIndex : null;
+            renderPager(data);
+            // Een nieuwe pagina begint bovenaan de lijst.
+            body.closest('.board-wrap')?.scrollTo?.(0, 0);
 
             subtitle.textContent = data.period === 'all'
                 ? 'Alle tijden ooit neergezet.'
@@ -219,21 +260,22 @@
      * Koppelen
      * ------------------------------------------------------------------ */
 
+    // Een ander filter is een andere lijst: dan weer bovenaan beginnen.
     eventSelect?.addEventListener('change', () => {
         state.event = eventSelect.value;
-        load();
+        goToOffset(0);
     });
 
     categorySelect?.addEventListener('change', () => {
         state.category = categorySelect.value;
-        load();
+        goToOffset(0);
     });
 
     periodButtons.forEach(button => {
         button.addEventListener('click', () => {
             state.period = button.dataset.boardPeriod;
             syncControls();
-            load();
+            goToOffset(0);
         });
     });
 
@@ -241,8 +283,14 @@
         button.addEventListener('click', () => {
             state.scope = button.dataset.boardScope;
             syncControls();
-            load();
+            goToOffset(0);
         });
+    });
+
+    prevButton?.addEventListener('click', () => goToOffset(offset - PAGE_SIZE));
+    nextButton?.addEventListener('click', () => goToOffset(offset + PAGE_SIZE));
+    mineButton?.addEventListener('click', () => {
+        if (myIndex !== null) goToOffset(Math.floor(myIndex / PAGE_SIZE) * PAGE_SIZE);
     });
 
     function open(options) {
@@ -250,7 +298,7 @@
         if (options && options.category) state.category = options.category;
         syncControls();
         UI.openModal(modal);
-        load();
+        goToOffset(0);
     }
 
     openButton.addEventListener('click', () => open());
