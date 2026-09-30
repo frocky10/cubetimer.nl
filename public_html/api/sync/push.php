@@ -42,7 +42,7 @@ if (!is_array($payload)) {
     Http::fail('invalid_payload', 'Er zijn geen sessies meegestuurd.', 422);
 }
 if (count($payload) > MAX_SESSIONS) {
-    Http::fail('too_many_sessions', 'Je hebt meer sessies dan we kunnen opslaan (maximaal ' . MAX_SESSIONS . ').', 422);
+    Http::fail('too_many_sessions', Taal::t('Je hebt meer sessies dan we kunnen opslaan (maximaal {n}).', ['n' => MAX_SESSIONS]), 422);
 }
 
 // Solves die de gebruiker uitdrukkelijk van zijn account af wil hebben.
@@ -108,7 +108,7 @@ foreach (array_values($payload) as $order => $rawSession) {
                 continue;
             }
             if (++$receivedSolves > MAX_SOLVES) {
-                Http::fail('too_many_solves', 'Je hebt meer solves dan we kunnen opslaan (maximaal ' . MAX_SOLVES . ').', 422);
+                Http::fail('too_many_solves', Taal::t('Je hebt meer solves dan we kunnen opslaan (maximaal {n}).', ['n' => MAX_SOLVES]), 422);
             }
 
             $solveId = $clean($rawSolve['id'] ?? '', 64);

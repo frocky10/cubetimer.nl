@@ -55,7 +55,7 @@
             list.innerHTML = '';
             const melding = document.createElement('p');
             melding.className = 'table-empty';
-            melding.textContent = err.message || 'De challenges konden niet geladen worden.';
+            melding.textContent = err.message || UI.t('De challenges konden niet geladen worden.');
             list.appendChild(melding);
         } finally {
             laden = false;
@@ -77,14 +77,14 @@
         guestNotice.hidden = ingelogd;
 
         const datum = new Date(data.date + 'T12:00:00');
-        dateLabel.textContent = datum.toLocaleDateString('nl-NL', {
+        dateLabel.textContent = datum.toLocaleDateString(UI.locale, {
             weekday: 'long', day: 'numeric', month: 'long'
         });
 
         if (!data.challenges.length) {
             const leeg = document.createElement('p');
             leeg.className = 'table-empty';
-            leeg.textContent = 'Er staan vandaag nog geen opdrachten klaar.';
+            leeg.textContent = UI.t('Er staan vandaag nog geen opdrachten klaar.');
             list.appendChild(leeg);
         }
 
@@ -136,7 +136,7 @@
         const head = document.createElement('div');
         head.className = 'challenge-progress__head';
         const links = document.createElement('span');
-        links.textContent = challenge.completed ? 'Gehaald!' : 'Voortgang';
+        links.textContent = challenge.completed ? UI.t('Gehaald!') : UI.t('Voortgang');
         const rechts = document.createElement('span');
         rechts.textContent = `${Math.min(challenge.progress, challenge.target)} / ${challenge.target}`;
         head.appendChild(links);
@@ -159,7 +159,7 @@
         if (!ingelogd) {
             const hint = document.createElement('p');
             hint.className = 'field__hint';
-            hint.textContent = 'Log in om je voortgang bij te houden.';
+            hint.textContent = UI.t('Log in om je voortgang bij te houden.');
             card.appendChild(hint);
         }
 
@@ -176,7 +176,7 @@
         } else {
             // Niet vooraf laten zien: dan kun je hem rustig vooruit oefenen.
             scramble.className = 'challenge-scramble challenge-scramble--hidden';
-            scramble.textContent = 'De scramble verschijnt zodra je begint.';
+            scramble.textContent = UI.t('De scramble verschijnt zodra je begint.');
         }
         card.appendChild(scramble);
 
@@ -186,19 +186,19 @@
             const tijd = document.createElement('span');
             tijd.className = 'challenge-result__time';
             tijd.textContent = UI.formatTime(challenge.valueMs);
-            resultaat.appendChild(document.createTextNode('Jouw tijd: '));
+            resultaat.appendChild(document.createTextNode(UI.t('Jouw tijd:') + ' '));
             resultaat.appendChild(tijd);
             card.appendChild(resultaat);
         } else if (challenge.attempted) {
             const resultaat = document.createElement('p');
             resultaat.className = 'challenge-result';
-            resultaat.textContent = 'Je poging van vandaag was een DNF. Morgen weer een kans.';
+            resultaat.textContent = UI.t('Je poging van vandaag was een DNF. Morgen weer een kans.');
             card.appendChild(resultaat);
         } else if (ingelogd) {
             const knop = document.createElement('button');
             knop.className = 'btn btn--primary';
             knop.type = 'button';
-            knop.textContent = 'Doe de scramble van de dag';
+            knop.textContent = UI.t('Doe de scramble van de dag');
             knop.addEventListener('click', () => startChallenge(challenge));
             card.appendChild(knop);
         }
@@ -208,7 +208,7 @@
         } else {
             const nog = document.createElement('p');
             nog.className = 'field__hint';
-            nog.textContent = 'Nog niemand heeft hem vandaag gedaan.';
+            nog.textContent = UI.t('Nog niemand heeft hem vandaag gedaan.');
             card.appendChild(nog);
         }
 
@@ -257,12 +257,13 @@
         // anders, dan is het aanbod om te wisselen logischer dan een waarschuwing.
         if (api.getActiveSessionEvent() !== challenge.event) {
             const wisselen = await UI.ask({
-                title: 'Naar ' + challenge.eventLabel + ' wisselen?',
-                message: `De scramble van de dag is voor ${challenge.eventLabel}, `
-                       + `maar je sessie staat op ${api.getEventLabel(api.getActiveSessionEvent())}. `
-                       + 'Zal ik je sessie omzetten?',
-                confirmLabel: 'Omzetten',
-                cancelLabel: 'Laat maar zo'
+                title: UI.t('Naar {event} wisselen?', { event: challenge.eventLabel }),
+                message: UI.t('De scramble van de dag is voor {event}, maar je sessie staat op {sessie}. Zal ik je sessie omzetten?', {
+                    event: challenge.eventLabel,
+                    sessie: api.getEventLabel(api.getActiveSessionEvent())
+                }),
+                confirmLabel: UI.t('Omzetten'),
+                cancelLabel: UI.t('Laat maar zo')
             });
             if (wisselen) {
                 api.setActiveSessionEvent(challenge.event);
@@ -274,12 +275,14 @@
         api.setScrambleOverride(challenge.scramble);
         banner.hidden = false;
         bannerHint.textContent = api.getActiveSessionEvent() === challenge.event
-            ? 'Je hebt een poging. Je volgende solve telt.'
-            : `Let op: je sessie staat op ${api.getEventLabel(api.getActiveSessionEvent())}, `
-              + `de scramble is er een voor ${challenge.eventLabel}.`;
+            ? UI.t('Je hebt een poging. Je volgende solve telt.')
+            : UI.t('Let op: je sessie staat op {sessie}, de scramble is er een voor {event}.', {
+                sessie: api.getEventLabel(api.getActiveSessionEvent()),
+                event: challenge.eventLabel
+            });
 
         UI.closeModal(modal);
-        UI.toast(`Scramble van de dag voor ${challenge.eventLabel} staat klaar. Je volgende solve telt.`,
+        UI.toast(UI.t('Scramble van de dag voor {event} staat klaar. Je volgende solve telt.', { event: challenge.eventLabel }),
             { type: 'info' });
     }
 
@@ -291,7 +294,7 @@
         if (melding) UI.toast(melding, { type: 'info' });
     }
 
-    bannerCancel?.addEventListener('click', () => stopChallenge('Challenge afgebroken. Je gewone scramble staat weer klaar.'));
+    bannerCancel?.addEventListener('click', () => stopChallenge(UI.t('Challenge afgebroken. Je gewone scramble staat weer klaar.')));
 
     // Zodra er in challengemodus een solve klaar is, sturen we die in.
     window.addEventListener('cubetimer:solve', async event => {
@@ -315,7 +318,7 @@
             UI.toast(response.message, { type: 'success' });
             await load();
         } catch (err) {
-            UI.toast(err.message || 'Je poging kon niet worden ingestuurd.', { type: 'error' });
+            UI.toast(err.message || UI.t('Je poging kon niet worden ingestuurd.'), { type: 'error' });
         }
     });
 

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/Auth.php';
 require_once __DIR__ . '/Mailer.php';
 
@@ -61,22 +62,24 @@ final class AccountMail
             [$userId, $user['email_lower'], hash('sha256', $token)]
         );
 
-        $link = Mailer::siteUrl() . '/#bevestig=' . $token;
-        $naam = (string) $user['username'];
+        // De mail in de taal van de pagina waar het verzoek vandaan kwam, en de
+        // link terug naar diezelfde taal (/en/#bevestig=...).
+        $link = Mailer::siteUrl() . Taal::prefix() . '/#bevestig=' . $token;
+        $aanhef = Taal::t('Hoi {naam},', ['naam' => (string) $user['username']]);
+        $voetnoot = Taal::t('De link werkt {n} uur. Heb je geen account aangemaakt op CubeTimer, dan kun je deze mail negeren.', ['n' => self::VERIFY_HOURS]);
 
         return Mailer::send(
             (string) $user['email'],
-            'Bevestig je e-mailadres voor CubeTimer',
-            "Hoi {$naam},\n\n"
-                . "Klik op deze link om je e-mailadres te bevestigen:\n{$link}\n\n"
-                . 'De link werkt ' . self::VERIFY_HOURS . " uur. Heb je geen account aangemaakt op CubeTimer, "
-                . "dan kun je deze mail negeren.\n\nCubeTimer\n" . Mailer::siteUrl() . "\n",
+            Taal::t('Bevestig je e-mailadres voor CubeTimer'),
+            $aanhef . "\n\n"
+                . Taal::t('Klik op deze link om je e-mailadres te bevestigen:') . "\n{$link}\n\n"
+                . $voetnoot . "\n\nCubeTimer\n" . Mailer::siteUrl() . Taal::prefix() . "/\n",
             self::html(
-                "Hoi {$naam},",
-                'Klik op de knop om je e-mailadres te bevestigen. Dan kunnen we je helpen als je ooit je wachtwoord vergeet.',
-                'E-mailadres bevestigen',
+                $aanhef,
+                Taal::t('Klik op de knop om je e-mailadres te bevestigen. Dan kunnen we je helpen als je ooit je wachtwoord vergeet.'),
+                Taal::t('E-mailadres bevestigen'),
                 $link,
-                'De link werkt ' . self::VERIFY_HOURS . ' uur. Heb je geen account aangemaakt op CubeTimer, dan kun je deze mail negeren.'
+                $voetnoot
             )
         );
     }
@@ -151,25 +154,23 @@ final class AccountMail
             [$userId, hash('sha256', $token)]
         );
 
-        $link = Mailer::siteUrl() . '/#herstel=' . $token;
-        $naam = (string) $user['username'];
+        $link = Mailer::siteUrl() . Taal::prefix() . '/#herstel=' . $token;
+        $aanhef = Taal::t('Hoi {naam},', ['naam' => (string) $user['username']]);
+        $reden = Taal::t('Iemand (hopelijk jij) vroeg om een nieuw wachtwoord voor je CubeTimer-account.');
+        $voetnoot = Taal::t('De link werkt {n} minuten en maar één keer. Heb je dit niet zelf gevraagd? Dan hoef je niets te doen; je wachtwoord blijft gewoon hetzelfde.', ['n' => self::RESET_MINUTES]);
 
         Mailer::send(
             (string) $user['email'],
-            'Je wachtwoord voor CubeTimer',
-            "Hoi {$naam},\n\n"
-                . "Iemand (hopelijk jij) vroeg om een nieuw wachtwoord voor je CubeTimer-account.\n"
-                . "Kies een nieuw wachtwoord via deze link:\n{$link}\n\n"
-                . 'De link werkt ' . self::RESET_MINUTES . " minuten en maar één keer. Heb je dit niet zelf "
-                . "gevraagd? Dan hoef je niets te doen; je wachtwoord blijft gewoon hetzelfde.\n\nCubeTimer\n"
-                . Mailer::siteUrl() . "\n",
+            Taal::t('Je wachtwoord voor CubeTimer'),
+            $aanhef . "\n\n" . $reden . "\n"
+                . Taal::t('Kies een nieuw wachtwoord via deze link:') . "\n{$link}\n\n"
+                . $voetnoot . "\n\nCubeTimer\n" . Mailer::siteUrl() . Taal::prefix() . "/\n",
             self::html(
-                "Hoi {$naam},",
-                'Iemand (hopelijk jij) vroeg om een nieuw wachtwoord voor je CubeTimer-account.',
-                'Nieuw wachtwoord kiezen',
+                $aanhef,
+                $reden,
+                Taal::t('Nieuw wachtwoord kiezen'),
                 $link,
-                'De link werkt ' . self::RESET_MINUTES . ' minuten en maar één keer. Heb je dit niet zelf gevraagd? '
-                    . 'Dan hoef je niets te doen; je wachtwoord blijft gewoon hetzelfde.'
+                $voetnoot
             )
         );
     }
@@ -235,7 +236,7 @@ final class AccountMail
         $e = static fn (string $s): string => htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $site = Mailer::siteUrl();
 
-        return '<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"></head>'
+        return '<!DOCTYPE html><html lang="' . Taal::huidig() . '"><head><meta charset="UTF-8"></head>'
             . '<body style="margin:0;padding:24px;background:#f4f7fd;font-family:Arial,Helvetica,sans-serif;color:#0b1a33;">'
             . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center">'
             . '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" '
@@ -248,7 +249,7 @@ final class AccountMail
             . 'font-weight:bold;padding:12px 20px;border-radius:10px;">' . $e($knop) . '</a></td></tr>'
             . '<tr><td style="font-size:13px;line-height:1.5;color:#5b6b85;padding-bottom:8px;">' . $e($voetnoot) . '</td></tr>'
             . '<tr><td style="font-size:12px;line-height:1.5;color:#8a97ad;word-break:break-all;">'
-            . 'Werkt de knop niet? Kopieer dan deze link: ' . $e($link) . '</td></tr>'
+            . $e(Taal::t('Werkt de knop niet? Kopieer dan deze link:')) . ' ' . $e($link) . '</td></tr>'
             . '</table>'
             . '<p style="font-size:12px;color:#8a97ad;">' . $e($site) . '</p>'
             . '</td></tr></table></body></html>';

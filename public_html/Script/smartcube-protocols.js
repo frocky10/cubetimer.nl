@@ -93,7 +93,7 @@
                 const dv = new DataView(buf.buffer);
                 return length === 16 ? dv.getUint16(0, littleEndian) : dv.getUint32(0, littleEndian);
             }
-            throw new Error('Veldlengte niet ondersteund: ' + length);
+            throw new Error('Veldlengte niet ondersteund: ' + length); // niet vertalen: smartcube.js vertaalt
         }
     }
 
@@ -121,7 +121,7 @@
     class SaltedCipher {
         constructor(key, iv, mac) {
             const salt = parseMac(mac);
-            if (!salt) throw new Error('Ongeldig MAC-adres');
+            if (!salt) throw new Error('Ongeldig MAC-adres'); // niet vertalen: smartcube.js vertaalt
             salt.reverse();
             this.key = key.slice();
             this.iv = iv.slice();
@@ -331,7 +331,7 @@
                     const face = msg.get(12 + 5 * i, 4);
                     const dir = msg.get(16 + 5 * i, 1);
                     if (face > 5) {
-                        this.emit('keyError', { reason: 'onmogelijke zet' });
+                        this.emit('keyError', { reason: 'onmogelijke zet' }); // niet vertalen
                         return;
                     }
                     let elapsed = msg.get(47 + 16 * i, 16);
@@ -362,7 +362,7 @@
 
                 const facelets = validCubies(cp, co, ep, eo);
                 if (!facelets) {
-                    this.emit('keyError', { reason: 'onleesbare stand' });
+                    this.emit('keyError', { reason: 'onleesbare stand' }); // niet vertalen
                     return;
                 }
                 if (this.lastSerial === -1) this.lastSerial = serial;
@@ -424,7 +424,7 @@
             if (canRequest && this.moveBuffer.length > 16) {
                 // Het gat raakt niet meer gevuld; liever opnieuw verbinden dan
                 // een stand bijhouden die niet klopt.
-                this.emit('disconnect', { reason: 'te veel gemiste zetten' });
+                this.emit('disconnect', { reason: 'te veel gemiste zetten' }); // niet vertalen
             }
         }
 
@@ -460,7 +460,7 @@
             this.lastLocalTimestamp = t;
             this.serial = serial;
             if (face < 0) {
-                this.emit('keyError', { reason: 'onmogelijke zet' });
+                this.emit('keyError', { reason: 'onmogelijke zet' }); // niet vertalen
                 return;
             }
             this.moveBuffer.push({
@@ -495,7 +495,7 @@
             const { cp, co, ep, eo } = readCubies();
             const facelets = validCubies(cp, co, ep, eo);
             if (!facelets) {
-                this.emit('keyError', { reason: 'onleesbare stand' });
+                this.emit('keyError', { reason: 'onleesbare stand' }); // niet vertalen
                 return;
             }
             if (this.lastSerial === -1) this.lastSerial = serial;
@@ -832,7 +832,7 @@
                     }
                 }
                 if (Cube && !Cube.fromFacelets(facelets)) {
-                    this.emit('keyError', { reason: 'onleesbare stand' });
+                    this.emit('keyError', { reason: 'onleesbare stand' }); // niet vertalen
                     return;
                 }
                 if (this.moveCnt === -1) this.moveCnt = msg.get(152, 8);
@@ -848,7 +848,7 @@
                 for (let i = 0; i < 5; i += 1) {
                     const m = msg.get(96 + i * 5, 5);
                     if (m >= 12) {
-                        this.emit('keyError', { reason: 'onmogelijke zet' });
+                        this.emit('keyError', { reason: 'onmogelijke zet' }); // niet vertalen
                         return;
                     }
                     zetten.push({ move: moveName('FBUDLR'[m >> 1], m & 1 ? "'" : ''), offset: msg.get(8 + i * 16, 16) });
@@ -1024,7 +1024,7 @@
         let rij = Promise.resolve();
         return bytes => {
             rij = rij.then(() => characteristic.writeValue(bytes)).catch(err => {
-                log('schrijven mislukt: ' + (err && err.message ? err.message : err));
+                log('schrijven mislukt: ' + (err && err.message ? err.message : err)); // niet vertalen
             });
             return rij;
         };
@@ -1058,7 +1058,7 @@
             try {
                 decoder.handle(huidigeCipher ? huidigeCipher.decrypt(bytes) : bytes);
             } catch (err) {
-                session.log('bericht niet te lezen: ' + err.message);
+                session.log('bericht niet te lezen: ' + err.message); // niet vertalen
             }
         });
 
@@ -1132,7 +1132,7 @@
                     if (byUuid.has(SERVICES.ganGen1Data) && byUuid.has(SERVICES.ganGen1Meta)) {
                         return openGanGen1(byUuid.get(SERVICES.ganGen1Data), byUuid.get(SERVICES.ganGen1Meta), session);
                     }
-                    throw new Error('Deze GAN-cube gebruikt een protocol dat we niet kennen.');
+                    throw new Error('Deze GAN-cube gebruikt een protocol dat we niet kennen.'); // niet vertalen: smartcube.js vertaalt
                 }
 
                 const chars = await characteristicsOf(byUuid.get(variant.service));
@@ -1181,7 +1181,7 @@
                 const service = await gatt.getPrimaryService(SERVICES.qiyi);
                 const chars = await characteristicsOf(service);
                 const char = chars.get(uuid16('fff6'));
-                if (!char) throw new Error('Deze QiYi-cube heeft niet de verwachte aansluiting.');
+                if (!char) throw new Error('Deze QiYi-cube heeft niet de verwachte aansluiting.'); // niet vertalen: smartcube.js vertaalt
 
                 const cipher = new BlockCipher(KEYS.qiyi);
                 const schrijf = writeQueue(char, session.log);
@@ -1267,7 +1267,7 @@
                 const service = await gatt.getPrimaryService(SERVICES.mhc);
                 const chars = await characteristicsOf(service);
                 const turn = chars.get(uuid16('1003'));
-                if (!turn) throw new Error('Deze MoYu-cube heeft niet de verwachte aansluiting.');
+                if (!turn) throw new Error('Deze MoYu-cube heeft niet de verwachte aansluiting.'); // niet vertalen: smartcube.js vertaalt
                 return notifyConnection({
                     label: 'MoYu AI (MHC)',
                     notify: turn,
@@ -1323,7 +1323,7 @@
                         const level = await Promise.race([antwoord, delay(3000).then(() => null)]);
                         if (typeof level === 'number') session.emit('battery', { level: Math.min(level, 100) });
                     } catch (err) {
-                        session.log('batterij opvragen mislukt: ' + err.message);
+                        session.log('batterij opvragen mislukt: ' + err.message); // niet vertalen
                     }
                 };
                 return conn;
@@ -1364,7 +1364,8 @@
         const versie = toBytes(await meta.get(uuid16('2a28')).readValue());
         const v = (versie[0] << 16) | (versie[1] << 8) | versie[2];
         if (!(v > 0x010007 && (v & 0xFFFE00) === 0x010000)) {
-            throw new Error('Deze firmware van de GAN 356i kennen we niet (versie ' + v.toString(16) + ').');
+            session.log('onbekende firmware van de GAN 356i: versie ' + v.toString(16)); // niet vertalen
+            throw new Error('Deze firmware van de GAN 356i kennen we niet.'); // niet vertalen: smartcube.js vertaalt
         }
         const hw = toBytes(await meta.get(uuid16('2a23')).readValue());
         const key = KEYS.ganGen1[(v >> 8) & 0xFF].slice();
@@ -1381,7 +1382,7 @@
         async function leesStand() {
             const facelets = Gen1.parseFacelets(await lees('fff2'));
             if (facelets) session.emit('facelets', { facelets });
-            else session.emit('keyError', { reason: 'onleesbare stand' });
+            else session.emit('keyError', { reason: 'onleesbare stand' }); // niet vertalen
         }
 
         async function lus() {
@@ -1412,7 +1413,7 @@
                     }
                 } catch (err) {
                     if (!actief) return;
-                    session.log('uitlezen mislukt: ' + err.message);
+                    session.log('uitlezen mislukt: ' + err.message); // niet vertalen
                     await delay(250);
                 }
             }
@@ -1528,7 +1529,7 @@
      *   log(tekst)
      */
     async function open(device, hooks) {
-        const log = tekst => hooks.log && hooks.log('[smartcube] ' + tekst);
+        const log = tekst => hooks.log && hooks.log('[smartcube] ' + tekst); // niet vertalen
         let brand = brandFor(device.name);
 
         // Het MAC-adres zoeken moet vóór het verbinden: een verbonden cube
@@ -1538,7 +1539,7 @@
         if (brand && brand.needsMac && !stored) {
             hooks.status('mac-zoeken');
             advertised = await macFromAdvertisements(device, brand);
-            if (advertised) log('MAC-adres uit de advertentie: ' + advertised);
+            if (advertised) log('MAC-adres uit de advertentie: ' + advertised); // niet vertalen
         }
 
         hooks.status('verbinden');
@@ -1548,7 +1549,7 @@
             const services = await gatt.getPrimaryServices();
             const uuids = services.map(s => toUuid128(s.uuid));
             brand = BRANDS.find(b => b.services.some(s => uuids.includes(s))) || null;
-            if (!brand) throw new Error('Dit apparaat herkennen we niet als smart cube.');
+            if (!brand) throw new Error('Dit apparaat herkennen we niet als smart cube.'); // niet vertalen: smartcube.js vertaalt
         }
 
         const macInfo = { mac: null, source: null };
@@ -1570,7 +1571,7 @@
                     }
                 }
                 const gevraagd = await hooks.askMac({ naam: device.name, voorstel: null, reden: 'onbekend' });
-                if (!parseMac(gevraagd)) throw new Error('Zonder MAC-adres kan deze cube niet verbinden.');
+                if (!parseMac(gevraagd)) throw new Error('Zonder MAC-adres kan deze cube niet verbinden.'); // niet vertalen: smartcube.js vertaalt
                 macInfo.mac = gevraagd;
                 macInfo.source = 'ingevoerd';
                 return gevraagd;
@@ -1587,7 +1588,7 @@
             clearTimeout(waakhond);
             geldigOntvangen = false;
             waakhond = setTimeout(() => {
-                if (!geldigOntvangen) hooks.emit('keyError', { reason: 'geen antwoord' });
+                if (!geldigOntvangen) hooks.emit('keyError', { reason: 'geen antwoord' }); // niet vertalen
             }, wachttijd);
         };
         session.emit = (type, data) => {
@@ -1633,7 +1634,7 @@
      * tweede venster, en dat werd daarom vaak geweigerd.
      */
     async function connect(hooks) {
-        if (!isSupported()) throw new Error('Web Bluetooth ontbreekt in deze browser.');
+        if (!isSupported()) throw new Error('Web Bluetooth ontbreekt in deze browser.'); // niet vertalen: smartcube.js vertaalt
         const device = await navigator.bluetooth.requestDevice(requestOptions());
         return open(device, hooks);
     }

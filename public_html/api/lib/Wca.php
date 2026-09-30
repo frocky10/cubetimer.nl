@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/Config.php';
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/Ranking.php';
 
@@ -90,8 +91,9 @@ final class Wca
 
     public static function attribution(?string $datum = null): string
     {
-        $tekst = 'Uitslagen: World Cube Association, worldcubeassociation.org/results';
-        return $datum ? $tekst . ' (opgehaald ' . $datum . ')' : $tekst;
+        return $datum
+            ? Taal::t('Uitslagen: World Cube Association, worldcubeassociation.org/results (opgehaald {datum})', ['datum' => $datum])
+            : Taal::t('Uitslagen: World Cube Association, worldcubeassociation.org/results');
     }
 
     /* =====================================================================
@@ -197,9 +199,9 @@ final class Wca
 
         if (!is_array($data)) {
             return ['ok' => false, 'message' => match ($mislukt) {
-                'no_results' => 'Van deze comp staan (nog) geen uitslagen bij de WCA.',
-                'no_events'  => 'Op deze comp stond geen event dat je hier kunt spelen.',
-                default      => 'De WCA is nu niet bereikbaar. Probeer het straks nog eens.',
+                'no_results' => Taal::t('Van deze comp staan (nog) geen uitslagen bij de WCA.'),
+                'no_events'  => Taal::t('Op deze comp stond geen event dat je hier kunt spelen.'),
+                default      => Taal::t('De WCA is nu niet bereikbaar. Probeer het straks nog eens.'),
             }];
         }
 

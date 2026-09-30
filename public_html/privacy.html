@@ -8,6 +8,9 @@
     <title>Privacyverklaring – CubeTimer</title>
     <meta name="description" content="Welke gegevens CubeTimer bewaart, waarom, hoe lang en bij wie. Over je account, je tijden, cookies, advertenties en je rechten onder de AVG." />
     <link rel="canonical" href="https://cubetimer.nl/privacy.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/privacy.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/privacy.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/privacy.html" />
     <meta name="robots" content="index, follow" />
 
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -59,6 +62,8 @@
         (function () {
             try {
                 var stored = localStorage.getItem('cubetimer_theme');
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) localStorage.setItem('cubetimer_taal', gekozen[1]);
                 if (stored !== 'light' && stored !== 'dark') {
                     stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
                 }
@@ -72,7 +77,12 @@
         <a class="profile-topbar__brand" href="/" aria-label="Naar de timer">
             <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
         </a>
-        <a class="btn btn--primary" href="/">Naar de timer</a>
+        <div class="profile-topbar__actions">
+            <a class="btn-icon lang-switch" href="/en/privacy.html#taal=en" hreflang="en" lang="en" title="English" aria-label="English">
+                <span class="lang-switch__code">EN</span>
+            </a>
+            <a class="btn btn--primary" href="/">Naar de timer</a>
+        </div>
     </header>
 
     <main class="profile-main">
@@ -117,6 +127,7 @@
                             <tr><td><code>cubetimer_removed_v1</code></td><td>Tijden die ook van je account af moeten bij de volgende synchronisatie</td></tr>
                             <tr><td><code>cubetimer_cube_macs</code></td><td>Het Bluetooth-adres van je smart cube, zodat je het maar één keer hoeft in te vullen</td></tr>
                             <tr><td><code>cubetimer_game_v1</code></td><td>Een lopende spelmodus en je laatste keuzes daarin</td></tr>
+                            <tr><td><code>cubetimer_taal</code>, <code>cubetimer_taal_gevraagd</code></td><td>Of je de site in het Nederlands of het Engels wilt, en of we dat al gevraagd hebben</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -158,16 +169,16 @@
                 <p>
                     We mailen alleen om je e-mailadres te bevestigen en als je zelf om een nieuw wachtwoord
                     vraagt. Geen nieuwsbrieven, geen reclame. De mail gaat via onze eigen mailbox bij onze
-                    hostingpartij.
+                    hostingpartij, in de taal van de pagina die je gebruikte.
                 </p>
 
                 <h2 id="meldingen">4. Een bug of idee melden</h2>
                 <p>
-                    Met de meldknop stuur je ons een melding. Die komt als issue op
-                    <a href="https://github.com/" rel="noopener">GitHub</a>, waar we onze takenlijst bijhouden, samen
-                    met technische gegevens die helpen om het probleem te vinden: de pagina, je browser, je
-                    schermformaat, taal, tijdzone, thema en event, en je gebruikersnaam als je bent ingelogd.
-                    <strong>Zet er geen persoonlijke gegevens in</strong>: een issue kan voor anderen leesbaar zijn.
+                    Met de meldknop stuur je ons een melding. Die komt als issue in onze takenlijst op
+                    <a href="https://github.com/" rel="noopener">GitHub</a>, samen met technische gegevens die helpen
+                    om het probleem te vinden: de pagina, je browser, je schermformaat, taal, tijdzone, thema en
+                    event, en je gebruikersnaam als je bent ingelogd. Die takenlijst is op dit moment niet openbaar.
+                    <strong>Zet er toch geen persoonlijke gegevens in</strong>, voor het geval dat ooit verandert.
                 </p>
                 <p>
                     Een e-mailadres voor een reactie is niet verplicht. Laat je het achter, dan staat het alleen in
@@ -281,6 +292,7 @@
     <footer class="site-footer">
         <a href="/">Timer</a>
         <a href="/leren.html">Leren</a>
+        <a href="/uitleg.html">Uitleg</a>
         <a href="/privacy.html" aria-current="page">Privacy</a>
         <a href="/voorwaarden.html">Voorwaarden</a>
         <a href="/#cookie-instellingen">Cookie-instellingen</a>

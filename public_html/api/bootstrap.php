@@ -7,6 +7,7 @@ declare(strict_types=1);
  */
 
 require_once __DIR__ . '/lib/Config.php';
+require_once __DIR__ . '/lib/Taal.php';
 require_once __DIR__ . '/lib/Http.php';
 require_once __DIR__ . '/lib/Database.php';
 require_once __DIR__ . '/lib/Auth.php';

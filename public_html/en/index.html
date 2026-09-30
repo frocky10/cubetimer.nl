@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<!-- Gegenereerd door tools/vertalen.php uit /index.html. Niet met de hand aanpassen:
+     verander de Nederlandse pagina of taal/en/html.json en draai het script opnieuw. -->
+<html lang="en" data-theme="dark"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)">
+    <title>Online Rubik's cube timer with WCA scrambles | CubeTimer</title>
+    <meta name="description" content="Time your solves with official WCA scrambles and inspection. Track your Ao5 and Ao12, connect your smart cube and see how you compare with other cubers.">
+    <meta name="keywords" content="cube timer, rubiks cube timer, rubik's cube timer online, speedcube timer, speedcubing timer, online timer, wca scrambles, scramble generator, ao5, ao12, inspection time, smart cube timer, gan cube timer, cstimer alternative">
+    <meta name="google-adsense-account" content="ca-pub-9889350952616788">
+
+    <!-- SEO: het ene echte adres van deze pagina (zie CLAUDE.md, SEO). -->
+    <link rel="canonical" href="https://cubetimer.nl/en/">
+    <!-- Dezelfde pagina in het Engels (gegenereerd door tools/vertalen.php). -->
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/">
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/">
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+
+    <!-- Het voorbeeldje bij een gedeelde link. Adressen moeten volledig zijn. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CubeTimer">
+    <meta property="og:locale" content="en_GB">
+    <meta property="og:url" content="https://cubetimer.nl/en/">
+    <meta property="og:title" content="CubeTimer, the cube timer in your browser">
+    <meta property="og:description" content="A free timer for speedcubers. WCA scrambles, inspection, stats and smart cubes, no account or install needed.">
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="The CubeTimer logo with the text: online speedcubing timer">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <!-- Structured data: vertelt Google dat dit een gratis webapp is, van wie
+         hij is en welk logo erbij hoort. -->
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "WebSite",
+            "@id": "https://cubetimer.nl/en/#website",
+            "url": "https://cubetimer.nl/en/",
+            "name": "CubeTimer",
+            "inLanguage": "en",
+            "publisher": {
+                "@id": "https://cubetimer.nl/en/#organisatie"
+            }
+        },
+        {
+            "@type": "Organization",
+            "@id": "https://cubetimer.nl/en/#organisatie",
+            "name": "CubeTimer",
+            "url": "https://cubetimer.nl/en/",
+            "logo": "https://cubetimer.nl/Pictures/favicon-192.png"
+        },
+        {
+            "@type": "WebApplication",
+            "@id": "https://cubetimer.nl/en/#timer",
+            "name": "CubeTimer",
+            "url": "https://cubetimer.nl/en/",
+            "description": "A free timer for speedcubers with WCA scrambles, inspection time, statistics and smart cubes. Runs in your browser, with or without an account.",
+            "image": "https://cubetimer.nl/Pictures/og-image.png",
+            "applicationCategory": "SportsApplication",
+            "operatingSystem": "Any modern browser",
+            "inLanguage": "en",
+            "isAccessibleForFree": true,
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "EUR"
+            },
+            "featureList": [
+                "Official WCA scrambles for 19 events",
+                "15-second WCA inspection",
+                "Ao5, Ao12, Ao50 and Ao100",
+                "Statistics per session, day and week",
+                "Smart cubes over Bluetooth",
+                "Leaderboards, tournaments and game modes"
+            ],
+            "isPartOf": {
+                "@id": "https://cubetimer.nl/en/#website"
+            }
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css">
+
+    <!-- Thema meteen zetten, vóór de eerste paint, anders flitst de site kort in
+         het verkeerde thema. Bewust inline en synchroon. -->
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+            } catch (err) {
+                /* localStorage geblokkeerd: dan blijft het donkere standaardthema staan. */
+            }
+        })();
+        // Eerder voor de andere taal gekozen (de taalknop)? Dan meteen daarheen,
+        // vóór er iets getekend wordt. Zonder keuze gebeurt er niets: zoekmachines
+        // en nieuwe bezoekers zien gewoon de pagina van het adres.
+        (function () {
+            try {
+                var hier = document.documentElement.lang;
+                // De taalknop wijst naar #taal=en of #taal=nl: dat is de keuze.
+                // Zo werkt hij ook als de scripts nog niet geladen zijn.
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+                var keuze = localStorage.getItem('cubetimer_taal');
+                if ((keuze === 'nl' || keuze === 'en') && keuze !== hier) {
+                    var ander = document.querySelector('link[rel="alternate"][hreflang="' + keuze + '"]');
+                    if (ander) location.replace(ander.getAttribute('href').replace(/^https:\/\/cubetimer\.nl/, '') + location.search + location.hash);
+                }
+            } catch (err) { /* geen localStorage: dan blijft iedereen waar hij is */ }
+        })();
+    </script>
+
+    <script src="/Script/taal-en.js" defer=""></script>
+    <script src="/Script/ui.js" defer=""></script>
+    <script src="/Script/script.js" defer=""></script>
+    <script src="/Script/stats.js" defer=""></script>
+    <script src="/Script/settings.js" defer=""></script>
+    <script src="/Script/feedback.js" defer=""></script>
+    <script src="/Script/leaderboard.js" defer=""></script>
+    <script src="/Script/challenges.js" defer=""></script>
+    <script src="/Script/achievements.js" defer=""></script>
+    <script src="/Script/tournament.js" defer=""></script>
+    <script src="/Script/games.js" defer=""></script>
+    <script src="/Script/admin.js" defer=""></script>
+    <script src="/Script/smartcube.js" defer=""></script>
+    <script src="/Script/account.js" defer=""></script>
+    <script type="module" src="/Script/scrambleScript.js"></script>
+
+    <!-- Google AdSense en Analytics, pas als de pagina klaar is, en Analytics
+         pas na toestemming.
+
+         Snelheid: ze laden allebei flink wat script; bij het openen van de site
+         ging dat af van de tijd die de timer nodig had om te starten. gtag()
+         werkt meteen: wat erin gaat, wacht in dataLayer tot het script er is.
+
+         Toestemming (AVG en de cookiewet): Consent Mode v2 staat standaard op
+         "geweigerd". De toestemmingsvraag zelf is het gecertificeerde
+         CMP-venster van Google (AdSense > Privacy en berichten), dat met het
+         AdSense-script meekomt. Analytics wordt pas geladen als dat venster
+         via de TCF-standaard (__tcfapi) zegt dat het mag, of dat de AVG voor
+         deze bezoeker niet geldt. Komt er geen antwoord (CMP niet ingesteld,
+         adblocker), dan laden we Analytics niet: liever geen statistieken dan
+         zonder toestemming. AdSense leest de toestemming zelf uit de CMP; zonder
+         toestemming toont het alleen niet-gepersonaliseerde advertenties.
+         Zie het hoofdstuk Privacy in CLAUDE.md. -->
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('consent', 'default', {
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied',
+            analytics_storage: 'denied',
+            wait_for_update: 500
+        });
+        gtag('set', 'ads_data_redaction', true);
+        gtag('js', new Date());
+        gtag('config', 'G-DNL5446N18');
+
+        window.googlefc = window.googlefc || {};
+        window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+
+        (function () {
+            var analyticsGeladen = false;
+
+            function laad(src, crossOrigin) {
+                var script = document.createElement('script');
+                script.async = true;
+                script.src = src;
+                if (crossOrigin) script.crossOrigin = 'anonymous';
+                document.head.appendChild(script);
+            }
+
+            function analyticsAan() {
+                gtag('consent', 'update', { analytics_storage: 'granted' });
+                if (analyticsGeladen) return;
+                analyticsGeladen = true;
+                laad('https://www.googletagmanager.com/gtag/js?id=G-DNL5446N18', false);
+            }
+
+            // Toestemming ingetrokken: niets meer meten en de cookies van
+            // Analytics (_ga, _ga_...) weghalen.
+            function analyticsUit() {
+                gtag('consent', 'update', { analytics_storage: 'denied' });
+                document.cookie.split(';').forEach(function (deel) {
+                    var naam = deel.split('=')[0].trim();
+                    if (naam.indexOf('_ga') !== 0) return;
+                    var weg = naam + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+                    document.cookie = weg;
+                    document.cookie = weg + '; domain=.' + location.hostname.replace(/^www\./, '');
+                });
+            }
+
+            // Doel 1 (informatie op je apparaat opslaan) plus doel 8 of 9
+            // (meten en statistiek) uit de TCF: dat is wat Analytics doet.
+            function beslis(tcData) {
+                if (!tcData) return;
+                if (tcData.gdprApplies === false) { analyticsAan(); return; }
+                if (tcData.eventStatus !== 'tcloaded' && tcData.eventStatus !== 'useractioncomplete') return;
+                var doelen = (tcData.purpose && tcData.purpose.consents) || {};
+                if (doelen[1] && (doelen[8] || doelen[9])) analyticsAan();
+                else analyticsUit();
+            }
+
+            function volgToestemming(pogingen) {
+                if (typeof window.__tcfapi === 'function') {
+                    window.__tcfapi('addEventListener', 2, function (tcData, gelukt) {
+                        if (gelukt) beslis(tcData);
+                    });
+                    return;
+                }
+                // De CMP komt met het AdSense-script mee; geef hem even de tijd.
+                if (pogingen > 0) window.setTimeout(function () { volgToestemming(pogingen - 1); }, 500);
+            }
+
+            function start() {
+                laad('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7865142075636059', true);
+                volgToestemming(30);
+            }
+            function zodraRustig() {
+                if ('requestIdleCallback' in window) {
+                    window.requestIdleCallback(start, { timeout: 4000 });
+                } else {
+                    window.setTimeout(start, 1500);
+                }
+            }
+            if (document.readyState === 'complete') {
+                zodraRustig();
+            } else {
+                window.addEventListener('load', zodraRustig, { once: true });
+            }
+
+            // "Cookie-instellingen": het venster van de CMP opnieuw openen.
+            // Werkt ook als link vanaf een andere pagina: /#cookie-instellingen.
+            function openInstellingen() {
+                var geopend = false;
+                window.googlefc.callbackQueue.push(function () {
+                    if (typeof window.googlefc.showRevocationMessage === 'function') {
+                        geopend = true;
+                        window.googlefc.showRevocationMessage();
+                    }
+                });
+                window.setTimeout(function () {
+                    if (geopend) return;
+                    var ui = window.CubeTimerUI;
+                    var tekst = 'De cookie-instellingen konden niet geladen worden, bijvoorbeeld door een adblocker. '
+                        + 'Zonder toestemming plaatsen we geen cookies van Google.';
+                    if (ui && ui.toast) ui.toast(ui.t ? ui.t(tekst) : tekst, { type: 'info' });
+                }, 4000);
+            }
+            window.CubeTimerToestemming = { open: openInstellingen };
+
+            document.addEventListener('click', function (e) {
+                var link = e.target.closest && e.target.closest('[data-cookie-instellingen]');
+                if (!link) return;
+                e.preventDefault();
+                openInstellingen();
+            });
+            function vanuitAdres() {
+                if (location.hash !== '#cookie-instellingen') return;
+                history.replaceState(null, '', location.pathname + location.search);
+                openInstellingen();
+            }
+            window.addEventListener('hashchange', vanuitAdres);
+            window.addEventListener('load', vanuitAdres, { once: true });
+        })();
+    </script>
+</head>
+<body>
+    <div class="app">
+        <!-- ================================================================
+             Sidebar: sessie, tijden en statistieken
+             ================================================================ -->
+        <aside class="sidebar">
+            <div class="sidebar__brand">
+                <img id="logo-sidebar" src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345">
+            </div>
+
+            <div class="sidebar__scroll">
+                <!-- Sessie en cube -->
+                <section class="panel" aria-label="Session">
+                    <div class="panel__head">
+                        <h2 class="panel__title">Session</h2>
+                        <span id="cube-display" class="cube-display">3x3x3</span>
+                    </div>
+                    <div class="panel__body">
+                        <div class="session-row">
+                            <label class="visually-hidden" for="session-select">Choose a session</label>
+                            <select id="session-select" class="select"></select>
+                            <div class="session-row__buttons">
+                                <button id="session-new" class="btn-icon btn-icon--sm" type="button" title="New session" aria-label="New session">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                                </button>
+                                <button id="session-rename" class="btn-icon btn-icon--sm" type="button" title="Rename session" aria-label="Rename session">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                                </button>
+                                <button id="session-reset" class="btn-icon btn-icon--sm" type="button" title="Clear session" aria-label="Clear session">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+                                </button>
+                                <button id="session-delete" class="btn-icon btn-icon--sm btn-icon--danger" type="button" title="Delete session" aria-label="Delete session">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="field__label" for="cube-select">Cube / event</label>
+                            <select id="cube-select" class="select"></select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tijden -->
+                <section class="panel panel--grow" id="times-table" aria-label="Times">
+                    <div class="panel__head">
+                        <h2 class="panel__title">Times</h2>
+                        <span id="times-count" class="panel__title">0</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="solves-table">
+                            <colgroup>
+                                <col class="col-index">
+                                <col class="col-time">
+                                <col class="col-avg">
+                                <col class="col-avg">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="col-index" scope="col">#</th>
+                                    <th scope="col">Time</th>
+                                    <th scope="col">Ao5</th>
+                                    <th scope="col">Ao12</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+                        <p id="times-empty" class="table-empty">No times yet. Press the space bar to start.</p>
+                    </div>
+                </section>
+
+                <!-- Statistieken: sessie / vandaag / deze week -->
+                <section class="panel" id="stats-panel" aria-label="Statistics">
+                    <div class="panel__head">
+                        <h2 class="panel__title">Statistics</h2>
+                    </div>
+                    <div class="panel__body">
+                        <div class="segmented" id="stats-scope" role="tablist" aria-label="Period">
+                            <button class="segmented__item is-active" type="button" data-stats-scope="session" role="tab" aria-selected="true">Session</button>
+                            <button class="segmented__item" type="button" data-stats-scope="today" role="tab" aria-selected="false">Today</button>
+                            <button class="segmented__item" type="button" data-stats-scope="week" role="tab" aria-selected="false">This week</button>
+                        </div>
+
+                        <p class="stats-meta">
+                            <span id="stats-scope-label">Current session</span>
+                            <strong id="stats-count">0 solves</strong>
+                        </p>
+
+                        <div class="stat-grid">
+                            <div class="stat stat--success">
+                                <span class="stat__label">Best</span>
+                                <span class="stat__value" id="stat-best">--</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat__label">Worst</span>
+                                <span class="stat__value" id="stat-worst">--</span>
+                            </div>
+                            <div class="stat stat--accent">
+                                <span class="stat__label">Mean</span>
+                                <span class="stat__value" id="stat-mean">--</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat__label">Median</span>
+                                <span class="stat__value" id="stat-median">--</span>
+                            </div>
+                        </div>
+
+                        <ul class="average-list" aria-label="Best averages">
+                            <li class="average-list__row">
+                                <span class="average-list__label">Mo3</span>
+                                <span class="average-list__value" id="stat-mo3">--</span>
+                            </li>
+                            <li class="average-list__row">
+                                <span class="average-list__label">Ao5</span>
+                                <span class="average-list__value" id="stat-ao5">--</span>
+                            </li>
+                            <li class="average-list__row">
+                                <span class="average-list__label">Ao12</span>
+                                <span class="average-list__value" id="stat-ao12">--</span>
+                            </li>
+                            <li class="average-list__row">
+                                <span class="average-list__label">Ao50</span>
+                                <span class="average-list__value" id="stat-ao50">--</span>
+                            </li>
+                            <li class="average-list__row">
+                                <span class="average-list__label">Ao100</span>
+                                <span class="average-list__value" id="stat-ao100">--</span>
+                            </li>
+                        </ul>
+
+                        <p class="field__hint" id="stats-footnote">Today and This week include every session for this event.</p>
+                    </div>
+                </section>
+            </div>
+            <footer class="site-footer" aria-label="About this site">
+                <a href="/en/faq.html">FAQ</a>
+                <a href="/en/privacy.html">Privacy</a>
+                <a href="/en/terms.html">Terms</a>
+                <a href="/en/#cookie-instellingen" data-cookie-instellingen="">Cookie settings</a>
+            </footer>
+        </aside>
+
+        <!-- ================================================================
+             Hoofdgebied: timer
+             ================================================================ -->
+        <main class="main">
+            <!-- De kop van de pagina voor zoekmachines en schermlezers. Zichtbaar
+                 staat het logo er al; een tweede kop zou de timer in de weg zitten. -->
+            <h1 class="visually-hidden">Online Rubik's cube timer</h1>
+            <header class="topbar">
+                <div class="topbar__brand">
+                    <img id="logo-header" src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345">
+                </div>
+
+                <div class="topbar__actions">
+                    <div class="topbar__group" id="topbar-group">
+                    <button id="smartcube-open" class="btn-icon btn-icon--badged smartcube-button" type="button" title="Smart cube" aria-label="Smart cube" data-state="off" hidden="">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4Z"></path><path d="M4 7.4l8 4.6 8-4.6M12 12v9.2"></path></svg>
+                        <span class="btn-icon__label">Smart cube</span>
+                        <span class="smartcube-button__dot" aria-hidden="true"></span>
+                    </button>
+
+                    <button id="leaderboard-open" class="btn-icon" type="button" title="Leaderboards" aria-label="Leaderboards" hidden="">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4"></path><path d="M7 4h10v5a5 5 0 0 1-10 0Z"></path><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"></path></svg>
+                        <span class="btn-icon__label">Leaderboards</span>
+                    </button>
+
+                    <button id="tournament-open" class="btn-icon btn-icon--badged" type="button" title="Tournament" aria-label="Tournament" hidden="">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"></path><path d="M6 20V9h4v11M14 20V4h4v16"></path></svg>
+                        <span class="btn-icon__label">Tournament</span>
+                        <span class="btn-icon__badge" id="tournament-badge" hidden="">!</span>
+                    </button>
+
+                    <button id="games-open" class="btn-icon btn-icon--badged" type="button" title="Game modes" aria-label="Game modes">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7h11a4 4 0 0 1 3.9 3.1l1 4.6a2.6 2.6 0 0 1-4.6 2.1L16 14.5H8l-1.8 2.3a2.6 2.6 0 0 1-4.6-2.1l1-4.6A4 4 0 0 1 6.5 7Z"></path><path d="M7.5 9.5v3M6 11h3"></path><path d="M15.5 10h.01M17.5 12h.01"></path></svg>
+                        <span class="btn-icon__label">Game modes</span>
+                        <span class="btn-icon__badge" id="games-badge" hidden="">0</span>
+                    </button>
+
+                    <button id="achievements-open" class="btn-icon btn-icon--badged" type="button" title="Achievements" aria-label="Achievements" hidden="">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="6"></circle><path d="M8.5 14.5 7 22l5-2.5 5 2.5-1.5-7.5"></path></svg>
+                        <span class="btn-icon__label">Achievements</span>
+                        <span class="btn-icon__badge" id="achievements-badge" hidden="">0</span>
+                    </button>
+
+                    <button id="challenges-open" class="btn-icon btn-icon--badged" type="button" title="Daily challenges" aria-label="Daily challenges" hidden="">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1.2"></circle></svg>
+                        <span class="btn-icon__label">Challenges</span>
+                        <span class="btn-icon__badge" id="challenges-badge" hidden="">0</span>
+                    </button>
+
+                    <a id="learn-open" class="btn-icon" href="/en/learn.html" title="Learn" aria-label="Learn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5Z"></path><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5Z"></path></svg>
+                        <span class="btn-icon__label">Learn</span>
+                    </a>
+
+                    <button id="feedback-open" class="btn-icon" type="button" title="Report a bug or idea" aria-label="Report a bug or idea">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6a4 4 0 0 1 8 0"></path><rect x="6" y="6" width="12" height="13" rx="6"></rect><path d="M3 12h3M18 12h3M4.5 6.5 7 8M19.5 6.5 17 8M4.5 18.5 7 17M19.5 18.5 17 17"></path></svg>
+                        <span class="btn-icon__label">Send feedback</span>
+                    </button>
+
+                    <button id="settings-open" class="btn-icon" type="button" title="Settings" aria-label="Settings">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+                        <span class="btn-icon__label">Settings</span>
+                    </button>
+
+                    <!-- Andere taal. tools/vertalen.php zet hem op de Engelse pagina om naar NL. -->
+                    <a class="btn-icon lang-switch" href="/#taal=nl" hreflang="nl" lang="nl" data-taalwissel="nl" data-niet-vertalen="" title="Nederlands" aria-label="Nederlands">
+                        <span class="lang-switch__code" data-taalwissel-code="">NL</span>
+                        <span class="btn-icon__label">Nederlands</span>
+                    </a>
+                    </div>
+
+                    <button id="account-open" class="account-chip" type="button" aria-label="Account" hidden="">
+                        <span class="rank-badge rank-badge--sm" id="account-badge" data-tier="brons" hidden="">
+                            <span class="rank-badge__value" id="account-badge-value">--</span>
+                        </span>
+                        <span class="account-chip__avatar" id="account-avatar">?</span>
+                        <span class="account-chip__name" id="account-name">Log in</span>
+                        <span class="account-chip__sync" id="account-sync" aria-hidden="true"></span>
+                    </button>
+
+                    <button id="topbar-menu" class="btn-icon topbar__menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="topbar-group" title="Menu">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+                    </button>
+
+                    <div class="toggle" id="theme-toggle" role="button" tabindex="0" aria-label="Switch between light and dark theme">
+                        <span class="toggle-icon moon active" aria-hidden="true">🌙</span>
+                        <span class="toggle-icon sun" aria-hidden="true">☀️</span>
+                        <div class="toggle-knob" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="stage">
+                <div class="challenge-banner challenge-banner--tournament" id="tournament-banner" hidden="">
+                    <span class="challenge-banner__dot" aria-hidden="true"></span>
+                    <span class="challenge-banner__text">
+                        <strong id="tournament-banner-title">Tournament</strong>
+                        <span id="tournament-banner-hint">Your next solve counts.</span>
+                    </span>
+                    <button class="btn btn--sm" type="button" id="tournament-banner-open">Standings</button>
+                </div>
+
+                <!-- Een lopende spelmodus of duel. -->
+                <div class="challenge-banner challenge-banner--game" id="games-banner" hidden="">
+                    <span class="challenge-banner__dot" aria-hidden="true"></span>
+                    <span class="challenge-banner__text">
+                        <strong id="games-banner-title">Game mode</strong>
+                        <span id="games-banner-hint">These solves don't count towards your session.</span>
+                    </span>
+                    <span class="challenge-banner__actions">
+                        <button class="btn btn--sm" type="button" id="games-banner-open">Menu</button>
+                        <button class="btn btn--sm" type="button" id="games-banner-stop">Stop</button>
+                    </span>
+                </div>
+
+                <div class="challenge-banner" id="challenge-banner" hidden="">
+                    <span class="challenge-banner__dot" aria-hidden="true"></span>
+                    <span class="challenge-banner__text">
+                        <strong>Scramble of the day</strong>
+                        <span id="challenge-banner-hint">You get one attempt. Your next solve counts.</span>
+                    </span>
+                    <button class="btn btn--sm" type="button" id="challenge-banner-cancel">Stop</button>
+                </div>
+
+                <!-- Oefenen met een algoritme van de leerpagina. -->
+                <div class="challenge-banner" id="practice-banner" hidden="">
+                    <span class="challenge-banner__dot" aria-hidden="true"></span>
+                    <span class="challenge-banner__text">
+                        <strong id="practice-banner-title">Practice</strong>
+                        <span id="practice-banner-hint">The scramble sets up this case for you.</span>
+                    </span>
+                    <button class="btn btn--sm" type="button" id="practice-banner-cancel">Stop</button>
+                </div>
+
+                <div class="stage__timer-row">
+                    <div id="ready-lights">
+                        <div class="ready-light" id="light1"></div>
+                        <div class="ready-light" id="light2"></div>
+                    </div>
+                    <div id="timer" role="timer" aria-live="off">00:00:000</div>
+                </div>
+
+                <div class="pr-strip">
+                    <span class="pr-strip__label">Session PB</span>
+                    <span id="session-pr">--</span>
+                </div>
+
+                <p class="stage__hint">
+                    <span><kbd>Space</kbd>inspect, hold, release</span>
+                    <span><kbd>2</kbd>+2 on last solve</span>
+                    <span><kbd>D</kbd>DNF</span>
+                    <span><kbd>⌫</kbd>delete</span>
+                </p>
+            </div>
+
+            <footer class="scramble-bar">
+                <div class="scramble-bar__inner">
+                <div class="scramble-bar__main">
+                <div id="Scrambles" class="ScrambleBox" aria-live="polite" data-leeg="Loading scramble…"></div>
+                <!-- Smart cube: hoe ver je bent met de scramble. Alleen als er een cube verbonden is. -->
+                <div class="smartcube-stage" id="smartcube-stage" hidden="">
+                    <div class="smartcube-stage__cube" id="smartcube-stage-cube" aria-hidden="true"></div>
+                    <div class="smartcube-stage__text">
+                        <strong id="smartcube-stage-title">Smart cube</strong>
+                        <span id="smartcube-stage-hint">Follow the scramble on your cube.</span>
+                    </div>
+                    <div class="smartcube-stage__bar" aria-hidden="true"><span id="smartcube-stage-progress"></span></div>
+                </div>
+               </div>
+
+                <!-- Sessiegrafiek: rechts naast de scramble, op een smal scherm eronder. -->
+                <section id="session-graph" class="session-graph" aria-label="Progress in this session">
+                    <span class="panel__title">Progress</span>
+                    <div class="session-graph__plot" id="session-graph-plot">
+                        <canvas id="session-graph-canvas" width="260" height="140"></canvas>
+                    </div>
+                </section>
+              </div>
+            </footer>
+        </main>
+    </div>
+
+    <canvas id="confetti-canvas"></canvas>
+    <div class="toast-host" id="toast-host" role="status" aria-live="polite"></div>
+
+    <!-- ====================================================================
+         Modal: solve bewerken
+         ==================================================================== -->
+    <div id="time-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="time-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-modal="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Solve</p>
+                <h2 class="modal__title" id="time-modal-title">Edit time</h2>
+            </div>
+
+            <div class="modal__body">
+                <div class="solve-summary">
+                    <p id="modal-current-time">00:00:000</p>
+                    <p id="modal-date">--</p>
+                </div>
+
+                <div class="field">
+                    <span class="field__label">Scramble</span>
+                    <p id="modal-scramble" class="time-modal__scramble">--</p>
+                </div>
+
+                <!-- Alleen bij een solve met een smart cube. Gevuld door smartcube.js. -->
+                <div class="field solve-analysis" id="modal-analysis" hidden=""></div>
+
+                <div class="time-modal__actions">
+                    <button id="modal-plus2" class="btn btn--warning" type="button">Toggle +2</button>
+                    <button id="modal-dnf" class="btn btn--danger" type="button">DNF</button>
+                    <button id="modal-normalize" class="btn" type="button">Clear penalty</button>
+                    <button id="modal-delete" class="btn btn--danger" type="button">Delete</button>
+                </div>
+            </div>
+
+            <div class="time-modal__footer">
+                <button class="btn" type="button" data-close-modal="">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: instellingen
+         ==================================================================== -->
+    <div id="settings-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog settings-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-settings="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">CubeTimer</p>
+                <h2 class="modal__title" id="settings-modal-title">Settings</h2>
+            </div>
+
+            <div class="settings-layout">
+                <nav class="settings-nav" aria-label="Settings">
+                    <button class="settings-nav__item active" type="button" data-settings-tab="general" aria-pressed="true">General</button>
+                    <button class="settings-nav__item" type="button" data-settings-tab="timer" aria-pressed="false">Timer</button>
+                    <button class="settings-nav__item" type="button" data-settings-tab="admin" aria-pressed="false" id="settings-tab-admin" hidden="">Admin</button>
+                </nav>
+
+                <div class="settings-content">
+                    <!-- Algemeen -->
+                    <section class="settings-section" data-settings-panel="general">
+                        <p class="settings-section__eyebrow">General</p>
+                        <h3 class="settings-section__title">Display</h3>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Theme</span>
+                                <span class="setting-row__hint">Follows your system setting by default.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <select id="setting-theme" class="select">
+                                    <option value="system">System</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="light">Light</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Focus mode</span>
+                                <span class="setting-row__hint">Dims everything except the time while the timer runs.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-focus-mode" checked="">
+                                    <span class="switch__track"></span>
+                                    <span class="visually-hidden">Focus mode</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Confetti on a PB</span>
+                                <span class="setting-row__hint">Celebrates a new session best.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-confetti" checked="">
+                                    <span class="switch__track"></span>
+                                    <span class="visually-hidden">Confetti on a PB</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Timer -->
+                    <section class="settings-section" data-settings-panel="timer" hidden="">
+                        <p class="settings-section__eyebrow">Timer</p>
+                        <h3 class="settings-section__title">Timing and inspection</h3>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">WCA inspection</span>
+                                <span class="setting-row__hint">15 seconds of inspection, with a +2 once you go over.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-inspection" checked="">
+                                    <span class="switch__track"></span>
+                                    <span class="visually-hidden">WCA inspection</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Hold time</span>
+                                <span class="setting-row__hint">How long to hold the space bar before the light turns green.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <select id="setting-hold-time" class="select">
+                                    <option value="0">Off (start straight away)</option>
+                                    <option value="300">0.3 seconds</option>
+                                    <option value="500">0.5 seconds (WCA)</option>
+                                    <option value="800">0.8 seconds</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Confirm before deleting</span>
+                                <span class="setting-row__hint">Asks first before you clear or delete a session.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <label class="switch">
+                                    <input type="checkbox" id="setting-confirm-destructive" checked="">
+                                    <span class="switch__track"></span>
+                                    <span class="visually-hidden">Confirm before deleting</span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Beheer: alleen zichtbaar voor een account met de rol admin -->
+                    <section class="settings-section" data-settings-panel="admin" hidden="">
+                        <p class="settings-section__eyebrow">Admin</p>
+                        <h3 class="settings-section__title">Flagged times</h3>
+                        <p class="field__hint">
+                            Times that don't look right wait here for your review. Until then they don't count for records or leaderboards; the user still sees their own time as normal.
+                        </p>
+
+                        <div class="segmented" id="admin-flag-status" role="tablist" aria-label="Status">
+                            <button class="segmented__item is-active" type="button" data-flag-status="pending" role="tab" aria-selected="true">Queue</button>
+                            <button class="segmented__item" type="button" data-flag-status="approved" role="tab" aria-selected="false">Approved</button>
+                            <button class="segmented__item" type="button" data-flag-status="rejected" role="tab" aria-selected="false">Rejected</button>
+                        </div>
+
+                        <div id="admin-flag-list" class="flag-list">
+                            <p class="table-empty">Loading…</p>
+                        </div>
+                    </section>
+
+                    <!-- Smart Cube -->
+                </div>
+            </div>
+
+            <div class="time-modal__footer">
+                <button class="btn" type="button" data-close-settings="">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: bug of idee melden
+         ==================================================================== -->
+    <div id="feedback-modal" class="time-modal modal--wide" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-feedback="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Feedback</p>
+                <h2 class="modal__title" id="feedback-modal-title">Send feedback</h2>
+                <p class="modal__subtitle">Your report goes straight to our issue list on GitHub.</p>
+            </div>
+
+            <form id="feedback-form" class="modal__body" novalidate="">
+                <div class="segmented" id="feedback-type" role="tablist" aria-label="Type of report">
+                    <button class="segmented__item is-active" type="button" data-feedback-type="bug" role="tab" aria-selected="true">Report a bug</button>
+                    <button class="segmented__item" type="button" data-feedback-type="feature" role="tab" aria-selected="false">Share an idea</button>
+                </div>
+
+                <div class="field">
+                    <label class="field__label" for="feedback-title">Title</label>
+                    <input class="input" type="text" id="feedback-title" name="title" maxlength="120" required="" placeholder="Short summary" autocomplete="off">
+                </div>
+
+                <div class="field">
+                    <label class="field__label" for="feedback-description" id="feedback-description-label">What's going wrong?</label>
+                    <textarea class="input" id="feedback-description" name="description" maxlength="4000" required="" placeholder="Describe what you see as precisely as you can."></textarea>
+                </div>
+
+                <div class="field" id="feedback-steps-field">
+                    <label class="field__label" for="feedback-steps">Steps to reproduce <span class="field__hint">(optional)</span></label>
+                    <textarea class="input" id="feedback-steps" name="steps" maxlength="2000" placeholder="1. Start a solve 2. Press ... 3. Then ... happens"></textarea>
+                </div>
+
+                <div class="field" id="feedback-expected-field">
+                    <label class="field__label" for="feedback-expected">What did you expect? <span class="field__hint">(optional)</span></label>
+                    <input class="input" type="text" id="feedback-expected" name="expected" maxlength="1000" placeholder="What should have happened?" autocomplete="off">
+                </div>
+
+                <div class="field">
+                    <label class="field__label" for="feedback-email">Your email address <span class="field__hint">(optional)</span></label>
+                    <input class="input" type="email" id="feedback-email" name="email" maxlength="191" placeholder="in case we have a question" autocomplete="email">
+                    <span class="field__hint">Stays private: it isn't added to the GitHub issue.</span>
+                </div>
+
+                <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots. -->
+                <div class="honeypot" aria-hidden="true">
+                    <label for="feedback-website">Leave this field empty</label>
+                    <input type="text" id="feedback-website" name="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                <p class="notice">Your browser, screen size and current event are sent along so we can reproduce the problem. No times are included. Your report becomes an issue in our task list on GitHub, so please leave out personal details. See the <a href="/en/privacy.html#reports" target="_blank" rel="noopener">privacy policy</a>.</p>
+
+                <p class="form-error" id="feedback-error" role="alert"></p>
+
+                <div class="time-modal__footer">
+                    <button class="btn" type="button" data-close-feedback="">Cancel</button>
+                    <button class="btn btn--primary" type="submit" id="feedback-submit">Send</button>
+                </div>
+            </form>
+
+            <div class="feedback-success" id="feedback-success" hidden="">
+                <div class="feedback-success__icon" aria-hidden="true">✓</div>
+                <h3 class="modal__title">Thanks for your report!</h3>
+                <p class="modal__subtitle" id="feedback-success-text"></p>
+                <a class="btn" id="feedback-issue-link" href="#" target="_blank" rel="noopener noreferrer">View the issue</a>
+                <button class="btn btn--ghost" type="button" data-close-feedback="">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: account
+         ==================================================================== -->
+    <div id="account-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="account-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-account="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Account</p>
+                <h2 class="modal__title" id="account-modal-title">Log in</h2>
+                <p class="modal__subtitle" id="account-modal-subtitle">Keep your times and take them to any device.</p>
+            </div>
+
+            <!-- Uitgelogd: inloggen of registreren -->
+            <div class="modal__body" id="account-guest">
+                <div class="segmented" id="auth-tabs" role="tablist" aria-label="Log in or sign up">
+                    <button class="segmented__item is-active" type="button" data-auth-tab="login" role="tab" aria-selected="true">Log in</button>
+                    <button class="segmented__item" type="button" data-auth-tab="register" role="tab" aria-selected="false">Sign up</button>
+                </div>
+
+                <form id="login-form" class="modal__body" novalidate="">
+                    <div class="field">
+                        <label class="field__label" for="login-identifier">Username or email</label>
+                        <input class="input" type="text" id="login-identifier" autocomplete="username" required="">
+                    </div>
+                    <div class="field">
+                        <label class="field__label" for="login-password">Password</label>
+                        <input class="input" type="password" id="login-password" autocomplete="current-password" required="">
+                    </div>
+                    <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots (zie BotGuard). -->
+                    <div class="honeypot" aria-hidden="true">
+                        <label for="login-website">Leave this field empty</label>
+                        <input type="text" id="login-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <p class="form-error" id="login-error" role="alert"></p>
+                    <button class="btn btn--primary btn--block" type="submit" id="login-submit">Log in</button>
+                    <button class="btn btn--ghost btn--sm auth-link" type="button" id="forgot-open" hidden="">Forgot your password?</button>
+                </form>
+
+                <!-- Wachtwoord vergeten: een herstellink per mail -->
+                <form id="forgot-form" class="modal__body" novalidate="" hidden="">
+                    <p class="field__hint">
+                        Enter your email address or username. We'll email you a link to choose a new password.
+                    </p>
+                    <div class="field">
+                        <label class="field__label" for="forgot-identifier">Email address or username</label>
+                        <input class="input" type="text" id="forgot-identifier" autocomplete="username" required="">
+                    </div>
+                    <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots (zie BotGuard). -->
+                    <div class="honeypot" aria-hidden="true">
+                        <label for="forgot-website">Leave this field empty</label>
+                        <input type="text" id="forgot-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <p class="form-error" id="forgot-error" role="alert"></p>
+                    <p class="notice" id="forgot-done" hidden=""></p>
+                    <button class="btn btn--primary btn--block" type="submit" id="forgot-submit">Send the link</button>
+                    <button class="btn btn--ghost btn--sm auth-link" type="button" data-auth-back="">Back to log in</button>
+                </form>
+
+                <!-- Nieuw wachtwoord kiezen, via de link uit de mail (#herstel=...) -->
+                <form id="reset-form" class="modal__body" novalidate="" hidden="">
+                    <div class="field">
+                        <label class="field__label" for="reset-password">New password</label>
+                        <input class="input" type="password" id="reset-password" autocomplete="new-password" required="" minlength="8">
+                        <span class="field__hint">At least 8 characters. You'll be logged out on all your other devices.</span>
+                    </div>
+                    <div class="field">
+                        <label class="field__label" for="reset-password-repeat">Repeat password</label>
+                        <input class="input" type="password" id="reset-password-repeat" autocomplete="new-password" required="" minlength="8">
+                    </div>
+                    <p class="form-error" id="reset-error" role="alert"></p>
+                    <button class="btn btn--primary btn--block" type="submit" id="reset-submit">Save password</button>
+                </form>
+
+                <form id="register-form" class="modal__body" novalidate="" hidden="">
+                    <div class="field">
+                        <label class="field__label" for="register-username">Username</label>
+                        <input class="input" type="text" id="register-username" autocomplete="username" required="" minlength="3" maxlength="32">
+                        <span class="field__hint">3 to 32 characters: letters, numbers, dot, dash or underscore.</span>
+                    </div>
+                    <div class="field">
+                        <label class="field__label" for="register-email">Email address</label>
+                        <input class="input" type="email" id="register-email" autocomplete="email" required="">
+                    </div>
+                    <div class="field">
+                        <label class="field__label" for="register-password">Password</label>
+                        <input class="input" type="password" id="register-password" autocomplete="new-password" required="" minlength="8">
+                        <span class="field__hint">At least 8 characters.</span>
+                    </div>
+                    <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots (zie BotGuard). -->
+                    <div class="honeypot" aria-hidden="true">
+                        <label for="register-website">Leave this field empty</label>
+                        <input type="text" id="register-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <p class="form-error" id="register-error" role="alert"></p>
+                    <button class="btn btn--primary btn--block" type="submit" id="register-submit">Create account</button>
+                    <p class="form-note">By creating an account you agree to the <a href="/en/terms.html" target="_blank" rel="noopener">terms</a>. How we handle your data is explained in the <a href="/en/privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p>
+                </form>
+            </div>
+
+            <!-- Ingelogd -->
+            <div class="modal__body" id="account-user" hidden="">
+                <!-- Adres nog niet bevestigd. Niet verplicht, wel handig voor als je je wachtwoord vergeet. -->
+                <div class="notice notice--warning account-verify" id="account-verify" hidden="">
+                    <span id="account-verify-text"></span>
+                    <button class="btn btn--sm" type="button" id="account-verify-resend">Resend the email</button>
+                </div>
+
+                <div class="account-summary">
+                    <span class="rank-badge" id="account-summary-badge" data-tier="brons">
+                        <span class="rank-badge__value" id="account-summary-rank">--</span>
+                        <span class="rank-badge__level" id="account-summary-level">Lv. 1</span>
+                    </span>
+                    <div class="account-summary__meta">
+                        <span class="account-summary__name" id="account-summary-name">--</span>
+                        <span class="account-summary__sub" id="account-summary-email">--</span>
+                        <span class="account-summary__sub" id="account-summary-rankline">No ranking yet</span>
+                    </div>
+                </div>
+
+                <div class="xp-bar">
+                    <div class="xp-bar__head">
+                        <span id="xp-level-label">Level 1 · Bronze</span>
+                        <span id="xp-progress-label">0 / 100 XP</span>
+                    </div>
+                    <div class="xp-bar__track">
+                        <div class="xp-bar__fill" id="xp-bar-fill" style="width: 0%"></div>
+                    </div>
+                    <p class="field__hint" id="xp-total-label">0 XP earned</p>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat">
+                        <span class="stat__label">Sessions</span>
+                        <span class="stat__value" id="account-stat-sessions">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat__label">Solves</span>
+                        <span class="stat__value" id="account-stat-solves">0</span>
+                    </div>
+                    <div class="stat stat--accent">
+                        <span class="stat__label">Streak (days)</span>
+                        <span class="stat__value" id="account-stat-streak">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat__label">Longest (days)</span>
+                        <span class="stat__value" id="account-stat-longest">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat__label">Achievements</span>
+                        <span class="stat__value" id="account-stat-achievements">0</span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <span class="field__label">Records per event</span>
+                    <div class="records-table" id="account-records">
+                        <p class="table-empty">No records yet. Sync your times first.</p>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <span class="field__label">Recent XP</span>
+                    <ul class="xp-log" id="account-xp-log"></ul>
+                </div>
+
+                <!--
+                  Losse tijden: solves die wel op het account staan maar niet
+                  meer in een sessie. Alleen zichtbaar als je ze hebt.
+                -->
+                <div class="field" id="account-loose" hidden="">
+                    <span class="field__label">Loose times</span>
+                    <p class="field__hint" id="account-loose-text"></p>
+                    <div class="time-modal__actions">
+                        <button class="btn" type="button" id="account-loose-restore">Restore as a session</button>
+                        <button class="btn btn--danger" type="button" id="account-loose-clear">Delete for good</button>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-row__text">
+                        <span class="setting-row__label">Main event</span>
+                        <span class="setting-row__hint">Decides which leaderboard your badge shows.</span>
+                    </div>
+                    <div class="setting-row__control">
+                        <select id="account-main-event" class="select"></select>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-row__text">
+                        <span class="setting-row__label">Country</span>
+                        <span class="setting-row__hint">Shown as a code next to your name on the leaderboard.</span>
+                    </div>
+                    <div class="setting-row__control">
+                        <select id="account-country" class="select"></select>
+                    </div>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-row__text">
+                        <span class="setting-row__label">Appear on leaderboards</span>
+                        <span class="setting-row__hint">Off = your times and profile are hidden from everyone.</span>
+                    </div>
+                    <div class="setting-row__control">
+                        <label class="switch">
+                            <input type="checkbox" id="account-show-leaderboard" checked="">
+                            <span class="switch__track"></span>
+                            <span class="visually-hidden">Appear on leaderboards</span>
+                        </label>
+                    </div>
+                </div>
+
+                <p class="notice" id="account-sync-status">Your times are saved automatically.</p>
+                <p class="notice notice--warning" id="account-flag-notice" hidden=""></p>
+
+                <div class="time-modal__actions">
+                    <a class="btn" id="account-profile-link" href="#" target="_blank" rel="noopener">My profile</a>
+                    <button class="btn" type="button" id="account-copy-profile">Copy profile link</button>
+                    <button class="btn" type="button" id="account-sync-now">Sync now</button>
+                    <button class="btn btn--danger" type="button" id="account-logout">Log out</button>
+                </div>
+
+                <!-- Je gegevens: downloaden en verwijderen (AVG). -->
+                <div class="account-danger">
+                    <p class="account-danger__title">Your data</p>
+                    <p class="account-danger__text">Download everything we store about your account, or delete your account and everything in it. More about this in the <a href="/en/privacy.html#rights" target="_blank" rel="noopener">privacy policy</a>.</p>
+                    <div class="account-danger__actions">
+                        <button class="btn" type="button" id="account-export">Download my data</button>
+                        <button class="btn btn--danger" type="button" id="account-delete">Delete account</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accounts staan uit op deze server -->
+            <div class="modal__body" id="account-unavailable" hidden="">
+                <p class="notice notice--warning">
+                    Accounts aren't set up on this server yet. For now your times are only kept in this browser.
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ====================================================================
+         Modal: ranglijsten
+         ==================================================================== -->
+    <div id="leaderboard-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-leaderboard="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Leaderboards</p>
+                <h2 class="modal__title" id="leaderboard-title">Who's the fastest?</h2>
+                <p class="modal__subtitle" id="leaderboard-subtitle">Days and weeks follow the site's time zone.</p>
+            </div>
+
+            <div class="board-filters">
+                <div class="field">
+                    <label class="field__label" for="leaderboard-event">Event</label>
+                    <select id="leaderboard-event" class="select"></select>
+                </div>
+                <div class="field">
+                    <label class="field__label" for="leaderboard-category">Category</label>
+                    <select id="leaderboard-category" class="select">
+                        <option value="single">Best single</option>
+                        <option value="ao5">Best Ao5</option>
+                        <option value="ao12">Best Ao12</option>
+                        <option value="ao50">Best Ao50</option>
+                        <option value="ao100">Best Ao100</option>
+                        <option value="mo3">Best Mo3</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <span class="field__label">Who</span>
+                    <div class="segmented" id="leaderboard-scope" role="tablist" aria-label="Who">
+                        <button class="segmented__item is-active" type="button" data-board-scope="all" role="tab" aria-selected="true">Everyone</button>
+                        <button class="segmented__item" type="button" data-board-scope="friends" role="tab" aria-selected="false">People I follow</button>
+                    </div>
+                </div>
+
+                <div class="field board-filters__period">
+                    <span class="field__label">Period</span>
+                    <div class="segmented" id="leaderboard-period" role="tablist" aria-label="Period">
+                        <button class="segmented__item is-active" type="button" data-board-period="all" role="tab" aria-selected="true">All time</button>
+                        <button class="segmented__item" type="button" data-board-period="week" role="tab" aria-selected="false">This week</button>
+                        <button class="segmented__item" type="button" data-board-period="day" role="tab" aria-selected="false">Today</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-me" id="leaderboard-me" hidden="">
+                <span class="rank-badge rank-badge--sm" id="leaderboard-me-badge" data-tier="brons">
+                    <span class="rank-badge__value" id="leaderboard-me-rank">--</span>
+                </span>
+                <span class="board-me__text" id="leaderboard-me-text">--</span>
+            </div>
+
+            <div class="board-wrap">
+                <table class="board-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Cuber</th>
+                            <th scope="col">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+                <p class="table-empty" id="leaderboard-empty" hidden="">Nobody here yet. Be the first.</p>
+            </div>
+
+            <!-- Bladeren: per 50, en in één klik naar de pagina waar jij staat. -->
+            <nav class="board-pager" id="leaderboard-pager" aria-label="Leaderboard pages" hidden="">
+                <button class="btn btn--sm" type="button" id="leaderboard-prev" aria-label="Previous page">‹ Previous</button>
+                <span class="board-pager__label" id="leaderboard-page-label">Page 1 of 1</span>
+                <button class="btn btn--sm" type="button" id="leaderboard-next" aria-label="Next page">Next ›</button>
+                <button class="btn btn--sm btn--primary" type="button" id="leaderboard-mine" hidden="">Jump to my rank</button>
+            </nav>
+
+            <div class="time-modal__footer">
+                <span class="field__hint" id="leaderboard-count"></span>
+                <button class="btn" type="button" data-close-leaderboard="">Close</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- ====================================================================
+         Modal: spelmodi en duels
+         ==================================================================== -->
+    <div id="games-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="games-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-games="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Game modes</p>
+                <h2 class="modal__title" id="games-title">Game modes</h2>
+                <p class="modal__subtitle" id="games-subtitle">A different way to time, with a record for each mode.</p>
+            </div>
+
+            <div class="modal__body" id="games-body">
+                <p class="table-empty">Loading…</p>
+            </div>
+
+            <div class="time-modal__footer">
+                <span class="field__hint" id="games-footnote"></span>
+                <button class="btn" type="button" data-close-games="">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: toernooimodus
+         ==================================================================== -->
+    <div id="tournament-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="tournament-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-tournament="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Tournament</p>
+                <h2 class="modal__title" id="tournament-title">Enter a competition</h2>
+                <p class="modal__subtitle" id="tournament-subtitle">Five solves per round, with a cutoff and time limit, just like a real comp.</p>
+            </div>
+
+            <div class="modal__body" id="tournament-body">
+                <p class="table-empty">Loading…</p>
+            </div>
+
+            <p class="notice" id="tournament-guest" hidden="">
+                Log in to enter a tournament. Your tournament times stay separate from your normal sessions.
+            </p>
+
+            <div class="time-modal__footer">
+                <span class="field__hint" id="tournament-footnote"></span>
+                <button class="btn" type="button" data-close-tournament="">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: achievements
+         ==================================================================== -->
+    <div id="achievements-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="achievements-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-achievements="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Achievements</p>
+                <h2 class="modal__title" id="achievements-title">What have you unlocked?</h2>
+                <p class="modal__subtitle" id="achievements-subtitle">--</p>
+            </div>
+
+            <div class="achievement-summary">
+                <div class="xp-bar__track">
+                    <div class="xp-bar__fill" id="achievements-progress" style="width: 0%"></div>
+                </div>
+                <div class="achievement-summary__meta">
+                    <span id="achievements-count">0 of 0 unlocked</span>
+                    <span id="achievements-xp">0 XP from achievements</span>
+                </div>
+            </div>
+
+            <div class="segmented segmented--wrap" id="achievements-filter" role="tablist" aria-label="Category">
+                <button class="segmented__item is-active" type="button" data-achievement-category="alles" role="tab" aria-selected="true">All</button>
+            </div>
+
+            <div class="modal__body" id="achievements-list">
+                <p class="table-empty">Loading…</p>
+            </div>
+
+            <p class="notice" id="achievements-guest" hidden="">
+                Log in to collect achievements. Everything you've timed so far counts straight away.
+            </p>
+
+            <div class="time-modal__footer">
+                <button class="btn" type="button" data-close-achievements="">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: daily challenges
+         ==================================================================== -->
+    <div id="challenges-modal" class="time-modal modal--board" role="dialog" aria-modal="true" aria-labelledby="challenges-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <button class="time-modal__close" type="button" data-close-challenges="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Daily challenges</p>
+                <h2 class="modal__title" id="challenges-title">Today's challenges</h2>
+                <p class="modal__subtitle" id="challenges-date">--</p>
+            </div>
+
+            <div class="modal__body" id="challenges-list">
+                <p class="table-empty">Loading…</p>
+            </div>
+
+            <p class="notice" id="challenges-guest" hidden="">
+                Log in to take part and earn XP. You can try the challenges without an account too, they just won't count.
+            </p>
+
+            <div class="time-modal__footer">
+                <button class="btn" type="button" data-close-challenges="">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================================================
+         Modal: generieke vraag (vervangt prompt() en confirm())
+         ==================================================================== -->
+    <!-- ================================================================
+         Smart cube
+         ================================================================ -->
+    <div id="smartcube-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="smartcube-title" aria-hidden="true">
+        <div class="time-modal__dialog smartcube-dialog">
+            <button class="time-modal__close" type="button" data-close-smartcube="" aria-label="Close">×</button>
+            <div class="modal__header">
+                <p class="modal__eyebrow">Smart cube</p>
+                <h2 class="modal__title" id="smartcube-title">Connect your smart cube</h2>
+                <p class="modal__subtitle" id="smartcube-subtitle">The timer starts on your first turn after the scramble and stops when the cube is solved.</p>
+            </div>
+
+            <div class="modal__body">
+                <!-- Niet verbonden -->
+                <section class="smartcube-view" data-sc-view="idle">
+                    <ul class="smartcube-brands" aria-label="Supported brands">
+                        <li>GAN</li><li>MoYu</li><li>QiYi</li><li>X-Man</li><li>Giiker</li><li>GoCube</li>
+                    </ul>
+                    <p class="smartcube-error" id="smartcube-error" role="alert" hidden=""></p>
+                    <button class="btn btn--primary btn--block" type="button" id="smartcube-connect">Connect</button>
+                    <p class="field__hint">
+                        Wake your cube up (a quick turn is enough) and pick it in the window that opens. Works in Chrome and Edge on Windows, macOS, Android and ChromeOS.
+                    </p>
+                </section>
+
+                <!-- Bezig met verbinden -->
+                <section class="smartcube-view" data-sc-view="busy" hidden="">
+                    <ol class="smartcube-steps">
+                        <li data-sc-step="kiezen">Choose cube</li>
+                        <li data-sc-step="mac-zoeken">Finding the cube's address</li>
+                        <li data-sc-step="verbinden">Connect</li>
+                        <li data-sc-step="stand">Reading the cube state</li>
+                    </ol>
+                </section>
+
+                <!-- MAC-adres nodig -->
+                <section class="smartcube-view" data-sc-view="mac" hidden="">
+                    <form id="smartcube-mac-form" class="smartcube-mac" novalidate="">
+                        <p class="smartcube-mac__lead" id="smartcube-mac-lead"></p>
+                        <div class="field">
+                            <label class="field__label" for="smartcube-mac-input">MAC address</label>
+                            <input class="input input--mono" type="text" id="smartcube-mac-input" placeholder="AB:12:34:CD:56:EF" autocomplete="off" spellcheck="false" maxlength="17">
+                            <p class="form-error" id="smartcube-mac-error" role="alert"></p>
+                        </div>
+                        <details class="smartcube-mac__help">
+                            <summary>Where do I find it?</summary>
+                            <ul>
+                                <li><strong>In Chrome or Edge on a computer:</strong> open <code>chrome://bluetooth-internals</code>, click <em>Start scan</em> and find your cube in the list. The address is shown next to it.</li>
+                                <li><strong>In your cube's app:</strong> under the device details or settings.</li>
+                                <li><strong>Faster next time:</strong> turn on <code>chrome://flags/#enable-experimental-web-platform-features</code> in Chrome and the site will read the address itself.</li>
+                            </ul>
+                            <p>You only need to enter it once; this browser remembers it after that.</p>
+                        </details>
+                        <div class="time-modal__footer">
+                            <button class="btn" type="button" id="smartcube-mac-cancel">Cancel</button>
+                            <button class="btn btn--primary" type="submit">Connect</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Verbonden -->
+                <section class="smartcube-view" data-sc-view="connected" hidden="">
+                    <div class="smartcube-live">
+                        <div class="smartcube-live__cube">
+                            <div id="smartcube-cube" class="smartcube-cube" aria-hidden="true"></div>
+                            <button class="btn btn--sm smartcube-flip" type="button" id="smartcube-flip" aria-pressed="false">Back</button>
+                        </div>
+                        <dl class="smartcube-facts">
+                            <div><dt>Cube</dt><dd id="smartcube-name">--</dd></div>
+                            <div><dt>Protocol</dt><dd id="smartcube-protocol">--</dd></div>
+                            <div>
+                                <dt>Battery</dt>
+                                <dd><span class="smartcube-battery"><span id="smartcube-battery-bar"></span></span> <span id="smartcube-battery">--</span></dd>
+                            </div>
+                            <div><dt>Standings</dt><dd id="smartcube-state">--</dd></div>
+                        </dl>
+                    </div>
+                    <p class="field__hint" id="smartcube-event-hint" hidden="">
+                        The smart cube only works in a 3x3 session. Pick 3x3 to use it.
+                    </p>
+                    <div class="time-modal__actions">
+                        <button class="btn" type="button" id="smartcube-solved" hidden="">Cube is solved</button>
+                        <button class="btn" type="button" id="smartcube-change-mac" hidden="">Change MAC address</button>
+                        <button class="btn btn--danger" type="button" id="smartcube-disconnect">Disconnect</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div id="prompt-modal" class="time-modal" role="dialog" aria-modal="true" aria-labelledby="prompt-modal-title" aria-hidden="true">
+        <div class="time-modal__dialog">
+            <div class="modal__header">
+                <h2 class="modal__title" id="prompt-modal-title">Are you sure?</h2>
+                <p class="modal__subtitle" id="prompt-modal-message"></p>
+            </div>
+            <form class="modal__body" id="prompt-modal-form">
+                <div class="field" id="prompt-modal-field" hidden="">
+                    <label class="field__label" for="prompt-modal-input" id="prompt-modal-label">Name</label>
+                    <input class="input" type="text" id="prompt-modal-input" maxlength="64" autocomplete="off">
+                </div>
+                <div class="time-modal__footer">
+                    <button class="btn" type="button" id="prompt-modal-cancel">Cancel</button>
+                    <!-- Tweede keuze, bijvoorbeeld "ook uit mijn account". Normaal verborgen. -->
+                    <button class="btn btn--danger" type="button" id="prompt-modal-extra" hidden="">Delete too</button>
+                    <button class="btn btn--primary" type="submit" id="prompt-modal-confirm">OK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+</body></html>

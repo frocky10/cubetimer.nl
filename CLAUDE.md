@@ -41,6 +41,9 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Donker en licht thema, sessiegrafiek, confetti bij een PR
 - Privacyverklaring en voorwaarden, toestemming via Googles CMP, je gegevens
   downloaden en je account verwijderen, botbescherming zonder derden
+- Helemaal in het Engels onder /en/ (interface, servermeldingen, mails, leerpagina,
+  uitleg, privacy en voorwaarden), met een taalknop en hreflang
+- Een uitlegpagina met veelgestelde vragen (/uitleg.html, /en/faq.html)
 
 ---
 
@@ -50,11 +53,15 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 .github/workflows/deploy.yml   FTP-deploy naar DirectAdmin (branch: Release)
 database/                      Genummerde SQL-migraties + uitleg
 tools/                         Hulpscripts voor het ontwikkelen (niet gedeployd)
+taal/en/                       Bron van alle Engelse teksten (html, js, server), zie Tweetalig
 public_html/                   Precies wat er op de server komt te staan
   index.html                   De timer
   leren.html                   Leerpagina: beginner, F2L, OLL, PLL
+  uitleg.html                  Uitleg en veelgestelde vragen (FAQ-structured data)
   privacy.html                 Privacyverklaring (AVG, cookies, je rechten)
   voorwaarden.html             Gebruiksvoorwaarden
+  en/                          De Engelse site: index.html en learn.html gegenereerd door
+                               tools/vertalen.php; faq, privacy en terms met de hand
   profiel.php                  Openbaar profiel, serverside gerenderd
   404.html                     Eigen foutpagina (noindex, paden vanaf de root)
   .htaccess                    Eén adres (https, zonder www), /u/naam, 404, caching
@@ -63,7 +70,8 @@ public_html/                   Precies wat er op de server komt te staan
   site.webmanifest, favicon.ico  Icoon en naam voor browsers en telefoons
   Style/style.css              Eén design system, met tokens bovenaan
   Script/
-    ui.js                      Toasts, modals, ask(), api(), opslag  ← laadt eerst
+    taal-en.js                 Engelse teksten voor de scripts (gegenereerd), alleen op /en/
+    ui.js                      Toasts, modals, ask(), api(), t(), opslag  ← laadt eerst
     script.js                  Timerkern, sessies, instellingen, tabel, grafiek
     stats.js                   Statistieken sessie / vandaag / deze week
     settings.js                Koppelt de instellingen-modal aan script.js
@@ -88,12 +96,13 @@ public_html/                   Precies wat er op de server komt te staan
     bootstrap.php              Laadt de libs, zet de foutafhandeling
     status.php                 Welke onderdelen zijn beschikbaar?
     config.example.php         Sjabloon — kopieer naar ~/cubetimer_config.php
-    lib/                       Config, Http, Database, Auth, RateLimiter, BotGuard, GitHubIssues,
+    lib/                       Config, Taal, Http, Database, Auth, RateLimiter, BotGuard, GitHubIssues,
                                SiteTime, Events, Averages, Records, Xp,
                                Leaderboard, Challenges, SolveFacts, Achievements,
                                PublicProfile, Follows, Tournaments, TournamentField,
                                SolveAnalysis, Ranking, GameModes, Duels, Wca,
                                Mailer, AccountMail, AccountData
+    lib/taal/en.php            Engelse serverteksten (gegenereerd uit taal/en/server.json)
     auth/                      register, login, logout, me, verify-email,
                                resend-verification, forgot-password, reset-password
     sync/                      pull, push
@@ -173,6 +182,15 @@ php tools/veiligheid-controleren.php
 # cubing.js opnieuw bouwen (nieuwe versie). Nooit met de hand in vendor/cubing.
 bash tools/cubing-bouwen.sh [versie]
 
+# De Engelse versie bouwen, en controleren dat elke tekst een vertaling heeft
+# (HTML, UI.t() in de scripts, meldingen en catalogi van de server). Draai na
+# elke wijziging aan een tekst, index.html of leren.html. Zie Tweetalig.
+php tools/vertalen.php
+php tools/vertalen.php --controleer
+
+# Nederlandse tekst in de scripts die nog niet door UI.t() gaat
+node tools/teksten-zoeken.js
+
 # De site lokaal draaien, inclusief werkende API
 php -S 127.0.0.1:8123 -t public_html
 
@@ -244,7 +262,8 @@ gebruikt, niet alleen die van een solve.
 `ui.js` moet als eerste geladen worden (alle andere scripts gebruiken
 `window.CubeTimerUI`), daarna `script.js` (dat `window.cubeTimerApi` zet),
 daarna de rest. Ze staan met `defer` in de `<head>`, wat de volgorde
-garandeert. `scrambleScript.js` is een ES-module (cubing.js), laadt apart en
+garandeert. Op de Engelse pagina's laadt `taal-en.js` nog vóór `ui.js` (ook met `defer`).
+`scrambleScript.js` is een ES-module (cubing.js), laadt apart en
 mag nergens vroeg op rekenen. Hij importeert `./vendor/cubing/scramble.js` van
 onze eigen server; zie het hoofdstuk Privacy.
 
@@ -257,7 +276,7 @@ smart-cubevenster opent). Wie ze niet nodig heeft, downloadt ze ook niet.
 
 | Object | Van wie | Waarvoor |
 |---|---|---|
-| `window.CubeTimerUI` | `ui.js` | `toast`, `ask` (ook `input: { type: 'password' }`), `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `protectedApi(path, body, form)` (formulieren met botbescherming), `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
+| `window.CubeTimerUI` | `ui.js` | `toast`, `ask` (ook `input: { type: 'password' }`), `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `protectedApi(path, body, form)` (formulieren met botbescherming), `t(tekst, waarden)`, `lang`, `locale`, `pad(pagina)`, `profielUrl(naam)`, `getal(n)`, `plek(n)`, `ontbrekendeVertalingen()`, `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
 | `window.CubeTimerToestemming` | inline in `index.html` | `open()`: het CMP-venster van Google opnieuw tonen (Cookie-instellingen) |
 | `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `bestAverageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture(handler, owner)`, `getSolveCaptureOwner`, `triggerConfetti`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, `startInspectionFromBluetooth`, `startTimerFromBluetooth`, `stopTimerFromBluetooth({ ms, analysis })` |
 | `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
@@ -304,6 +323,8 @@ blijft de timer dus gewoon werken.
 | `cubetimer_removed_v1` | solve-id's die ook van het account af moeten, tot de volgende synchronisatie ze heeft doorgegeven |
 | `cubetimer_cube_macs` | per naam van een smart cube het MAC-adres dat werkte, zodat je het maar één keer hoeft in te vullen |
 | `cubetimer_game_v1` | `{ run, prefs }`: een lopende streak/survival/ladder (zodat herladen hem niet kost) en de laatst gekozen instellingen per modus |
+| `cubetimer_taal` | `nl` of `en`: de keuze met de taalknop. Het inline script in de `<head>` stuurt daarop door |
+| `cubetimer_taal_gevraagd` | de Engelse versie is één keer aangeboden aan een niet-Nederlandstalige browser |
 
 Een solve ziet er zo uit:
 
@@ -714,7 +735,10 @@ stop-toets tot je tijd in beeld 1023 → 105 ms, langste blokkade bij het laden
   duizenden tijden meer dan een seconde. Een andere sessie begint weer bij 100.
 - **Geen maten opvragen direct na een DOM-wijziging.** De grafiek vroeg
   `clientWidth` op vlak nadat de tabel vernieuwd was, en dwong Chrome zo om
-  meteen alles op te meten. De breedte komt nu uit een `ResizeObserver`.
+  meteen alles op te meten. De maat komt nu uit een `ResizeObserver` op
+  `#session-graph-plot`. De grafiek staat rechts naast de scramble
+  (`.scramble-bar__inner`, een grid) en neemt diens hoogte over; onder 1100px
+  staat hij eronder.
 - **Rekenwerk dat niet meteen in beeld hoeft, wacht.** `stats.js` rekent na een
   solve pas in `requestIdleCallback`, zodat hij niet tussen de stop-toets en je
   tijd in zit.
@@ -738,10 +762,13 @@ op één adres, **`https://cubetimer.nl`**, zonder www.
 |---|---|---|
 | Eén adres | `.htaccess` | `www.` en `http://` gaan met een 301 naar `https://cubetimer.nl`, `/index.html` naar `/`. Anders ziet Google drie sites met dezelfde inhoud. Controleert `X-Forwarded-Proto`, zodat een proxy geen lus geeft |
 | Canonical | `<link rel="canonical">` op elke indexeerbare pagina | Precies het adres uit de sitemap, ook als iemand `?oefen=...` of `/index.html` deelt |
-| Sitemap | `sitemap.xml` | `/`, `/leren.html`, `/privacy.html` en `/voorwaarden.html`. Een nieuwe openbare pagina hoort erin, met hetzelfde adres als in zijn canonical |
+| Sitemap | `sitemap.xml` | Elke openbare pagina in beide talen, met per pagina de `xhtml:link`-alternatieven (nl, en, x-default). Een nieuwe openbare pagina hoort erin, met hetzelfde adres als in zijn canonical |
+| Talen | `hreflang` in de `<head>` | Elke pagina noemt zichzelf, zijn tegenhanger en `x-default` (de Nederlandse). Moet over en weer kloppen, anders negeert Google het; de controle kijkt dat na, ook tegen de sitemap |
 | robots.txt | `robots.txt` | Blokkeert alleen `/api/`. Profielen bewust **niet**: een geblokkeerde pagina leest Google niet, dus dan ziet hij de noindex niet en kan de kale URL alsnog in de resultaten komen |
 | Niet in Google | `profiel.php`, `404.html` | `noindex, follow` als meta-tag en als `X-Robots-Tag`-header. De 404-pagina geeft ook echt een 404 |
-| Titel en omschrijving | `<head>` | Nederlands, titel ≤ 60 tekens, omschrijving 70-160 tekens |
+| Titel en omschrijving | `<head>` | Titel ≤ 60 tekens, omschrijving 70-160 tekens. Geschreven voor mensen, met de woorden waarop gezocht wordt ("Rubik's cube timer", "kubus oplossen") gewoon in de zin, niet opgesomd |
+| Uitleg | `uitleg.html`, `en/faq.html` | Echte antwoorden op vragen waarop gezocht wordt (Ao5, WCA-inspectie, +2 en DNF, smart cubes), met `FAQPage` in de JSON-LD. Google toont FAQ-resultaten alleen nog bij een paar soorten sites, maar de tekst zelf helpt wel |
+| Zoekwoorden | `<meta name="keywords">` | Staat erin, maar Google gebruikt hem niet. Wat telt is de zichtbare tekst |
 | Kop | `index.html` | Een `<h1>` met `.visually-hidden`: het logo staat er al, een zichtbare kop zou de timer in de weg zitten. Er is bewust geen verborgen lap tekst voor zoekmachines; dat ziet Google als misleiding |
 | Delen | `og:*` en `twitter:card` | `Pictures/og-image.png` (1200x630), altijd als volledig adres; een relatief pad toont in WhatsApp niets |
 | Structured data | JSON-LD in de `<head>` | Timer: `WebSite`, `Organization` (met logo) en `WebApplication` (gratis). Leren: `WebPage`/`LearningResource` met een kruimelpad |
@@ -756,6 +783,70 @@ getest op een echte Apache (redirects, 404, headers, gzip); `php -S` leest geen
 **Na de deploy**: meld de site aan in Google Search Console (eigendom bewijzen
 via DNS of een HTML-bestand), stuur daar `https://cubetimer.nl/sitemap.xml` in,
 en controleer met de Rich Results Test dat de structured data gelezen wordt.
+
+## Tweetalig: Nederlands en Engels
+
+De hele site bestaat in het Nederlands (`/`) en in het Engels (`/en/`). **De
+Nederlandse tekst is de sleutel**: code en HTML blijven gewoon Nederlands, en
+`taal/en/*.json` zegt per Nederlandse zin wat het in het Engels is.
+
+| Bron | Wat | Wordt |
+|---|---|---|
+| `taal/en/html.json` | de vaste teksten in `index.html` en `leren.html` (ook title, aria-label, placeholder, meta, JSON-LD) | `public_html/en/index.html`, `en/learn.html` |
+| `taal/en/js.json` | alles wat een script in beeld zet via `UI.t('...')` | `Script/taal-en.js` |
+| `taal/en/server.json` | meldingen (`Http::fail`, `'message' =>`), `Taal::t('...')` en de catalogi (achievements, toernooiniveaus, rondenamen) | `api/lib/taal/en.php` |
+
+`php tools/vertalen.php` maakt de vier bestanden rechts; **nooit met de hand
+aanpassen**. `--controleer` faalt als een tekst geen vertaling heeft, als er
+Nederlands buiten `UI.t()` staat (`tools/teksten-zoeken.js`), als een
+servermelding geen vaste tekst is (`tools/server-teksten.php`), of als de
+gegenereerde bestanden niet bij zijn.
+
+**Een tekst toevoegen of veranderen**
+
+- In de HTML van de timer of de leerpagina: gewoon in het Nederlands, daarna
+  `php tools/vertalen.php`; die zegt welke zin ontbreekt. Een zin met opmaak
+  (`<strong>`, een link) is één sleutel, zodat de woordvolgorde in het Engels
+  anders mag.
+- In een script: `UI.t('Tekst')`, met plaatshouders voor wat verandert:
+  `UI.t('Nog {n} solves', { n })`. **Geen ternary binnen `t()`**
+  (`UI.t(n === 1 ? 'a' : 'b')` ziet de controle niet); schrijf
+  `n === 1 ? UI.t('a') : UI.t('b')`. Wat echt niet vertaald hoeft (een logregel)
+  krijgt `// niet vertalen` op dezelfde regel.
+- Op de server: een vaste zin in `Http::fail()` of `'message' =>` wordt vanzelf
+  vertaald (`Http::send()` roept `Taal::t()` aan). Met een getal of naam erin:
+  `Taal::t('Probeer het over {n} minuten nog eens.', ['n' => $n])`.
+- Plaatshouders moeten in beide talen gelijk zijn; de controle kijkt dat na.
+
+**Welke taal**: in de browser `document.documentElement.lang`. `UI.api()` stuurt
+`X-Taal` mee, en daaraan ziet `Taal::huidig()` op de server welke taal het
+antwoord moet hebben (`profiel.php` leest `?lang=en`). Mails gaan in de taal van
+de pagina waar het verzoek vandaan kwam, met een link naar `/en/#…` of `/#…`.
+
+**Wat in het Nederlands in de database staat**, wordt bij het tonen vertaald:
+de titels en omschrijvingen van challenges worden opnieuw opgebouwd uit type en
+payload (`Challenges::titel()`), rondenamen gaan door `Tournaments::rondeNaam()`,
+en het XP-logboek door `Xp::detailTekst()` (herkent de vaste vormen). De
+toelichting bij gemarkeerde tijden (alleen voor de beheerder) blijft Nederlands.
+
+**Adressen**: `/` ↔ `/en/`, `/leren.html` ↔ `/en/learn.html`, `/uitleg.html` ↔
+`/en/faq.html`, `/privacy.html` ↔ `/en/privacy.html`, `/voorwaarden.html` ↔
+`/en/terms.html`, `/u/naam` ↔ `/en/u/naam`. Die lijst staat twee keer: `PAGINAS`
+in `tools/vertalen.php` en in `ui.js` (`UI.pad()`). Alle paden in de scripts
+beginnen bij de root (`/api/`, `/Script/`), anders klopt het niet vanuit `/en/`.
+
+**Taalknop**: `[data-taalwissel]` in de balk. Hij wijst naar `…#taal=en`; het
+inline script in de `<head>` slaat dat op in `cubetimer_taal` en stuurt
+voortaan door naar de gekozen taal (via de `hreflang`-link van de pagina). Dat
+werkt ook voordat de scripts geladen zijn. Zonder keuze gebeurt er niets:
+Google en nieuwe bezoekers zien gewoon het adres dat ze openden. Een browser
+die geen Nederlands spreekt krijgt één keer een toast met het aanbod.
+
+**Met de hand geschreven**: `uitleg.html`/`en/faq.html` (gemaakt uit één lijst
+vragen, maar daarna gewoon twee bestanden), `privacy.html`/`en/privacy.html` en
+`voorwaarden.html`/`en/terms.html`. **Verander je er één, verander dan de
+ander mee.** In de Engelse privacy en voorwaarden staat dat bij verschil de
+Nederlandse tekst geldt. `404.html` is tweetalig.
 
 ## Privacy en toestemming
 
@@ -1185,13 +1276,16 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
   Wil je ze wel in je statistieken, dan kan de capture-handler ze ook doorgeven.
 
 - **Na de deploy, voor de eigenaar**: in AdSense onder Privacy en berichten het
-  bericht voor de Europese regelgeving aanzetten (met Consent Mode), de mailbox
-  `privacy@cubetimer.nl` aanmaken, en controleren dat `security.app_key` in de
-  config staat. Zonder CMP laadt Analytics nooit (bewust).
+  bericht voor de Europese regelgeving aanzetten (met Consent Mode), en
+  controleren dat `security.app_key` in de config staat. Zonder CMP laadt
+  Analytics nooit (bewust). De mailbox `privacy@cubetimer.nl` bestaat.
+- In Google Search Console na de deploy de sitemap opnieuw insturen: er staan nu
+  ook de Engelse pagina's en de uitleg in.
 - De privacyverklaring noemt de hostingpartij niet bij naam. Wil je dat wel
   (netter), zet dan naam en land erbij in hoofdstuk 6.
-- De meldknop maakt een GitHub-issue; is de repository openbaar, dan is de
-  melding dat ook. Dat staat in de privacyverklaring en bij het formulier.
+- De meldknop maakt een GitHub-issue. De repository is privé; de
+  privacyverklaring zegt dat, en vraagt toch om geen persoonlijke gegevens in een
+  melding te zetten. Wordt de repository openbaar, pas dan hoofdstuk 4 aan.
 - E-mailadres wijzigen kan nog niet vanuit de site. Komt dat, stuur dan een
   nieuwe bevestigingsmail en zet `email_verified_at` terug op NULL; een oude
   link werkt dan vanzelf niet meer (`email_verifications.email_lower`).
@@ -1211,7 +1305,7 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
   (`Challenges::ROTATING_EVENTS`, acht stuks, dus een cyclus van acht dagen).
   Megaminx, Square-1 en Clock doen niet mee: hun notatie is te eigenzinnig om
   een aangeleverde scramble betrouwbaar te controleren. Zie
-  `Events::SCRAMBLE_FORMATS`.
+  `Events::SCRAMBLE_FORMATS`. **Besloten: zo laten**; niet meer voorstellen.
 - Loopt de voorraad voor het roulerende event leeg, dan is er die dag geen
   tweede scramble van de dag. Dat is bewust; liever geen opdracht dan een
   scramble waarvan we de herkomst niet kennen.

@@ -249,23 +249,23 @@
      * ================================================================== */
 
     const OLL_GROUP_LABELS = {
-        punt: 'Punt (geen rand goed)',
-        haak: 'Haak (twee randen naast elkaar)',
-        lijn: 'Lijn (twee randen tegenover elkaar)',
-        kruis: 'Kruis (alle randen goed)'
+        punt: 'Punt (geen rand goed)', // niet vertalen: dat doet groupLabel()
+        haak: 'Haak (twee randen naast elkaar)', // niet vertalen: dat doet groupLabel()
+        lijn: 'Lijn (twee randen tegenover elkaar)', // niet vertalen: dat doet groupLabel()
+        kruis: 'Kruis (alle randen goed)' // niet vertalen: dat doet groupLabel()
     };
 
     const PLL_GROUP_LABELS = {
-        hoeken: 'Alleen hoeken',
-        randen: 'Alleen randen',
-        beide: 'Hoeken en randen'
+        hoeken: 'Alleen hoeken', // niet vertalen: dat doet groupLabel()
+        randen: 'Alleen randen', // niet vertalen: dat doet groupLabel()
+        beide: 'Hoeken en randen' // niet vertalen: dat doet groupLabel()
     };
 
     const F2L_GROUP_LABELS = {
-        'beide-boven': 'Hoek en rand liggen allebei boven',
-        'rand-in-sleuf': 'De rand zit al in de sleuf',
-        'hoek-in-sleuf': 'De hoek zit al in de sleuf',
-        'beide-in-sleuf': 'Allebei zitten ze al in de sleuf'
+        'beide-boven': 'Hoek en rand liggen allebei boven', // niet vertalen: dat doet groupLabel()
+        'rand-in-sleuf': 'De rand zit al in de sleuf', // niet vertalen: dat doet groupLabel()
+        'hoek-in-sleuf': 'De hoek zit al in de sleuf', // niet vertalen: dat doet groupLabel()
+        'beide-in-sleuf': 'Allebei zitten ze al in de sleuf' // niet vertalen: dat doet groupLabel()
     };
 
     /** Bouwt de lijst op en hangt er alles aan wat de pagina nodig heeft. */
@@ -335,7 +335,10 @@
             const labels = soort === 'oll' ? OLL_GROUP_LABELS
                 : soort === 'pll' ? PLL_GROUP_LABELS
                     : F2L_GROUP_LABELS;
-            return labels[groep] || groep;
+            const label = labels[groep] || groep;
+            // Vertaald via ui.js als dat er is (niet in de controlescripts van node).
+            const ui = typeof window !== 'undefined' ? window.CubeTimerUI : null;
+            return ui && ui.t ? ui.t(label) : label;
         },
         OLL_GROUP_LABELS,
         PLL_GROUP_LABELS,

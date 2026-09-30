@@ -494,7 +494,7 @@ function loadScriptsInOrder(bronnen) {
         const element = document.createElement('script');
         element.src = src;
         element.onload = () => klaar();
-        element.onerror = () => mislukt(new Error('Kon ' + src + ' niet laden'));
+        element.onerror = () => mislukt(new Error('Kon ' + src + ' niet laden')); // niet vertalen: alleen in de console
         document.head.appendChild(element);
     })), Promise.resolve());
 }
@@ -509,7 +509,7 @@ function stopPractice() {
 
 practiceCancel?.addEventListener('click', () => {
     stopPractice();
-    UI.toast('Klaar met oefenen. Je gewone scramble staat weer klaar.', { type: 'info' });
+    UI.toast(UI.t('Klaar met oefenen. Je gewone scramble staat weer klaar.'), { type: 'info' });
 });
 
 async function startPracticeFromUrl() {
@@ -517,21 +517,21 @@ async function startPracticeFromUrl() {
     if (!gevraagd) return;
 
     try {
-        await loadScriptsInOrder(['Script/cube.js', 'Script/algorithms.js']);
+        await loadScriptsInOrder(['/Script/cube.js', '/Script/algorithms.js']);
     } catch (err) {
-        UI.toast('De algoritmes konden niet geladen worden.', { type: 'error' });
+        UI.toast(UI.t('De algoritmes konden niet geladen worden.'), { type: 'error' });
         return;
     }
 
     const geval = window.CubeTimerAlgorithms?.byId(gevraagd);
     if (!geval) {
-        UI.toast('Dat algoritme kennen we niet.', { type: 'warning' });
+        UI.toast(UI.t('Dat algoritme kennen we niet.'), { type: 'warning' });
         return;
     }
 
     setScrambleOverride(geval.setup);
     if (practiceBanner && practiceTitle && practiceHint) {
-        practiceTitle.textContent = 'Oefenen: ' + geval.titel;
+        practiceTitle.textContent = UI.t('Oefenen: {geval}', { geval: geval.titel });
         practiceHint.textContent = geval.alg;
         practiceBanner.hidden = false;
     }
@@ -635,7 +635,7 @@ async function askRemoval({ title, keepMessage, plainMessage, keepLabel, wipeLab
         const akkoord = await UI.ask({
             title,
             message: plainMessage,
-            confirmLabel: 'Verwijderen',
+            confirmLabel: UI.t('Verwijderen'),
             danger: true
         });
         return akkoord ? 'session' : null;
@@ -680,7 +680,7 @@ function loadSessionsFromStorage() {
 function createDefaultSession() {
     const id = generateSessionId();
     sessions = {
-        [id]: { id, name: 'Session 1', times: [], event: DEFAULT_EVENT }
+        [id]: { id, name: UI.t('Sessie {n}', { n: 1 }), times: [], event: DEFAULT_EVENT }
     };
     activeSessionId = id;
 }
@@ -736,12 +736,12 @@ function setActiveSession(id) {
 }
 
 async function createNewSession() {
-    const defaultName = `Sessie ${Object.keys(sessions).length + 1}`;
+    const defaultName = UI.t('Sessie {n}', { n: Object.keys(sessions).length + 1 });
     const input = await UI.ask({
-        title: 'Nieuwe sessie',
-        message: 'Onder welke naam wil je deze sessie opslaan?',
-        confirmLabel: 'Aanmaken',
-        input: { label: 'Naam', value: defaultName }
+        title: UI.t('Nieuwe sessie'),
+        message: UI.t('Onder welke naam wil je deze sessie opslaan?'),
+        confirmLabel: UI.t('Aanmaken'),
+        input: { label: UI.t('Naam'), value: defaultName }
     });
     if (input === null) return;
     const name = input.trim() ? input.trim() : defaultName;
@@ -755,9 +755,9 @@ async function renameActiveSession() {
     const session = sessions[activeSessionId];
     if (!session) return;
     const input = await UI.ask({
-        title: 'Sessie hernoemen',
-        confirmLabel: 'Opslaan',
-        input: { label: 'Naam', value: session.name }
+        title: UI.t('Sessie hernoemen'),
+        confirmLabel: UI.t('Opslaan'),
+        input: { label: UI.t('Naam'), value: session.name }
     });
     if (input === null || !input.trim()) return;
     session.name = input.trim();
@@ -772,12 +772,11 @@ async function resetActiveSession() {
 
     const aantal = session.times.length;
     const keuze = await askRemoval({
-        title: 'Sessie leegmaken?',
-        keepMessage: `De ${aantal} tijden in "${session.name}" verdwijnen uit deze sessie. `
-            + 'Op je account blijven ze staan en tellen ze mee voor je records, tenzij je ze ook daar weghaalt.',
-        plainMessage: `Alle ${aantal} tijden in "${session.name}" worden gewist. Dit kun je niet ongedaan maken.`,
-        keepLabel: 'Uit de sessie halen',
-        wipeLabel: 'Ook van mijn account'
+        title: UI.t('Sessie leegmaken?'),
+        keepMessage: UI.t('De {n} tijden in "{naam}" verdwijnen uit deze sessie. Op je account blijven ze staan en tellen ze mee voor je records, tenzij je ze ook daar weghaalt.', { n: aantal, naam: session.name }),
+        plainMessage: UI.t('Alle {n} tijden in "{naam}" worden gewist. Dit kun je niet ongedaan maken.', { n: aantal, naam: session.name }),
+        keepLabel: UI.t('Uit de sessie halen'),
+        wipeLabel: UI.t('Ook van mijn account')
     });
     if (keuze === null) return;
 
@@ -793,17 +792,16 @@ async function resetActiveSession() {
 async function deleteActiveSession() {
     const session = sessions[activeSessionId];
     const aantal = session?.times.length ?? 0;
-    const naam = session?.name ?? 'Deze sessie';
+    const naam = session?.name ?? UI.t('Deze sessie');
 
     const keuze = await askRemoval({
-        title: 'Sessie verwijderen?',
+        title: UI.t('Sessie verwijderen?'),
         keepMessage: aantal
-            ? `"${naam}" verdwijnt uit je lijst. De ${aantal} tijden erin blijven op je account staan `
-                + 'en tellen mee voor je records; je vindt ze terug onder Losse tijden.'
-            : `"${naam}" verdwijnt uit je lijst. Er staan geen tijden in.`,
-        plainMessage: `"${naam}" en alle tijden erin verdwijnen definitief.`,
-        keepLabel: 'Sessie verwijderen',
-        wipeLabel: 'Sessie én tijden wissen'
+            ? UI.t('"{naam}" verdwijnt uit je lijst. De {n} tijden erin blijven op je account staan en tellen mee voor je records; je vindt ze terug onder Losse tijden.', { naam, n: aantal })
+            : UI.t('"{naam}" verdwijnt uit je lijst. Er staan geen tijden in.', { naam }),
+        plainMessage: UI.t('"{naam}" en alle tijden erin verdwijnen definitief.', { naam }),
+        keepLabel: UI.t('Sessie verwijderen'),
+        wipeLabel: UI.t('Sessie én tijden wissen')
     });
     if (keuze === null) return;
 
@@ -861,7 +859,7 @@ function renderTimes() {
         const extra = Math.min(TABLE_PAGE, start);
         rows.push(`<tr class="solves-more"><td colspan="4">
             <button type="button" class="solves-more__button" data-more-times>
-                Toon er ${extra} meer <span>(nog ${start} ouder)</span>
+                ${UI.t('Toon er {n} meer', { n: extra })} <span>(${UI.t('nog {n} ouder', { n: start })})</span>
             </button></td></tr>`);
     }
 
@@ -1201,11 +1199,11 @@ function openEditModal(index) {
     modalCurrentTime.textContent = `#${index + 1} - ${getDisplayLabel(entry)}`;
     if (modalDateField) {
         modalDateField.textContent = entry.timestamp
-            ? new Date(entry.timestamp).toLocaleString('nl-NL')
-            : 'Datum onbekend';
+            ? new Date(entry.timestamp).toLocaleString(UI.locale)
+            : UI.t('Datum onbekend');
     }
     if (modalScrambleField) {
-        modalScrambleField.textContent = entry.scramble || 'Scramble niet bewaard';
+        modalScrambleField.textContent = entry.scramble || UI.t('Scramble niet bewaard');
     }
     // smartcube.js vult hiermee de analyse in, als die er is.
     window.dispatchEvent(new CustomEvent('cubetimer:solve-open', { detail: { solve: { ...entry } } }));
@@ -1261,12 +1259,11 @@ async function deleteEntryAtIndex() {
     if (!entry) return;
 
     const keuze = await askRemoval({
-        title: 'Tijd verwijderen?',
-        keepMessage: 'De tijd verdwijnt uit deze sessie. Op je account blijft hij staan en telt hij '
-            + 'mee voor je records, tenzij je hem daar ook weghaalt.',
-        plainMessage: 'Deze tijd wordt verwijderd.',
-        keepLabel: 'Uit de sessie halen',
-        wipeLabel: 'Ook van mijn account'
+        title: UI.t('Tijd verwijderen?'),
+        keepMessage: UI.t('De tijd verdwijnt uit deze sessie. Op je account blijft hij staan en telt hij mee voor je records, tenzij je hem daar ook weghaalt.'),
+        plainMessage: UI.t('Deze tijd wordt verwijderd.'),
+        keepLabel: UI.t('Uit de sessie halen'),
+        wipeLabel: UI.t('Ook van mijn account')
     });
     if (keuze === null) return;
 
@@ -1325,14 +1322,20 @@ function deleteLastSolve() {
  * deel van de hapering na een solve.
  */
 let graphCssWidth = 0;
-if (sessionGraphCanvas && 'ResizeObserver' in window) {
+let graphCssHeight = 0;
+const sessionGraphPlot = document.getElementById('session-graph-plot');
+if (sessionGraphPlot && 'ResizeObserver' in window) {
+    // Het vak rond de canvas, niet de canvas zelf: de grafiek staat naast de
+    // scramble en neemt diens hoogte over.
     new ResizeObserver(entries => {
         const breedte = Math.round(entries[0].contentRect.width);
-        if (breedte && breedte !== graphCssWidth) {
+        const hoogte = Math.round(entries[0].contentRect.height);
+        if (breedte && (breedte !== graphCssWidth || hoogte !== graphCssHeight)) {
             graphCssWidth = breedte;
+            graphCssHeight = hoogte;
             renderGraph();
         }
-    }).observe(sessionGraphCanvas);
+    }).observe(sessionGraphPlot);
 }
 
 /** Zet de canvasgrootte gelijk aan de CSS-grootte, zodat de lijn scherp blijft. */
@@ -1341,7 +1344,7 @@ function resizeGraphCanvas() {
 
     const ratio = window.devicePixelRatio || 1;
     const cssWidth = graphCssWidth || 260;
-    const cssHeight = Math.round(cssWidth * 0.54);
+    const cssHeight = graphCssHeight || Math.round(cssWidth * 0.54);
 
     // Alleen aanpassen als het nodig is: een nieuwe canvasgrootte wist en
     // alloceert het hele canvas opnieuw.
@@ -1350,7 +1353,6 @@ function resizeGraphCanvas() {
     if (sessionGraphCanvas.width !== pixelWidth || sessionGraphCanvas.height !== pixelHeight) {
         sessionGraphCanvas.width = pixelWidth;
         sessionGraphCanvas.height = pixelHeight;
-        sessionGraphCanvas.style.height = cssHeight + 'px';
     }
 
     sessionGraphCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -1374,7 +1376,7 @@ function renderGraph() {
         ctx.fillStyle = emptyColor;
         ctx.font = '12px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('No solves yet', width / 2, height / 2);
+        ctx.fillText(UI.t('Nog geen solves'), width / 2, height / 2);
         return;
     }
     const minValue = Math.min(...data.map(d => d.value));

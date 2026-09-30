@@ -31,4 +31,4 @@ if (!AccountMail::sendVerification((int) $user['id'])) {
     Http::fail('send_failed', 'De mail kon niet verstuurd worden. Probeer het later nog eens.', 502);
 }
 
-Http::ok(['message' => 'Verstuurd naar ' . $user['email'] . '. Kijk ook even in je spam.']);
+Http::ok(['message' => Taal::t('Verstuurd naar {email}. Kijk ook even in je spam.', ['email' => $user['email']])]);

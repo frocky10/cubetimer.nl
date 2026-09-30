@@ -8,6 +8,9 @@
     <title>Gebruiksvoorwaarden – CubeTimer</title>
     <meta name="description" content="De spelregels van CubeTimer: gratis gebruik, je account, eerlijk timen op de ranglijsten, wat niet mag, en wat we wel en niet kunnen beloven." />
     <link rel="canonical" href="https://cubetimer.nl/voorwaarden.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/voorwaarden.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/terms.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/voorwaarden.html" />
     <meta name="robots" content="index, follow" />
 
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -59,6 +62,8 @@
         (function () {
             try {
                 var stored = localStorage.getItem('cubetimer_theme');
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) localStorage.setItem('cubetimer_taal', gekozen[1]);
                 if (stored !== 'light' && stored !== 'dark') {
                     stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
                 }
@@ -72,7 +77,12 @@
         <a class="profile-topbar__brand" href="/" aria-label="Naar de timer">
             <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
         </a>
-        <a class="btn btn--primary" href="/">Naar de timer</a>
+        <div class="profile-topbar__actions">
+            <a class="btn-icon lang-switch" href="/en/terms.html#taal=en" hreflang="en" lang="en" title="English" aria-label="English">
+                <span class="lang-switch__code">EN</span>
+            </a>
+            <a class="btn btn--primary" href="/">Naar de timer</a>
+        </div>
     </header>
 
     <main class="profile-main">
@@ -188,6 +198,7 @@
     <footer class="site-footer">
         <a href="/">Timer</a>
         <a href="/leren.html">Leren</a>
+        <a href="/uitleg.html">Uitleg</a>
         <a href="/privacy.html">Privacy</a>
         <a href="/voorwaarden.html" aria-current="page">Voorwaarden</a>
         <a href="/#cookie-instellingen">Cookie-instellingen</a>

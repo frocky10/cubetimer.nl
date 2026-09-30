@@ -65,7 +65,7 @@
                 guestNotice.hidden = false;
                 body.innerHTML = '';
             } else if (toon) {
-                toonMelding(err.message || 'Het toernooi kon niet geladen worden.');
+                toonMelding(err.message || UI.t('Het toernooi kon niet geladen worden.'));
             }
         } finally {
             laden = false;
@@ -122,14 +122,14 @@
         footnote.textContent = '';
 
         if (!data) {
-            toonMelding('Laden…');
+            toonMelding(UI.t('Laden…'));
             return;
         }
 
         if (data.tournament && data.tournament.status === 'active') {
             subtitle.textContent = data.tournament.competition
-                ? 'De echte rondes, tegen de echte tijden van toen. Alleen de besten gaan door.'
-                : 'Vijf solves per ronde. Alleen de besten gaan door.';
+                ? UI.t('De echte rondes, tegen de echte tijden van toen. Alleen de besten gaan door.')
+                : UI.t('Vijf solves per ronde. Alleen de besten gaan door.');
             body.appendChild(renderActief(data.tournament));
             body.appendChild(renderStanden(data.tournament));
             return;
@@ -142,8 +142,8 @@
         }
 
         subtitle.textContent = startTab === 'wca'
-            ? 'Speel een echte comp na, tegen de echte tijden van toen.'
-            : 'Vijf solves per ronde, cutoff en tijdslimiet, net als op een echte comp.';
+            ? UI.t('Speel een echte comp na, tegen de echte tijden van toen.')
+            : UI.t('Vijf solves per ronde, cutoff en tijdslimiet, net als op een echte comp.');
         body.appendChild(renderStart());
         if (data.history.length) body.appendChild(renderHistorie());
     }
@@ -159,8 +159,8 @@
             const grid = document.createElement('div');
             grid.className = 'stat-grid';
             [
-                ['Gespeeld', s.played], ['Gewonnen', s.won],
-                ['Podiums', s.podiums], ['Beste plek', s.bestPosition ? s.bestPosition + 'e' : '--']
+                [UI.t('Gespeeld'), s.played], [UI.t('Gewonnen'), s.won],
+                [UI.t('Podiums'), s.podiums], [UI.t('Beste plek'), s.bestPosition ? UI.plek(s.bestPosition) : '--']
             ].forEach(([label, waarde]) => {
                 const tegel = document.createElement('div');
                 tegel.className = 'stat';
@@ -177,7 +177,7 @@
             const tabs = document.createElement('div');
             tabs.className = 'segmented';
             tabs.setAttribute('role', 'tablist');
-            [['sim', 'Gesimuleerd'], ['wca', 'Historische comp']].forEach(([id, label]) => {
+            [['sim', UI.t('Gesimuleerd')], ['wca', UI.t('Historische comp')]].forEach(([id, label]) => {
                 const tab = document.createElement('button');
                 tab.type = 'button';
                 tab.className = 'segmented__item' + (startTab === id ? ' is-active' : '');
@@ -221,7 +221,7 @@
 
         const kop = document.createElement('p');
         kop.className = 'field__label';
-        kop.textContent = 'Moeilijkheid';
+        kop.textContent = UI.t('Moeilijkheid');
         wrap.appendChild(kop);
 
         const kaarten = document.createElement('div');
@@ -241,7 +241,7 @@
 
             const veld = document.createElement('span');
             veld.className = 'difficulty-card__meta';
-            veld.textContent = `Veld van ${niveau.fieldSize}`;
+            veld.textContent = UI.t('Veld van {n}', { n: niveau.fieldSize });
 
             kaart.appendChild(naam);
             kaart.appendChild(omschrijving);
@@ -253,9 +253,7 @@
 
         const uitleg = document.createElement('p');
         uitleg.className = 'notice';
-        uitleg.textContent = 'Je tegenstanders zijn verzonnen cubers, aangevuld met andere gebruikers van de site. '
-            + 'Hun tijden worden gesimuleerd op hun eigen niveau; ze doen niet echt mee. '
-            + 'Je toernooisolves blijven los van je gewone tijden en krijgen een eigen blok op je profiel.';
+        uitleg.textContent = UI.t('Je tegenstanders zijn verzonnen cubers, aangevuld met andere gebruikers van de site. Hun tijden worden gesimuleerd op hun eigen niveau; ze doen niet echt mee. Je toernooisolves blijven los van je gewone tijden en krijgen een eigen blok op je profiel.');
         wrap.appendChild(uitleg);
 
         return wrap;
@@ -268,19 +266,19 @@
 
         const soorten = s.perType || [];
         if (soorten.length) {
-            host.appendChild(kleineTabel('Per soort toernooi', ['Soort', 'Gespeeld', 'Podiums', 'Beste plek'],
+            host.appendChild(kleineTabel(UI.t('Per soort toernooi'), [UI.t('Soort'), UI.t('Gespeeld'), UI.t('Podiums'), UI.t('Beste plek')],
                 soorten.map(soort => [
                     soort.label, String(soort.played), String(soort.podiums),
-                    soort.bestPosition ? soort.bestPosition + 'e' : '--'
+                    soort.bestPosition ? UI.plek(soort.bestPosition) : '--'
                 ])));
         }
 
         const comps = s.competitions || [];
         if (comps.length) {
-            host.appendChild(kleineTabel('Historische comps', ['Comp', 'Event', 'Beste plek'],
+            host.appendChild(kleineTabel(UI.t('Historische comps'), ['Comp', 'Event', UI.t('Beste plek')],
                 comps.map(comp => [
                     comp.name || comp.competitionId, comp.eventLabel,
-                    comp.bestPosition ? `${comp.bestPosition}e van ${comp.fieldSize}` : '--'
+                    comp.bestPosition ? UI.t('{plek} van {n}', { plek: UI.plek(comp.bestPosition), n: comp.fieldSize }) : '--'
                 ])));
         }
         return host;
@@ -342,13 +340,13 @@
         invoer.className = 'input';
         invoer.type = 'search';
         invoer.id = 'wca-search-input';
-        invoer.placeholder = 'Zoek een comp, bijvoorbeeld "Dutch" of "Euro"';
+        invoer.placeholder = UI.t('Zoek een comp, bijvoorbeeld "Dutch" of "Euro"');
         invoer.value = wca.query;
-        invoer.setAttribute('aria-label', 'Zoek een WCA-competitie');
+        invoer.setAttribute('aria-label', UI.t('Zoek een WCA-competitie'));
         const knop = document.createElement('button');
         knop.className = 'btn btn--primary';
         knop.type = 'submit';
-        knop.textContent = wca.zoeken ? 'Zoeken…' : 'Zoeken';
+        knop.textContent = wca.zoeken ? UI.t('Zoeken…') : UI.t('Zoeken');
         knop.disabled = wca.zoeken;
         formulier.appendChild(invoer);
         formulier.appendChild(knop);
@@ -368,7 +366,7 @@
         if (wca.results !== null) {
             const kop = document.createElement('p');
             kop.className = 'field__label';
-            kop.textContent = wca.featured ? 'Kampioenschappen' : (wca.results.length ? 'Gevonden' : 'Niets gevonden');
+            kop.textContent = wca.featured ? UI.t('Kampioenschappen') : (wca.results.length ? UI.t('Gevonden') : UI.t('Niets gevonden'));
             wrap.appendChild(kop);
 
             const lijst = document.createElement('div');
@@ -385,7 +383,7 @@
                 const meta = document.createElement('span');
                 meta.className = 'wca-comp__meta';
                 meta.textContent = wca.compLaden === comp.id
-                    ? 'Uitslagen ophalen bij de WCA…'
+                    ? UI.t('Uitslagen ophalen bij de WCA…')
                     : [comp.city, comp.country ? UI.countryName(comp.country) : '', (comp.startDate || '').slice(0, 10)]
                         .filter(Boolean).join(' · ');
                 kaart.appendChild(naam);
@@ -398,9 +396,7 @@
 
         const uitleg = document.createElement('p');
         uitleg.className = 'notice';
-        uitleg.textContent = 'Je speelt de rondes van een echte comp, met het echte format, de echte cutoff en tijdslimiet, '
-            + 'tegen de echte tijden van toen. Eindig je hoog genoeg om bij het aantal te horen dat in het echt doorging, '
-            + 'dan ga jij ook door. Zo zie je waar je op die comp was geëindigd.';
+        uitleg.textContent = UI.t('Je speelt de rondes van een echte comp, met het echte format, de echte cutoff en tijdslimiet, tegen de echte tijden van toen. Eindig je hoog genoeg om bij het aantal te horen dat in het echt doorging, dan ga jij ook door. Zo zie je waar je op die comp was geëindigd.');
         wrap.appendChild(uitleg);
         return wrap;
     }
@@ -418,7 +414,7 @@
         const terug = document.createElement('button');
         terug.className = 'btn btn--sm';
         terug.type = 'button';
-        terug.textContent = 'Andere comp';
+        terug.textContent = UI.t('Andere comp');
         terug.addEventListener('click', () => {
             wca.comp = null;
             render();
@@ -428,7 +424,7 @@
 
         const label = document.createElement('p');
         label.className = 'field__label';
-        label.textContent = 'Kies een event';
+        label.textContent = UI.t('Kies een event');
         wrap.appendChild(label);
 
         const kaarten = document.createElement('div');
@@ -443,11 +439,18 @@
             naam.textContent = event.label;
             const omschrijving = document.createElement('span');
             omschrijving.className = 'difficulty-card__description';
-            omschrijving.textContent = `${event.competitors} deelnemers · ${event.rounds} ${event.rounds === 1 ? 'ronde' : 'rondes'} · ${event.format}`
-                + (event.winner ? `. Gewonnen door ${event.winner.name}` + (event.winner.resultMs ? ` met ${UI.formatTime(event.winner.resultMs)}` : '') + '.' : '');
+            omschrijving.textContent = [
+                UI.t('{n} deelnemers', { n: event.competitors }),
+                event.rounds === 1 ? UI.t('1 ronde') : UI.t('{n} rondes', { n: event.rounds }),
+                event.format
+            ].join(' · ') + (event.winner
+                ? '. ' + (event.winner.resultMs
+                    ? UI.t('Gewonnen door {naam} met {tijd}.', { naam: event.winner.name, tijd: UI.formatTime(event.winner.resultMs) })
+                    : UI.t('Gewonnen door {naam}.', { naam: event.winner.name }))
+                : '');
             const meta = document.createElement('span');
             meta.className = 'difficulty-card__meta';
-            meta.textContent = event.officialScrambles ? 'Met de echte scrambles' : 'Met nieuwe scrambles';
+            meta.textContent = event.officialScrambles ? UI.t('Met de echte scrambles') : UI.t('Met nieuwe scrambles');
 
             kaart.appendChild(naam);
             kaart.appendChild(omschrijving);
@@ -474,7 +477,7 @@
             wca.results = antwoord.competitions;
             wca.featured = antwoord.featured;
         } catch (err) {
-            wca.fout = err.message || 'Zoeken is niet gelukt.';
+            wca.fout = err.message || UI.t('Zoeken is niet gelukt.');
         } finally {
             wca.zoeken = false;
             if (startTab === 'wca') render();
@@ -489,7 +492,7 @@
             const antwoord = await UI.api('tournament/wca-competition.php?id=' + encodeURIComponent(id));
             wca.comp = antwoord.competition;
         } catch (err) {
-            wca.fout = err.message || 'Deze comp kon niet opgehaald worden.';
+            wca.fout = err.message || UI.t('Deze comp kon niet opgehaald worden.');
         } finally {
             wca.compLaden = null;
             if (startTab === 'wca') render();
@@ -502,7 +505,7 @@
 
         const kop = document.createElement('h3');
         kop.className = 'achievement-group__name';
-        kop.textContent = 'Eerder gespeeld';
+        kop.textContent = UI.t('Eerder gespeeld');
         groep.appendChild(kop);
 
         const wrap = document.createElement('div');
@@ -516,11 +519,11 @@
 
             const plek = document.createElement('td');
             plek.className = 'board-position';
-            plek.textContent = item.position === null ? '--' : item.position + 'e';
+            plek.textContent = item.position === null ? '--' : UI.plek(item.position);
 
             const wat = document.createElement('td');
             wat.textContent = `${item.eventLabel} · ${item.competitionName || item.difficultyLabel}`
-                + (item.status === 'abandoned' ? ' (gestopt)' : ` · veld van ${item.fieldSize}`);
+                + (item.status === 'abandoned' ? ' ' + UI.t('(gestopt)') : ' · ' + UI.t('veld van {n}', { n: item.fieldSize }));
 
             const resultaat = document.createElement('td');
             resultaat.className = 'board-time';
@@ -551,12 +554,13 @@
         kop.querySelector('.tournament-header__title').textContent =
             `${toernooi.eventLabel} · ${toernooi.competition ? toernooi.competition.name : toernooi.difficultyLabel}`;
         kop.querySelector('.tournament-header__sub').textContent =
-            `Veld van ${toernooi.fieldSize} · ronde ${toernooi.currentRound} van ${toernooi.totalRounds}`;
+            UI.t('Veld van {n}', { n: toernooi.fieldSize }) + ' · '
+            + UI.t('ronde {ronde} van {totaal}', { ronde: toernooi.currentRound, totaal: toernooi.totalRounds });
 
         const stoppen = document.createElement('button');
         stoppen.className = 'btn btn--danger btn--sm';
         stoppen.type = 'button';
-        stoppen.textContent = 'Stoppen';
+        stoppen.textContent = UI.t('Stoppen');
         stoppen.addEventListener('click', () => abandon(toernooi.id));
         kop.appendChild(stoppen);
         wrap.appendChild(kop);
@@ -566,8 +570,8 @@
 
         const rondeKop = document.createElement('p');
         rondeKop.className = 'tournament-round__name';
-        rondeKop.textContent = `${ronde.name} — ${ronde.entrants} deelnemers`
-            + (ronde.advancing > 0 ? `, ${ronde.advancing} gaan door` : ', dit is de finale')
+        rondeKop.textContent = ronde.name + ' · ' + UI.t('{n} deelnemers', { n: ronde.entrants })
+            + ', ' + (ronde.advancing > 0 ? UI.t('{n} gaan door', { n: ronde.advancing }) : UI.t('dit is de finale'))
             + (ronde.formatLabel && ronde.formatLabel !== 'Ao5' ? ` · ${ronde.formatLabel}` : '');
         wrap.appendChild(rondeKop);
 
@@ -596,17 +600,18 @@
         regels.className = 'field__hint';
         const delen = [];
         if (ronde.cutoffMs) {
-            const binnen = ronde.cutoffAttempts === 1 ? 'je eerste solve' : `${ronde.cutoffAttempts || 2} solves`;
-            delen.push(`Cutoff ${UI.formatTime(ronde.cutoffMs)}: haal je die niet in ${binnen}, dan stopt je ronde daar.`);
+            delen.push(ronde.cutoffAttempts === 1
+                ? UI.t('Cutoff {tijd}: haal je die niet in je eerste solve, dan stopt je ronde daar.', { tijd: UI.formatTime(ronde.cutoffMs) })
+                : UI.t('Cutoff {tijd}: haal je die niet in {n} solves, dan stopt je ronde daar.', { tijd: UI.formatTime(ronde.cutoffMs), n: ronde.cutoffAttempts || 2 }));
         }
         if (ronde.timeLimitMs && ronde.limitCumulative) {
             const over = Math.max(0, ronde.timeLimitMs - (ronde.limitUsedMs || 0));
-            delen.push(`Tijdslimiet ${UI.formatTime(ronde.timeLimitMs)} voor alle pogingen samen; je hebt nog ${UI.formatTime(over)}.`);
+            delen.push(UI.t('Tijdslimiet {tijd} voor alle pogingen samen; je hebt nog {over}.', { tijd: UI.formatTime(ronde.timeLimitMs), over: UI.formatTime(over) }));
         } else if (ronde.timeLimitMs) {
-            delen.push(`Tijdslimiet ${UI.formatTime(ronde.timeLimitMs)}: daarboven is het een DNF.`);
+            delen.push(UI.t('Tijdslimiet {tijd}: daarboven is het een DNF.', { tijd: UI.formatTime(ronde.timeLimitMs) }));
         }
         if (ronde.scramble) {
-            delen.push('Je krijgt de echte scrambles van deze ronde.');
+            delen.push(UI.t('Je krijgt de echte scrambles van deze ronde.'));
         }
         regels.textContent = delen.join(' ');
         wrap.appendChild(regels);
@@ -615,8 +620,8 @@
         knop.className = 'btn btn--primary btn--block';
         knop.type = 'button';
         knop.textContent = ronde.attemptsDone === 0
-            ? 'Begin met solve 1'
-            : `Doe solve ${ronde.attemptsDone + 1}`;
+            ? UI.t('Begin met solve 1')
+            : UI.t('Doe solve {n}', { n: ronde.attemptsDone + 1 });
         knop.addEventListener('click', () => naarDeTimer(toernooi));
         wrap.appendChild(knop);
 
@@ -631,22 +636,22 @@
 
         const plek = document.createElement('p');
         plek.className = 'tournament-result__position';
-        plek.textContent = toernooi.finalPosition === null ? '--' : toernooi.finalPosition + 'e';
+        plek.textContent = toernooi.finalPosition === null ? '--' : UI.plek(toernooi.finalPosition);
 
         const tekst = document.createElement('p');
         tekst.className = 'tournament-result__text';
         if (toernooi.status === 'abandoned') {
-            tekst.textContent = 'Je bent met dit toernooi gestopt.';
+            tekst.textContent = UI.t('Je bent met dit toernooi gestopt.');
         } else if (toernooi.competition) {
             tekst.textContent = toernooi.finalPosition === 1
-                ? `Je had ${toernooi.competition.name} gewonnen!`
-                : `Op ${toernooi.competition.name} was je ${toernooi.finalPosition}e geworden van ${toernooi.fieldSize}.`;
+                ? UI.t('Je had {comp} gewonnen!', { comp: toernooi.competition.name })
+                : UI.t('Op {comp} was je {plek} geworden van {n}.', { comp: toernooi.competition.name, plek: UI.plek(toernooi.finalPosition), n: toernooi.fieldSize });
         } else if (toernooi.finalPosition === 1) {
-            tekst.textContent = `Gewonnen! Eerste van ${toernooi.fieldSize} op ${toernooi.difficultyLabel}.`;
+            tekst.textContent = UI.t('Gewonnen! Eerste van {n} op {niveau}.', { n: toernooi.fieldSize, niveau: toernooi.difficultyLabel });
         } else if (toernooi.finalPosition <= 3) {
-            tekst.textContent = `Op het podium: ${toernooi.finalPosition}e van ${toernooi.fieldSize}.`;
+            tekst.textContent = UI.t('Op het podium: {plek} van {n}.', { plek: UI.plek(toernooi.finalPosition), n: toernooi.fieldSize });
         } else {
-            tekst.textContent = `Je eindigde als ${toernooi.finalPosition}e van ${toernooi.fieldSize}.`;
+            tekst.textContent = UI.t('Je eindigde als {plek} van {n}.', { plek: UI.plek(toernooi.finalPosition), n: toernooi.fieldSize });
         }
 
         wrap.appendChild(plek);
@@ -655,7 +660,7 @@
         if (toernooi.finalAo5Ms) {
             const gemiddelde = document.createElement('p');
             gemiddelde.className = 'field__hint';
-            gemiddelde.textContent = `Je gemiddelde in de laatste ronde: ${UI.formatTime(toernooi.finalAo5Ms)}`;
+            gemiddelde.textContent = UI.t('Je gemiddelde in de laatste ronde: {tijd}', { tijd: UI.formatTime(toernooi.finalAo5Ms) });
             wrap.appendChild(gemiddelde);
         }
 
@@ -669,7 +674,7 @@
         const opnieuw = document.createElement('button');
         opnieuw.className = 'btn btn--primary';
         opnieuw.type = 'button';
-        opnieuw.textContent = 'Nog een toernooi';
+        opnieuw.textContent = UI.t('Nog een toernooi');
         opnieuw.addEventListener('click', async () => {
             data.tournament = null;
             render();
@@ -692,7 +697,7 @@
 
             const kop = document.createElement('h3');
             kop.className = 'achievement-group__name';
-            kop.textContent = `${ronde.name} · ${ronde.entrants} deelnemers`;
+            kop.textContent = ronde.name + ' · ' + UI.t('{n} deelnemers', { n: ronde.entrants });
             groep.appendChild(kop);
 
             const wrap = document.createElement('div');
@@ -703,7 +708,7 @@
             // Bij best of telt alleen de single; dan is er geen kolom voor een gemiddelde.
             const metGemiddelde = !ronde.format || ronde.format === 'a' || ronde.format === 'm';
             const thead = document.createElement('thead');
-            thead.innerHTML = '<tr><th>#</th><th>Cuber</th>' + (metGemiddelde ? '<th></th>' : '') + '<th>Beste</th></tr>';
+            thead.innerHTML = '<tr><th>#</th><th>Cuber</th>' + (metGemiddelde ? '<th></th>' : '') + '<th>' + UI.t('Beste') + '</th></tr>';
             if (metGemiddelde) thead.querySelectorAll('th')[2].textContent = ronde.formatLabel || 'Ao5';
             tabel.appendChild(thead);
 
@@ -727,7 +732,7 @@
                     tekst.href = 'https://www.worldcubeassociation.org/persons/' + encodeURIComponent(resultaat.wcaId);
                     tekst.target = '_blank';
                     tekst.rel = 'noopener noreferrer';
-                    tekst.title = 'WCA-profiel van ' + resultaat.name;
+                    tekst.title = UI.t('WCA-profiel van {naam}', { naam: resultaat.name });
                 }
                 wrapNaam.appendChild(tekst);
 
@@ -735,8 +740,7 @@
                     const merk = document.createElement('span');
                     merk.className = 'country-tag';
                     merk.textContent = 'sim';
-                    merk.title = 'Een echte gebruiker van de site. Zijn tijden zijn gesimuleerd op zijn niveau; '
-                               + 'hij heeft niet echt meegedaan.';
+                    merk.title = UI.t('Een echte gebruiker van de site. De tijden zijn gesimuleerd op zijn of haar niveau; deze cuber heeft niet echt meegedaan.');
                     wrapNaam.appendChild(merk);
                 }
                 if (resultaat.country) {
@@ -778,7 +782,7 @@
 
     async function start(event, difficulty, knop, competitionId) {
         if (window.CubeTimerGames?.isRunning?.()) {
-            UI.toast('Maak eerst je spelmodus of duel af.', { type: 'warning' });
+            UI.toast(UI.t('Maak eerst je spelmodus of duel af.'), { type: 'warning' });
             return;
         }
         knop.disabled = true;
@@ -794,9 +798,9 @@
 
             render();
             syncBanner();
-            UI.toast('Toernooi gestart. Succes!', { type: 'success' });
+            UI.toast(UI.t('Toernooi gestart. Succes!'), { type: 'success' });
         } catch (err) {
-            UI.toast(err.message || 'Het toernooi kon niet gestart worden.', { type: 'error' });
+            UI.toast(err.message || UI.t('Het toernooi kon niet gestart worden.'), { type: 'error' });
         } finally {
             knop.disabled = false;
         }
@@ -804,9 +808,9 @@
 
     async function abandon(tournamentId) {
         const zeker = await UI.ask({
-            title: 'Toernooi stoppen?',
-            message: 'Je resultaat telt dan niet mee en je kunt niet verder waar je gebleven was.',
-            confirmLabel: 'Stoppen',
+            title: UI.t('Toernooi stoppen?'),
+            message: UI.t('Je resultaat telt dan niet mee en je kunt niet verder waar je gebleven was.'),
+            confirmLabel: UI.t('Stoppen'),
             danger: true
         });
         if (!zeker) return;
@@ -815,9 +819,9 @@
             await UI.api('tournament/abandon.php', { body: { tournamentId } });
             stopCapture();
             await load();
-            UI.toast('Toernooi gestopt.', { type: 'info' });
+            UI.toast(UI.t('Toernooi gestopt.'), { type: 'info' });
         } catch (err) {
-            UI.toast(err.message || 'Dat is niet gelukt.', { type: 'error' });
+            UI.toast(err.message || UI.t('Dat is niet gelukt.'), { type: 'error' });
         }
     }
 
@@ -826,7 +830,7 @@
         UI.closeModal(modal);
         startCapture();
         syncBanner();
-        UI.toast(`${toernooi.round.name}, solve ${toernooi.round.attemptsDone + 1} van ${toernooi.round.attemptsTotal}.`,
+        UI.toast(UI.t('{ronde}, solve {n} van {totaal}.', { ronde: toernooi.round.name, n: toernooi.round.attemptsDone + 1, totaal: toernooi.round.attemptsTotal }),
             { type: 'info' });
     }
 
@@ -883,7 +887,7 @@
                 }
             } catch (err) {
                 stopCapture();
-                UI.toast(err.message || 'Je solve kon niet worden opgeslagen.', { type: 'error' });
+                UI.toast(err.message || UI.t('Je solve kon niet worden opgeslagen.'), { type: 'error' });
                 await load(false);
             } finally {
                 bezigMetInsturen = false;
@@ -913,8 +917,8 @@
 
         banner.hidden = false;
         bannerTitle.textContent = `${toernooi.eventLabel} · ${toernooi.round.name}`;
-        bannerHint.textContent = `Solve ${toernooi.round.attemptsDone + 1} van ${toernooi.round.attemptsTotal}`
-            + ` · je tijden tellen niet mee voor je sessie`;
+        bannerHint.textContent = UI.t('Solve {n} van {totaal}', { n: toernooi.round.attemptsDone + 1, totaal: toernooi.round.attemptsTotal })
+            + ' · ' + UI.t('je tijden tellen niet mee voor je sessie');
         startCapture();
     }
 

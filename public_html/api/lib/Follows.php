@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/Xp.php';
 
 /**
@@ -66,11 +67,11 @@ final class Follows
             [$targetId]
         );
         if ($doel === null) {
-            return ['ok' => false, 'message' => 'Deze cuber bestaat niet, of deelt zijn profiel niet.'];
+            return ['ok' => false, 'message' => 'Deze cuber bestaat niet, of deelt dit profiel niet.'];
         }
 
         if (self::countFollowing($viewerId) >= self::MAX_FOLLOWING) {
-            return ['ok' => false, 'message' => 'Je volgt al het maximale aantal cubers (' . self::MAX_FOLLOWING . ').'];
+            return ['ok' => false, 'message' => Taal::t('Je volgt al het maximale aantal cubers ({n}).', ['n' => self::MAX_FOLLOWING])];
         }
 
         try {

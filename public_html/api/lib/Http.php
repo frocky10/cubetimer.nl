@@ -101,11 +101,16 @@ final class Http
     /** @param array<string,mixed> $payload */
     private static function send(array $payload, int $status): never
     {
+        // Meldingen in de taal van de pagina (zie Taal).
+        if (isset($payload['message']) && is_string($payload['message']) && class_exists('Taal', false)) {
+            $payload['message'] = Taal::t($payload['message']);
+        }
         if (!headers_sent()) {
             http_response_code($status);
             header('Content-Type: application/json; charset=utf-8');
             header('Cache-Control: no-store');
             header('X-Content-Type-Options: nosniff');
+            header('Vary: X-Taal');
         }
         echo json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         exit;

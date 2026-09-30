@@ -41,7 +41,9 @@ async function generateScramble(eventType) {
         if (requestId !== requestCounter) return;
         console.error("[cubetimer] scramble genereren mislukt", error);
         scrambleBox.classList.remove("is-loading");
-        scrambleBox.textContent = "Scramble genereren is niet gelukt. Ververs de pagina om het opnieuw te proberen.";
+        scrambleBox.textContent = window.CubeTimerUI
+            ? window.CubeTimerUI.t("Scramble genereren is niet gelukt. Ververs de pagina om het opnieuw te proberen.")
+            : "Scramble genereren is niet gelukt. Ververs de pagina om het opnieuw te proberen."; // niet vertalen: zonder ui.js
         window.currentScramble = "";
     }
 }

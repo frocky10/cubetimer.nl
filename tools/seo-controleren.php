@@ -4,7 +4,9 @@
  *
  *   php tools/seo-controleren.php
  *
- * Per pagina uit sitemap.xml: een titel van hooguit 60 tekens, een
+ * Per pagina uit sitemap.xml (Nederlands en Engels): lang past bij het adres
+ * (/en/ is Engels), hreflang naar beide talen en x-default, over en weer
+ * gelijk aan de sitemap, og:locale per taal, een titel van hooguit 60 tekens, een
  * omschrijving tussen 70 en 160 tekens, een canonical die precies gelijk is
  * aan het adres in de sitemap, één <h1>, lang="nl", een og:image met een
  * volledig adres dat ook echt bestaat, geldige JSON-LD, en bij elk plaatje een
@@ -50,15 +52,24 @@ function attr(DOMXPath $x, string $query, string $naam): ?string
 function bestandVoor(string $root, string $url): string
 {
     $pad = substr($url, strlen(SITE)) ?: '/';
-    return $root . ltrim($pad === '/' ? 'index.html' : $pad, '/');
+    if (str_ends_with($pad, '/')) {
+        $pad .= 'index.html';
+    }
+    return $root . ltrim($pad, '/');
 }
 
 // --- sitemap ----------------------------------------------------------------
 $sitemap = simplexml_load_file($root . 'sitemap.xml');
 klopt($sitemap !== false, 'sitemap.xml is geldige XML');
 $adressen = [];
+$alternatievenSitemap = [];
 foreach ($sitemap->url as $url) {
-    $adressen[] = (string) $url->loc;
+    $loc = (string) $url->loc;
+    $adressen[] = $loc;
+    foreach ($url->children('http://www.w3.org/1999/xhtml')->link as $link) {
+        $a = $link->attributes();
+        $alternatievenSitemap[$loc][(string) $a['hreflang']] = (string) $a['href'];
+    }
 }
 klopt(count($adressen) >= 2, 'sitemap.xml heeft pagina\'s');
 
@@ -83,7 +94,7 @@ foreach (['/profiel.php', '/u/'] as $pad) {
 // --- elke pagina uit de sitemap -----------------------------------------------
 foreach ($adressen as $adres) {
     $bestand = bestandVoor($root, $adres);
-    $naam = basename($bestand);
+    $naam = substr($bestand, strlen($root));
     echo "$naam\n";
     klopt(is_file($bestand), "$naam bestaat");
     if (!is_file($bestand)) {
@@ -92,7 +103,21 @@ foreach ($adressen as $adres) {
     $html = (string) file_get_contents($bestand);
     $x = laad($html);
 
-    klopt(attr($x, '//html', 'lang') === 'nl', "$naam: lang=\"nl\"");
+    $taal = str_starts_with(substr($adres, strlen(SITE)), '/en/') ? 'en' : 'nl';
+    klopt(attr($x, '//html', 'lang') === $taal, "$naam: lang=\"$taal\"");
+
+    // hreflang: beide talen en x-default, gelijk aan de sitemap, en de pagina
+    // zelf staat erbij (Google negeert hreflang die niet over en weer klopt).
+    $alternatieven = [];
+    foreach ($x->query('//link[@rel="alternate"][@hreflang]') as $link) {
+        $alternatieven[$link->getAttribute('hreflang')] = $link->getAttribute('href');
+    }
+    klopt(isset($alternatieven['nl'], $alternatieven['en'], $alternatieven['x-default']), "$naam: hreflang nl, en en x-default");
+    klopt(($alternatieven[$taal] ?? '') === $adres, "$naam: hreflang $taal wijst naar zichzelf");
+    klopt($alternatieven === ($alternatievenSitemap[$adres] ?? null), "$naam: hreflang gelijk aan de sitemap");
+    foreach (['nl', 'en'] as $andere) {
+        klopt(in_array($alternatieven[$andere] ?? '', $adressen, true), "$naam: hreflang $andere staat in de sitemap");
+    }
 
     $titel = trim((string) ($x->query('//title')->item(0)?->textContent ?? ''));
     klopt($titel !== '' && mb_strlen($titel) <= 60, "$naam: titel van hooguit 60 tekens (" . mb_strlen($titel) . ')');
@@ -104,6 +129,8 @@ foreach ($adressen as $adres) {
     klopt(attr($x, '//link[@rel="canonical"]', 'href') === $adres, "$naam: canonical is $adres");
     klopt(attr($x, '//meta[@property="og:url"]', 'content') === $adres, "$naam: og:url is $adres");
     klopt($x->query('//h1')->length === 1, "$naam: precies één h1");
+    $locale = (string) attr($x, '//meta[@property="og:locale"]', 'content');
+    klopt($locale === ($taal === 'en' ? 'en_GB' : 'nl_NL'), "$naam: og:locale past bij de taal ($locale)");
     klopt(!str_contains((string) attr($x, '//meta[@name="robots"]', 'content'), 'noindex'), "$naam: geen noindex");
 
     $afbeelding = (string) attr($x, '//meta[@property="og:image"]', 'content');

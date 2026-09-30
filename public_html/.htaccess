@@ -34,11 +34,17 @@ ErrorDocument 404 /404.html
     # De querystring (?oefen=OLL-27) gaat vanzelf mee.
     RewriteCond %{THE_REQUEST} \s/index\.html[\s?] [NC]
     RewriteRule ^index\.html$ / [R=301,L]
+    RewriteCond %{THE_REQUEST} \s/en/index\.html[\s?] [NC]
+    RewriteRule ^en/index\.html$ /en/ [R=301,L]
+    # /en zonder slash hoort bij de map.
+    RewriteRule ^en$ /en/ [R=301,L]
 
     # Nette profiel-URL's: /u/naam komt uit bij profiel.php?u=naam.
     # Werkt hij niet (bijvoorbeeld omdat mod_rewrite uitstaat), dan blijft
     # /profiel.php?u=naam gewoon werken.
     RewriteRule ^u/([A-Za-z0-9_.-]{3,32})/?$ profiel.php?u=$1 [L,QSA]
+    # En in het Engels: /en/u/naam.
+    RewriteRule ^en/u/([A-Za-z0-9_.-]{3,32})/?$ profiel.php?u=$1&lang=en [L,QSA]
 </IfModule>
 
 # --- Beveiligingsheaders ------------------------------------------------------

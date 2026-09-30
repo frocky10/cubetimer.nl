@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/SiteTime.php';
 require_once __DIR__ . '/Records.php';
@@ -100,8 +101,10 @@ final class Challenges
                 'type'        => $row['type'],
                 'event'       => $row['event'],
                 'eventLabel'  => Events::label((string) $row['event']),
-                'title'       => $row['title'],
-                'description' => $row['description'],
+                // Niet de opgeslagen (Nederlandse) tekst, maar opnieuw opgebouwd
+                // in de taal van de pagina.
+                'title'       => self::titel($row),
+                'description' => self::omschrijving($row, $payload),
                 'xpReward'    => (int) $row['xp_reward'],
                 'progress'    => $entry !== null ? (int) $entry['progress'] : 0,
                 'target'      => $entry !== null ? (int) $entry['target'] : self::targetFor($row, $payload),
@@ -114,16 +117,17 @@ final class Challenges
                 // plaats van "5% sneller dan je gebruikelijke tijd".
                 $challenge['targetMs'] = null;
                 if ($userId === null) {
-                    $challenge['description'] = 'Log in, dan krijg je een eigen doeltijd op basis van je laatste solves.';
+                    $challenge['description'] = Taal::t('Log in, dan krijg je een eigen doeltijd op basis van je laatste solves.');
                 } else {
                     $doel = self::beatAverageTarget($userId, (int) ($payload['percent'] ?? 5), SiteTime::utcStartOfDay($date));
                     $challenge['event'] = $doel['event'];
                     $challenge['eventLabel'] = Events::label($doel['event']);
                     $challenge['targetMs'] = $doel['targetMs'];
                     $challenge['description'] = $doel['targetMs'] !== null
-                        ? sprintf('Doe vandaag een solve onder %s op %s.', self::formatMs($doel['targetMs']), Events::label($doel['event']))
-                        : sprintf('Doe eerst nog %d %s op %s; dan krijg je een doeltijd.',
-                            $doel['missing'], $doel['missing'] === 1 ? 'solve' : 'solves', Events::label($doel['event']));
+                        ? Taal::t('Doe vandaag een solve onder {tijd} op {event}.', ['tijd' => self::formatMs($doel['targetMs']), 'event' => Events::label($doel['event'])])
+                        : ($doel['missing'] === 1
+                            ? Taal::t('Doe eerst nog 1 solve op {event}; dan krijg je een doeltijd.', ['event' => Events::label($doel['event'])])
+                            : Taal::t('Doe eerst nog {n} solves op {event}; dan krijg je een doeltijd.', ['n' => $doel['missing'], 'event' => Events::label($doel['event'])]));
                 }
             }
 
@@ -223,6 +227,28 @@ final class Challenges
             );
             $volgorde++;
         }
+    }
+
+    /** De titel van een opdracht, in de taal van het verzoek. */
+    private static function titel(array $row): string
+    {
+        return match ((string) $row['type']) {
+            'solve_count'         => Taal::t('Blijf oefenen'),
+            'beat_average'        => Taal::t('Sneller dan jezelf'),
+            'scramble_of_the_day' => Taal::t('Scramble van de dag · {event}', ['event' => Events::label((string) $row['event'])]),
+            default               => Taal::t((string) $row['title']),
+        };
+    }
+
+    /** @param array<string,mixed> $payload */
+    private static function omschrijving(array $row, array $payload): string
+    {
+        return match ((string) $row['type']) {
+            'solve_count'         => Taal::t('Doe vandaag {n} solves. Elk event telt mee.', ['n' => (int) ($payload['target'] ?? 0)]),
+            'beat_average'        => Taal::t('Doe een solve onder je eigen doeltijd voor vandaag.'),
+            'scramble_of_the_day' => Taal::t('Iedereen krijgt dezelfde scramble en heeft een poging. Hoe snel ben jij?'),
+            default               => Taal::t((string) $row['description']),
+        };
     }
 
     /** @param array<string,mixed> $payload */

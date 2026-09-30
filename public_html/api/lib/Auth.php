@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/Config.php';
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Http.php';
+require_once __DIR__ . '/Taal.php';
 
 /**
  * Registratie, login en sessieherkenning.
@@ -221,13 +222,13 @@ final class Auth
     {
         $length = strlen($password);
         if ($length < self::MIN_PASSWORD_LENGTH) {
-            return 'Je wachtwoord moet minstens ' . self::MIN_PASSWORD_LENGTH . ' tekens lang zijn.';
+            return Taal::t('Je wachtwoord moet minstens {n} tekens lang zijn.', ['n' => self::MIN_PASSWORD_LENGTH]);
         }
         if ($length > self::MAX_PASSWORD_LENGTH) {
-            return 'Je wachtwoord mag hooguit ' . self::MAX_PASSWORD_LENGTH . ' tekens lang zijn.';
+            return Taal::t('Je wachtwoord mag hooguit {n} tekens lang zijn.', ['n' => self::MAX_PASSWORD_LENGTH]);
         }
         if (preg_match('/^\d+$/', $password) === 1) {
-            return 'Kies een wachtwoord met meer dan alleen cijfers.';
+            return Taal::t('Kies een wachtwoord met meer dan alleen cijfers.');
         }
         return null;
     }

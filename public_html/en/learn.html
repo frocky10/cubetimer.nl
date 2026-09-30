@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<!-- Gegenereerd door tools/vertalen.php uit /leren.html. Niet met de hand aanpassen:
+     verander de Nederlandse pagina of taal/en/html.json en draai het script opnieuw. -->
+<html lang="en" data-theme="dark"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)">
+    <meta name="description" content="Learn to solve the Rubik's cube, from the first layer to CFOP. The beginner's method step by step, F2L and all 57 OLL and 21 PLL algorithms with diagrams.">
+    <meta name="keywords" content="how to solve a rubik's cube, rubik's cube tutorial, beginner method, f2l, oll, pll, cfop, algorithms, learn speedcubing">
+    <title>How to solve a Rubik's cube: beginner method, F2L, OLL, PLL</title>
+
+    <link rel="canonical" href="https://cubetimer.nl/en/learn.html">
+    <!-- Dezelfde pagina in het Engels (gegenereerd door tools/vertalen.php). -->
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/leren.html">
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/learn.html">
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/leren.html">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192">
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="CubeTimer">
+    <meta property="og:locale" content="en_GB">
+    <meta property="og:url" content="https://cubetimer.nl/en/learn.html">
+    <meta property="og:title" content="Learn to solve the Rubik's cube">
+    <meta property="og:description" content="From your first solve to CFOP: the beginner's method, F2L and every OLL and PLL algorithm, with a practice button.">
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Structured data: een leerpagina die bij CubeTimer hoort, met een
+         kruimelpad (CubeTimer › Leren) voor in de zoekresultaten. -->
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": [
+                "WebPage",
+                "LearningResource"
+            ],
+            "@id": "https://cubetimer.nl/en/learn.html#pagina",
+            "url": "https://cubetimer.nl/en/learn.html",
+            "name": "Learn to solve the Rubik's cube",
+            "description": "The beginner's method step by step, an explanation of F2L, and all 57 OLL and 21 PLL algorithms with diagrams.",
+            "inLanguage": "en",
+            "learningResourceType": "Tutorial",
+            "educationalLevel": "Beginner to advanced",
+            "teaches": [
+                "Beginner's method",
+                "F2L",
+                "OLL",
+                "PLL"
+            ],
+            "isAccessibleForFree": true,
+            "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/en/#website",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/en/"
+            },
+            "breadcrumb": {
+                "@id": "https://cubetimer.nl/en/learn.html#kruimelpad"
+            }
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://cubetimer.nl/en/learn.html#kruimelpad",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "CubeTimer",
+                    "item": "https://cubetimer.nl/en/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Learn",
+                    "item": "https://cubetimer.nl/en/learn.html"
+                }
+            ]
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css">
+
+    <!-- Thema meteen zetten, vóór de eerste paint. Zelfde script als in
+         index.html en profiel.php; bewust inline, anders flitst de pagina. -->
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+            } catch (err) {
+                /* localStorage geblokkeerd: dan blijft het donkere standaardthema staan. */
+            }
+        })();
+        // Eerder voor de andere taal gekozen (de taalknop)? Dan meteen daarheen,
+        // vóór er iets getekend wordt. Zonder keuze gebeurt er niets: zoekmachines
+        // en nieuwe bezoekers zien gewoon de pagina van het adres.
+        (function () {
+            try {
+                var hier = document.documentElement.lang;
+                // De taalknop wijst naar #taal=en of #taal=nl: dat is de keuze.
+                // Zo werkt hij ook als de scripts nog niet geladen zijn.
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+                var keuze = localStorage.getItem('cubetimer_taal');
+                if ((keuze === 'nl' || keuze === 'en') && keuze !== hier) {
+                    var ander = document.querySelector('link[rel="alternate"][hreflang="' + keuze + '"]');
+                    if (ander) location.replace(ander.getAttribute('href').replace(/^https:\/\/cubetimer\.nl/, '') + location.search + location.hash);
+                }
+            } catch (err) { /* geen localStorage: dan blijft iedereen waar hij is */ }
+        })();
+    </script>
+
+    <script src="/Script/taal-en.js" defer=""></script>
+    <script src="/Script/ui.js" defer=""></script>
+    <script src="/Script/cube.js" defer=""></script>
+    <script src="/Script/algorithms.js" defer=""></script>
+    <script src="/Script/tutorials.js" defer=""></script>
+</head>
+<body class="profile-page">
+    <!-- Eén pijl die in het plaatje bij elke PLL hergebruikt wordt. -->
+    <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+        <defs>
+            <marker id="cube-arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M0 1 L9 5 L0 9 z" fill="currentColor"></path>
+            </marker>
+        </defs>
+    </svg>
+
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/en/" aria-label="Go to the timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345">
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn-icon lang-switch" href="/leren.html#taal=nl" hreflang="nl" lang="nl" data-taalwissel="nl" data-niet-vertalen="" title="Nederlands" aria-label="Nederlands">
+                <span class="lang-switch__code" data-taalwissel-code="">NL</span>
+            </a>
+            <a class="btn btn--primary" href="/en/">Go to the timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main learn">
+        <section class="panel">
+            <div class="panel__body">
+                <p class="modal__eyebrow">Learn</p>
+                <h1 class="modal__title">Solving the cube</h1>
+                <p class="modal__subtitle">
+                    Start with the beginner's method if you can't solve the cube yet. If you can, F2L is the next step, followed by OLL and PLL. Every diagram on this page is drawn from the algorithm underneath it, so what you see always matches what you do.
+                </p>
+
+                <div class="segmented learn__tabs" role="tablist" aria-label="Section">
+                    <button class="segmented__item is-active" type="button" role="tab" data-leer-tab="beginner">Beginner</button>
+                    <button class="segmented__item" type="button" role="tab" data-leer-tab="f2l">F2L</button>
+                    <button class="segmented__item" type="button" role="tab" data-leer-tab="oll">OLL</button>
+                    <button class="segmented__item" type="button" role="tab" data-leer-tab="pll">PLL</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             Beginnersmethode
+             ================================================================ -->
+        <section data-leer-panel="beginner">
+            <div class="panel">
+                <div class="panel__body learn__prose">
+                    <h2>The beginner's method</h2>
+                    <p>You solve the cube layer by layer: the white side first, then the middle layer, then the yellow side. You only need a handful of moves. From step 3 on, always hold the cube with <strong>white on the bottom</strong> and <strong>yellow on top</strong>.</p>
+
+                    <h3>How to read the moves</h3>
+                    <p>A letter is a quarter turn of that face, clockwise as seen from that side. <span class="alg-inline">R</span> is right, <span class="alg-inline">L</span> left, <span class="alg-inline">U</span> up, <span class="alg-inline">D</span> down, <span class="alg-inline">F</span> front and <span class="alg-inline">B</span> back. An apostrophe means counterclockwise (<span class="alg-inline">R'</span>) and a 2 means a half turn (<span class="alg-inline">R2</span>). That's all there is to it.</p>
+
+                    <h3>Step 1: the white cross</h3>
+                    <p>
+                        Find the four edges with white on them and place them in a cross around the white centre. Watch the second colour: it has to line up with the centre of that side. So a white and green edge belongs next to the green centre. You do this by feel, without an algorithm; keep trying until it works.
+                    </p>
+
+                    <h3>Step 2: the white corners</h3>
+                    <p>
+                        Turn the cube over so white is on the bottom. Find a corner with white in it, move it above the spot where it belongs, then repeat:
+                    </p>
+                    <p class="alg-line">R U R' U'</p>
+                    <p>At most six times and the corner drops into place. If a white corner sits in the bottom layer the wrong way round, do this once to pop it out and start again. These four moves are called the <em>sexy move</em>; you'll see them everywhere.</p>
+
+                    <h3>Step 3: the middle layer</h3>
+                    <p>Find an edge in the top layer <em>without</em> yellow. Turn the top so its front colour matches the centre below it, and see which way it needs to go:</p>
+                    <p class="alg-line">to the right: U R U' R' U' F' U F</p>
+                    <p class="alg-line">to the left: U' L' U L U F U' F'</p>
+                    <p>
+                        Is an edge in the right spot but flipped? Do either of the two to take it out, then put it back the right way.
+                    </p>
+
+                    <h3>Step 4: the yellow cross</h3>
+                    <p>
+                        Only the top is left. You'll see a dot, an L shape or a line of yellow. These six moves take you one step further each time, until you have a cross:
+                    </p>
+                    <p class="alg-line">F R U R' U' F'</p>
+                    <p>
+                        Hold an L shape in the top left and a line horizontally. With a dot it doesn't matter; you'll need it three times.
+                    </p>
+
+                    <h3>Step 5: orient the yellow corners</h3>
+                    <p>
+                        Hold a corner that isn't yellow yet at the front right and repeat:
+                    </p>
+                    <p class="alg-line">R U R' U R U2 R'</p>
+                    <p>Turn <em>only the top layer</em> to bring the next wrong corner to the front right and do it again. In between the cube looks scrambled; that's expected, it'll come back. This algorithm is called the <em>Sune</em> and is case 27 in OLL.</p>
+
+                    <h3>Step 6: place the corners</h3>
+                    <p>
+                        The top is yellow, but the corners may be in the wrong places. Find two neighbouring corners that are already right, hold them at the back and do:
+                    </p>
+                    <p class="alg-line">U R U' L' U R' U' L</p>
+                    <p>If no pair is right, do it once and look again.</p>
+
+                    <h3>Step 7: place the edges</h3>
+                    <p>
+                        Three edges left to cycle. Hold the edge that's already right at the back and do:
+                    </p>
+                    <p class="alg-line">R U' R U R U R U' R' U' R2</p>
+                    <p>
+                        Still not right? Then they cycle the other way: do it twice. This is the Ua perm; you'll find it in PLL as well.
+                    </p>
+
+                    <h3>What's next?</h3>
+                    <p>That's the whole cube in seven steps. To get faster, replace steps 2 and 3 with <strong>F2L</strong> (corner and edge together), steps 4 and 5 with <strong>OLL</strong> (the whole top yellow at once) and steps 6 and 7 with <strong>PLL</strong> (the top layer solved at once). That's the CFOP method, and it's in the other tabs.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================
+             F2L
+             ================================================================ -->
+        <section data-leer-panel="f2l" hidden="">
+            <div class="panel">
+                <div class="panel__body learn__prose">
+                    <h2>F2L: the first two layers</h2>
+                    <p>
+                        In the beginner's method you place all the white corners first and then the middle-layer edges. F2L does both at once: you find a corner and the edge that goes next to it, pair them up on top, and insert the pair into its slot in one go. Four pairs, four slots, and your first two layers are done.
+                    </p>
+                    <p>
+                        The idea matters more than the list. Everything below comes down to three things:
+                    </p>
+                    <ul>
+                        <li><strong>Is the pair already joined?</strong> Then move it above the right slot with <span class="alg-inline">U</span> and insert it with <span class="alg-inline">R U R'</span> or <span class="alg-inline">F' U' F</span>.</li>
+                        <li><strong>Are the corner and edge apart?</strong> Bring them together first. That's almost always: open a slot, turn the edge next to the corner, and close the slot again.</li>
+                        <li><strong>Is something already in the slot?</strong> Take it out with <span class="alg-inline">R U R'</span> and treat it as a normal case. That costs a few extra moves, but there's nothing extra to memorise.</li>
+                    </ul>
+                    <p>Below are all 41 cases for the <strong>front right</strong> slot. For the other three slots, rotate the cube until the slot you're working on is at the front right. The diagram only shows the corner and edge of the pair; everything else is left out because you don't need to look at it. The second diagram is the slot itself.</p>
+                    <p class="learn__progress" data-progress="f2l"></p>
+                    <p class="field__hint" data-signin-hint="" hidden="">
+                        Log in to keep track of what you've learned.
+                    </p>
+                </div>
+            </div>
+            <div data-leer-list="f2l"></div>
+        </section>
+
+        <!-- ================================================================
+             OLL
+             ================================================================ -->
+        <section data-leer-panel="oll" hidden="">
+            <div class="panel">
+                <div class="panel__body learn__prose">
+                    <h2>OLL: making the top yellow</h2>
+                    <p>
+                        Your first two layers are done and the top is still a mess. OLL turns it fully yellow with one algorithm. Where the pieces end up doesn't matter yet; PLL sorts that out afterwards.
+                    </p>
+                    <p>There are 57 cases. That sounds like a lot, but you recognise them by the shape the yellow makes, and those shapes are grouped below. Start with <strong>Cross</strong>: there are only seven, and with those seven you can already finish any cube. The rest just saves time.</p>
+                    <p>
+                        In the diagram, yellow is what's already facing up and blank is what still needs to be turned. The strips around it are the sides, which show where the yellow is facing now.
+                    </p>
+                    <p class="learn__progress" data-progress="oll"></p>
+                    <p class="field__hint" data-signin-hint="" hidden="">
+                        Log in to keep track of what you've learned.
+                    </p>
+                </div>
+            </div>
+            <div data-leer-list="oll"></div>
+        </section>
+
+        <!-- ================================================================
+             PLL
+             ================================================================ -->
+        <section data-leer-panel="pll" hidden="">
+            <div class="panel">
+                <div class="panel__body learn__prose">
+                    <h2>PLL: solving the top layer</h2>
+                    <p>
+                        The top is yellow, but the pieces aren't where they belong yet. PLL puts them in place with one algorithm. Twenty-one cases, and then the cube is solved.
+                    </p>
+                    <p>You recognise them by the sides, not the top: two stickers of the same colour next to each other are <em>headlights</em>, three in a row is a <em>bar</em>. That's why the sides are coloured in the diagram, with arrows showing which piece goes where.</p>
+                    <p>Start with the <strong>edges only</strong> group and the T and J perms: they already cover a large share of your solves, and you can pick up the rest at your own pace.</p>
+                    <p class="learn__progress" data-progress="pll"></p>
+                    <p class="field__hint" data-signin-hint="" hidden="">
+                        Log in to keep track of what you've learned.
+                    </p>
+                </div>
+            </div>
+            <div data-leer-list="pll"></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/en/">Timer</a>
+        <a href="/en/faq.html">FAQ</a>
+        <a href="/en/privacy.html">Privacy</a>
+        <a href="/en/terms.html">Terms</a>
+        <a href="/en/#cookie-instellingen">Cookie settings</a>
+    </footer>
+
+
+</body></html>
