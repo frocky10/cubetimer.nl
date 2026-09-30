@@ -28,7 +28,7 @@ if (!$byIp['allowed'] || !$byAccount['allowed']) {
 
 $normalized = strtolower($login);
 $row = Database::first(
-    'SELECT u.id, u.public_id, u.username, u.email, u.role, u.created_at, u.password_hash, u.is_active,
+    'SELECT u.id, u.public_id, u.username, u.email, u.email_verified_at, u.role, u.created_at, u.password_hash, u.is_active,
             p.display_name, p.country_code, p.main_event, p.xp, p.level
      FROM users u LEFT JOIN user_profiles p ON p.user_id = u.id
      WHERE u.username_lower = ? OR u.email_lower = ?

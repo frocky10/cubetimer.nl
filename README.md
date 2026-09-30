@@ -138,12 +138,16 @@ terug te zien.
 - [x] Een sessie verwijderen laat je tijden op je account staan
 - [x] Verwijderen is een keuze: uit de sessie, of ook van je account
 - [x] Losse tijden terug te halen of alsnog te wissen vanuit je account
+- [x] Wachtwoord vergeten: een herstellink per mail, eenmalig en een uur geldig
+- [x] E-mailadres bevestigen, niet verplicht; opnieuw te sturen vanuit je account
+- [x] Mail via een eigen SMTP-mailbox, zonder externe bibliotheek
 - [x] Blijft werken zonder internet; localStorage is altijd de werkkopie
 
 **Ranglijsten en voortgang**
 
 - [x] Leaderboards per event, voor single, Mo3, Ao5, Ao12, Ao50 en Ao100 — [#13](https://github.com/frocky10/cubetimer.nl/issues/13)
 - [x] Te bekijken over alle tijd, deze week of vandaag
+- [x] Bladeren per 50, met een knop die meteen naar je eigen plek springt
 - [x] XP voor solven, persoonlijke records en dagen op rij — [#28](https://github.com/frocky10/cubetimer.nl/issues/28)
 - [x] Levels met tiers: Brons, Zilver, Goud, Platina, Diamant
 - [x] Rangbadge met je positie, in de kleur van je level — [#26](https://github.com/frocky10/cubetimer.nl/issues/26)
@@ -260,28 +264,27 @@ terug te zien.
 
 **Nieuwe manieren om te oefenen**
 
-- [ ] Training tools — [#30](https://github.com/frocky10/cubetimer.nl/issues/30)
-- [ ] Historische toernooien testen tegen de echte WCA-API (in de ontwikkelomgeving
-      was die niet bereikbaar; gebouwd en getest op voorbeeldantwoorden in dezelfde vorm)
+- [x] Training tools — [#30](https://github.com/frocky10/cubetimer.nl/issues/30)
+- [x] Historische toernooien testen tegen de echte WCA-API
 
 **Techniek**
 
 - [ ] Eigen scramble-script in plaats van de CDN — [#36](https://github.com/frocky10/cubetimer.nl/issues/36)
-- [ ] Wachtwoord vergeten (de tabel staat er al, de e-mailflow nog niet)
-- [ ] E-mailadres bevestigen bij registratie
-- [ ] Paginering op de ranglijsten (de server kan het al, de interface nog niet)
+- [x] Wachtwoord vergeten
+- [x] E-mailadres bevestigen bij registratie
+- [x] Paginering op de ranglijsten
 - [ ] Scramble van de dag ook voor Megaminx, Square-1 en Clock (lastige notatie)
-- [ ] Echte vlaggen in plaats van landcodes (vraagt meegeleverde SVG-bestanden)
+- [x] ~~Echte vlaggen in plaats van landcodes~~ — besloten: de landcodes blijven
 - [x] ~~`bluetoothCube.js` opschonen~~ — vervangen door de nieuwe smart-cubedrivers
-- [ ] Losse tijden per stuk kunnen bekijken (nu alleen als aantal)
-- [ ] F2L-gevallen ook gespiegeld tonen voor de sleuf linksvoor
+- [x] ~~Losse tijden per stuk kunnen bekijken~~ — besloten: het aantal plus terughalen of wissen is genoeg
+- [x] F2L-gevallen ook gespiegeld tonen voor de sleuf linksvoor
 - [ ] Smart cube automatisch opnieuw verbinden als de verbinding wegvalt
 - [ ] Smart cube ook voor 2x2 (GAN 251) en met de gyroscoop
 - [x] ~~Tijden tonen als `11.53`~~ — besloten: blijft `00:11:530`
 
 **Beheer**
 
-- [ ] Site aanmelden in Google Search Console en de sitemap insturen
+- [x] Site aanmelden in Google Search Console en de sitemap insturen
 - [ ] Google Ads goed instellen — [#15](https://github.com/frocky10/cubetimer.nl/issues/15)
 
 ---
@@ -319,7 +322,9 @@ PHP 8.1 en MySQL.
    [`database/README.md`](database/README.md).
 3. **Configuratie** — kopieer `public_html/api/config.example.php` naar
    `~/cubetimer_config.php`, dus één map **boven** je webroot, en vul je
-   database-gegevens in. Daar komt de deploy nooit aan, dus je config blijft
+   database-gegevens in. Voor wachtwoord vergeten en e-mail bevestigen: maak in
+   DirectAdmin een mailbox aan (bijv. `noreply@cubetimer.nl`) en vul die in
+   onder `mail`. Daar komt de deploy nooit aan, dus je config blijft
    staan bij elke nieuwe release.
 4. **Bug-knop** (optioneel) — maak een
    [fine-grained token](https://github.com/settings/personal-access-tokens) met

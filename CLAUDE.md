@@ -87,8 +87,10 @@ public_html/                   Precies wat er op de server komt te staan
                                SiteTime, Events, Averages, Records, Xp,
                                Leaderboard, Challenges, SolveFacts, Achievements,
                                PublicProfile, Follows, Tournaments, TournamentField,
-                               SolveAnalysis, Ranking, GameModes, Duels, Wca
-    auth/                      register, login, logout, me
+                               SolveAnalysis, Ranking, GameModes, Duels, Wca,
+                               Mailer, AccountMail
+    auth/                      register, login, logout, me, verify-email,
+                               resend-verification, forgot-password, reset-password
     sync/                      pull, push
     feedback/                  report
     leaderboard/               list
@@ -161,6 +163,9 @@ php -S 127.0.0.1:8123 -t public_html
 
 # Een nagebootste WCA-API, voor de historische toernooien (zie Toernooimodus)
 php -S 127.0.0.1:8124 tools/nep-wca-server.php
+
+# Een nagebootste mailserver: elke mail wordt een .eml-bestand (zie Mail)
+php tools/nep-smtp-server.php 2525 /tmp
 ```
 
 Voor een echte test van accounts en synchronisatie: zet een MySQL/MariaDB op,
@@ -351,11 +356,15 @@ uit `lib/`.
 | `auth/register.php` | POST | Account aanmaken en meteen inloggen |
 | `auth/login.php` | POST | Inloggen met gebruikersnaam of e-mail |
 | `auth/logout.php` | POST | Sessie beëindigen |
-| `auth/me.php` | GET | Huidige gebruiker, of `user: null` |
+| `auth/me.php` | GET | Huidige gebruiker (met `emailVerified`), of `user: null` |
+| `auth/verify-email.php` | POST | E-mailadres bevestigen met het token uit de mail (zonder login) |
+| `auth/resend-verification.php` | POST | De bevestigingsmail opnieuw sturen |
+| `auth/forgot-password.php` | POST | Herstellink mailen; antwoordt altijd hetzelfde |
+| `auth/reset-password.php` | POST | Nieuw wachtwoord met het token uit de mail; logt overal uit en hier in |
 | `sync/pull.php` | GET | Alle sessies en solves ophalen |
 | `sync/push.php` | POST | Volledige staat opslaan (legt ernaast, zie Synchronisatie) en alles herberekenen |
 | `feedback/report.php` | POST | Melding als GitHub-issue |
-| `leaderboard/list.php` | GET | Ranglijst per event, categorie en periode (openbaar) |
+| `leaderboard/list.php` | GET | Ranglijst per event, categorie en periode (openbaar), per pagina (`limit`, `offset`), met `myIndex` voor "Naar mijn plek" |
 | `profile/overview.php` | GET | XP, level, rang, streak, records, XP-logboek |
 | `profile/settings.php` | POST | Hoofd-event, land, wel of niet op de ranglijst |
 | `profile/public.php` | GET | Het openbare profiel van een cuber (zonder login) |
@@ -388,7 +397,9 @@ uit `lib/`.
 `RateLimiter` werkt op bestanden in `storage_path`, niet op de database, zodat
 de bug-knop ook werkt op een installatie zonder database. Huidige limieten
 (per IP): registreren 5/uur, inloggen 15 per kwartier per IP en 8 per kwartier
-per account, meldingen 5/uur. Per account: toernooien starten 20/uur,
+per account, meldingen 5/uur, wachtwoord vergeten 5/uur per IP en 3/uur per
+account, een nieuw wachtwoord zetten 10/uur, bevestigen 20/uur. Per account:
+bevestigingsmail opnieuw 3/uur, toernooien starten 20/uur,
 spelmodusrondes 120/uur, duels aanmaken 30/uur, WCA-comps zoeken 40 en ophalen
 30 per tien minuten. Zonder schrijfbare map wordt er niet gelimiteerd.
 
@@ -726,12 +737,44 @@ getest op een echte Apache (redirects, 404, headers, gzip); `php -S` leest geen
 via DNS of een HTML-bestand), stuur daar `https://cubetimer.nl/sitemap.xml` in,
 en controleer met de Rich Results Test dat de structured data gelezen wordt.
 
+## Mail: bevestigen en wachtwoord vergeten
+
+`lib/Mailer.php` praat zelf SMTP met een mailbox op de hosting (geen composer,
+en PHP's `mail()` belandt te vaak in de spam). Instellingen onder `mail` in
+`~/cubetimer_config.php`; zie `config.example.php`. Zonder `host` staat mail
+uit en verbergt de interface "wachtwoord vergeten" en de bevestigingsvraag
+(`status.php`: `mail` en `emailVerification`).
+
+`lib/AccountMail.php` doet de twee mails:
+
+| | Bevestigen | Wachtwoord vergeten |
+|---|---|---|
+| Tabel | `email_verifications` (migratie 010) | `password_resets` (al sinds 001) |
+| Geldig | 48 uur | 1 uur, eenmalig |
+| Link | `/#bevestig=<token>` | `/#herstel=<token>` |
+| Verplicht? | Nee: een onbevestigd account kan alles, het accountvenster vraagt er alleen om | — |
+| Daarna | `users.email_verified_at` gezet | nieuw wachtwoord, **alle sessies weg**, hier ingelogd, adres telt als bevestigd |
+
+- **Tokens**: 64 hextekens uit `random_bytes`; in de database alleen de
+  SHA-256. Een nieuwe mail maakt de vorige link ongeldig.
+- **Het token staat achter een hekje.** Wat na `#` staat stuurt de browser
+  nooit naar een server, dus het komt niet in logbestanden, niet in de
+  Referer en niet bij Google Analytics. `account.js` leest het uit (bij het
+  laden én bij `hashchange`) en haalt het meteen uit de adresbalk.
+- **Wachtwoord vergeten verraadt niet of een account bestaat**: het antwoord is
+  altijd hetzelfde, en op PHP-FPM gaat de mail pas weg nadat het antwoord
+  verstuurd is (`fastcgi_finish_request`), zodat ook de wachttijd niets zegt.
+- **Testen**: `php tools/nep-smtp-server.php 2525 /tmp` schrijft elke mail als
+  `.eml`. Met een PEM-bestand als derde argument kan hij ook STARTTLS. Zet
+  lokaal `'mail' => ['host' => '127.0.0.1', 'port' => 2525, 'encryption' =>
+  'none', ...]` en `'site_url' => 'http://127.0.0.1:8123'`.
+
 ## Landen
 
 De landcode staat als tekstbadge naast de naam, niet als vlag. Emoji-vlaggen
 worden op Windows als losse letters getoond, en dat is voor het grootste deel
-van de desktopbezoekers lelijker dan de code zelf. Wil je alsnog echte vlaggen,
-dan moeten het meegeleverde SVG-bestanden worden.
+van de desktopbezoekers lelijker dan de code zelf. **Besloten: er komen geen
+echte vlaggen**, ook niet als meegeleverde SVG's. Niet meer voorstellen.
 
 De codes staan in `ui.js` (`COUNTRY_CODES`, 195 stuks). De **namen** komen uit
 de browser via `Intl.DisplayNames`, dus er is geen vertaallijst om bij te
@@ -1040,9 +1083,9 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
 - Solves uit een spelmodus komen niet in je sessie (net als bij toernooien).
   Wil je ze wel in je statistieken, dan kan de capture-handler ze ook doorgeven.
 
-- Wachtwoord vergeten: de tabel `password_resets` staat er al, de e-mailflow
-  nog niet.
-- E-mailadres bevestigen: `users.email_verified_at` staat er al, ongebruikt.
+- E-mailadres wijzigen kan nog niet vanuit de site. Komt dat, stuur dan een
+  nieuwe bevestigingsmail en zet `email_verified_at` terug op NULL; een oude
+  link werkt dan vanzelf niet meer (`email_verifications.email_lower`).
 - De statistieken rekenen in de browser over alle sessies. Bij duizenden solves
   kan dat beter naar een query op `solves` met de index
   `(user_id, event, solved_at)`, die daar al voor ligt.
@@ -1051,8 +1094,10 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
 - De herberekening na een synchronisatie draait over álle solves. Bij 18.000
   solves duurt dat 2,5 seconde. Wordt dat een probleem, dan is de volgende stap
   alleen de staart herberekenen met een `records_computed_through`-markering.
-- Leaderboards tonen nu de top 100. Paginering zit al in `Leaderboard::top()`
-  (`offset`), maar de interface gebruikt hem nog niet.
+- De ranglijst bladert per 50 tot plek 10.000 (`MAX_OFFSET` in
+  `leaderboard.js`, gelijk aan de grens in `Leaderboard::top()`). "Naar mijn
+  plek" gebruikt `Leaderboard::indexFor()`, met dezelfde volgorde als `top()`:
+  tijd, dan wie hem het eerst zette, dan het user-id.
 - De scramble van de dag is er voor 3x3 plus een roulerend event
   (`Challenges::ROTATING_EVENTS`, acht stuks, dus een cyclus van acht dagen).
   Megaminx, Square-1 en Clock doen niet mee: hun notatie is te eigenzinnig om
@@ -1073,8 +1118,8 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
   bij een heel groot account; bij klachten kan het scherm de laatst bekende
   cijfers gebruiken in plaats van opnieuw te rekenen.
 - Losse tijden zijn alleen als aantal zichtbaar, niet als lijst. Terughalen doet
-  ze allemaal tegelijk, in een nieuwe sessie per event. Wil je ze per stuk
-  kunnen bekijken, dan moet `archive/list.php` gaan pagineren.
+  ze allemaal tegelijk, in een nieuwe sessie per event. **Besloten: zo laten**;
+  een lijst per stuk komt er niet.
 - De leerpagina legt F2L uit voor de sleuf rechtsvoor. De andere drie sleuven
   doe je door de kubus te draaien; er staan dus geen gespiegelde varianten in.
 - Smart cubes werken alleen in een 3x3-sessie. De GAN 251 (2x2) kent een eigen
