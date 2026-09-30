@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)">
-    <title>Online Rubik's cube timer with WCA scrambles | CubeTimer</title>
+    <title>Online Rubik's cube timer | cubetimer.nl</title>
     <meta name="description" content="Time your solves with official WCA scrambles and inspection. Track your Ao5 and Ao12, connect your smart cube and see how you compare with other cubers.">
     <meta name="keywords" content="cube timer, rubiks cube timer, rubik's cube timer online, speedcube timer, speedcubing timer, online timer, wca scrambles, scramble generator, ao5, ao12, inspection time, smart cube timer, gan cube timer, cstimer alternative">
     <meta name="google-adsense-account" content="ca-pub-9889350952616788">
@@ -24,7 +24,7 @@
     <meta property="og:site_name" content="CubeTimer">
     <meta property="og:locale" content="en_GB">
     <meta property="og:url" content="https://cubetimer.nl/en/">
-    <meta property="og:title" content="CubeTimer, the cube timer in your browser">
+    <meta property="og:title" content="Online Rubik's cube timer | cubetimer.nl">
     <meta property="og:description" content="A free timer for speedcubers. WCA scrambles, inspection, stats and smart cubes, no account or install needed.">
     <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png">
     <meta property="og:image:width" content="1200">
@@ -491,12 +491,6 @@
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
                         <span class="btn-icon__label">Settings</span>
                     </button>
-
-                    <!-- Andere taal. tools/vertalen.php zet hem op de Engelse pagina om naar NL. -->
-                    <a class="btn-icon lang-switch" href="/#taal=nl" hreflang="nl" lang="nl" data-taalwissel="nl" data-niet-vertalen="" title="Nederlands" aria-label="Nederlands">
-                        <span class="lang-switch__code" data-taalwissel-code="">NL</span>
-                        <span class="btn-icon__label">Nederlands</span>
-                    </a>
                     </div>
 
                     <button id="account-open" class="account-chip" type="button" aria-label="Account" hidden="">
@@ -512,11 +506,6 @@
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
                     </button>
 
-                    <div class="toggle" id="theme-toggle" role="button" tabindex="0" aria-label="Switch between light and dark theme">
-                        <span class="toggle-icon moon active" aria-hidden="true">🌙</span>
-                        <span class="toggle-icon sun" aria-hidden="true">☀️</span>
-                        <div class="toggle-knob" aria-hidden="true"></div>
-                    </div>
                 </div>
             </header>
 
@@ -675,6 +664,20 @@
                     <section class="settings-section" data-settings-panel="general">
                         <p class="settings-section__eyebrow">General</p>
                         <h3 class="settings-section__title">Display</h3>
+
+                        <div class="setting-row">
+                            <div class="setting-row__text">
+                                <span class="setting-row__label">Language</span>
+                                <span class="setting-row__hint">The whole site, including messages and emails.</span>
+                            </div>
+                            <div class="setting-row__control">
+                                <!-- De namen staan in hun eigen taal; settings.js stuurt naar de andere versie. -->
+                                <select id="setting-taal" class="select" data-niet-vertalen="" aria-label="Taal / Language">
+                                    <option value="nl" lang="nl">Nederlands</option>
+                                    <option value="en" lang="en">English</option>
+                                </select>
+                            </div>
+                        </div>
 
                         <div class="setting-row">
                             <div class="setting-row__text">

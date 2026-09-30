@@ -42,7 +42,7 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Privacyverklaring en voorwaarden, toestemming via Googles CMP, je gegevens
   downloaden en je account verwijderen, botbescherming zonder derden
 - Helemaal in het Engels onder /en/ (interface, servermeldingen, mails, leerpagina,
-  uitleg, privacy en voorwaarden), met een taalknop en hreflang
+  uitleg, privacy en voorwaarden), met de taal in Instellingen en hreflang
 - Een uitlegpagina met veelgestelde vragen (/uitleg.html, /en/faq.html)
 
 ---
@@ -228,6 +228,10 @@ Er is geen CSS-framework meer. Bootstrap is eruit; de componenten
 `.toast`, `.time-modal`) staan in `style.css` en zijn in beide thema's
 uitgewerkt.
 
+**Taal en thema staan in Instellingen** (Algemeen → Weergave), niet als knop
+in de balk. Dat was een keuze van de eigenaar: de EN-knop en de themaschakelaar
+maakten de balk druk en werkten niet prettig.
+
 Het thema wordt vóór de eerste paint gezet door een klein inline script in de
 `<head>`, dat `cubetimer_theme` uit localStorage leest. Verplaats dat script
 niet naar een bestand; dan flitst de site bij het laden. `profiel.php` heeft
@@ -247,8 +251,7 @@ namen liggen vast tenzij je het JS meeverandert:
 
 `#timer`, `#ready-lights`, `.ready-light` (+ `.active` / `.green`),
 `#table-body`, `#times-table`, `#Scrambles`, `.ScrambleBox`, `#session-pr`,
-`#session-graph-canvas`, `#confetti-canvas`, `#theme-toggle` (+ `.moon` /
-`.sun` / `.toggle-knob`), `#session-select`, `#cube-select`, `#cube-display`,
+`#session-graph-canvas`, `#confetti-canvas`, `#session-select`, `#cube-select`, `#cube-display`,
 `.time-modal` (+ `.visible`), alle `#modal-*`, alle `#smartcube-*`,
 alle `#games-*` en `[data-close-games]`, alle `#tournament-*`,
 `[data-sc-view]` / `[data-sc-step]`, `.sc-move`, `[data-more-times]`,
@@ -256,6 +259,10 @@ alle `#games-*` en `[data-close-games]`, alle `#tournament-*`,
 
 De klasse `.time-modal` is een historische naam en wordt door **alle** modals
 gebruikt, niet alleen die van een solve.
+
+Omgekeerd: geef op een losse pagina (FAQ, privacy, …) geen element een id dat
+ook in `style.css` staat. De vraag "Hoe werkt de timer?" had `id="timer"` en
+kreeg daardoor de grote timercijfers. `tools/seo-controleren.php` kijkt dat na.
 
 ### Laadvolgorde
 
@@ -323,7 +330,7 @@ blijft de timer dus gewoon werken.
 | `cubetimer_removed_v1` | solve-id's die ook van het account af moeten, tot de volgende synchronisatie ze heeft doorgegeven |
 | `cubetimer_cube_macs` | per naam van een smart cube het MAC-adres dat werkte, zodat je het maar één keer hoeft in te vullen |
 | `cubetimer_game_v1` | `{ run, prefs }`: een lopende streak/survival/ladder (zodat herladen hem niet kost) en de laatst gekozen instellingen per modus |
-| `cubetimer_taal` | `nl` of `en`: de keuze met de taalknop. Het inline script in de `<head>` stuurt daarop door |
+| `cubetimer_taal` | `nl` of `en`: de keuze in Instellingen of met de taallink onderaan een losse pagina. Het inline script in de `<head>` stuurt daarop door |
 | `cubetimer_taal_gevraagd` | de Engelse versie is één keer aangeboden aan een niet-Nederlandstalige browser |
 
 Een solve ziet er zo uit:
@@ -766,8 +773,8 @@ op één adres, **`https://cubetimer.nl`**, zonder www.
 | Talen | `hreflang` in de `<head>` | Elke pagina noemt zichzelf, zijn tegenhanger en `x-default` (de Nederlandse). Moet over en weer kloppen, anders negeert Google het; de controle kijkt dat na, ook tegen de sitemap |
 | robots.txt | `robots.txt` | Blokkeert alleen `/api/`. Profielen bewust **niet**: een geblokkeerde pagina leest Google niet, dus dan ziet hij de noindex niet en kan de kale URL alsnog in de resultaten komen |
 | Niet in Google | `profiel.php`, `404.html` | `noindex, follow` als meta-tag en als `X-Robots-Tag`-header. De 404-pagina geeft ook echt een 404 |
-| Titel en omschrijving | `<head>` | Titel ≤ 60 tekens, omschrijving 70-160 tekens. Geschreven voor mensen, met de woorden waarop gezocht wordt ("Rubik's cube timer", "kubus oplossen") gewoon in de zin, niet opgesomd |
-| Uitleg | `uitleg.html`, `en/faq.html` | Echte antwoorden op vragen waarop gezocht wordt (Ao5, WCA-inspectie, +2 en DNF, smart cubes), met `FAQPage` in de JSON-LD. Google toont FAQ-resultaten alleen nog bij een paar soorten sites, maar de tekst zelf helpt wel |
+| Titel en omschrijving | `<head>` | Titel kort en krachtig, altijd eindigend op ` \| cubetimer.nl` (keuze van de eigenaar; hooguit 50 tekens, de controle kijkt het na), omschrijving 70-160 tekens. Geschreven voor mensen, met de woorden waarop gezocht wordt ("Rubik's cube timer", "kubus oplossen") gewoon in de zin, niet opgesomd |
+| FAQ | `uitleg.html`, `en/faq.html` | In de footer heet de link overal "FAQ" ("Uitleg" paste niet op één regel). Echte antwoorden op vragen waarop gezocht wordt (Ao5, WCA-inspectie, +2 en DNF, smart cubes), met `FAQPage` in de JSON-LD. Google toont FAQ-resultaten alleen nog bij een paar soorten sites, maar de tekst zelf helpt wel |
 | Zoekwoorden | `<meta name="keywords">` | Staat erin, maar Google gebruikt hem niet. Wat telt is de zichtbare tekst |
 | Kop | `index.html` | Een `<h1>` met `.visually-hidden`: het logo staat er al, een zichtbare kop zou de timer in de weg zitten. Er is bewust geen verborgen lap tekst voor zoekmachines; dat ziet Google als misleiding |
 | Delen | `og:*` en `twitter:card` | `Pictures/og-image.png` (1200x630), altijd als volledig adres; een relatief pad toont in WhatsApp niets |
@@ -835,12 +842,17 @@ toelichting bij gemarkeerde tijden (alleen voor de beheerder) blijft Nederlands.
 in `tools/vertalen.php` en in `ui.js` (`UI.pad()`). Alle paden in de scripts
 beginnen bij de root (`/api/`, `/Script/`), anders klopt het niet vanuit `/en/`.
 
-**Taalknop**: `[data-taalwissel]` in de balk. Hij wijst naar `…#taal=en`; het
-inline script in de `<head>` slaat dat op in `cubetimer_taal` en stuurt
-voortaan door naar de gekozen taal (via de `hreflang`-link van de pagina). Dat
-werkt ook voordat de scripts geladen zijn. Zonder keuze gebeurt er niets:
-Google en nieuwe bezoekers zien gewoon het adres dat ze openden. Een browser
-die geen Nederlands spreekt krijgt één keer een toast met het aanbod.
+**Taal kiezen**: op de timer in Instellingen (`#setting-taal`, in
+`settings.js`). De keuze gaat naar `cubetimer_taal` en je gaat naar de andere
+versie van dezelfde pagina, met de querystring erbij; het adres komt uit de
+`hreflang`-link, dus daar hoeft geen lijst voor. Op de losse pagina's (leren,
+FAQ, privacy, voorwaarden, profiel) staat onderaan een gewone link "English" /
+"Nederlands" (`[data-taalwissel]`), die naar `…#taal=en` wijst; het inline
+script in de `<head>` slaat dat op en haalt het hekje meteen weg. Leren en de
+timer sturen voortaan door naar de gekozen taal (via de `hreflang`-link), ook
+voordat de scripts geladen zijn. Zonder keuze gebeurt er niets: Google en
+nieuwe bezoekers zien gewoon het adres dat ze openden. Een browser die geen
+Nederlands spreekt krijgt één keer een toast met het aanbod.
 
 **Met de hand geschreven**: `uitleg.html`/`en/faq.html` (gemaakt uit één lijst
 vragen, maar daarna gewoon twee bestanden), `privacy.html`/`en/privacy.html` en

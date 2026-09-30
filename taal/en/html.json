@@ -1,8 +1,7 @@
 {
-  "Online Rubik's cube timer met WCA-scrambles | CubeTimer": "Online Rubik's cube timer with WCA scrambles | CubeTimer",
+  "Online Rubik's cube timer | cubetimer.nl": "Online Rubik's cube timer | cubetimer.nl",
   "Time je solves met officiële WCA-scrambles en inspectietijd. Houd je Ao5 en Ao12 bij, koppel je smart cube en kijk hoe je het doet tegen andere cubers.": "Time your solves with official WCA scrambles and inspection. Track your Ao5 and Ao12, connect your smart cube and see how you compare with other cubers.",
   "cube timer, rubiks cube timer, rubik's kubus timer, speedcube timer, speedcubing, online timer, wca scrambles, scramble generator, ao5, ao12, inspectietijd, smart cube timer, gan cube, cstimer alternatief": "cube timer, rubiks cube timer, rubik's cube timer online, speedcube timer, speedcubing timer, online timer, wca scrambles, scramble generator, ao5, ao12, inspection time, smart cube timer, gan cube timer, cstimer alternative",
-  "CubeTimer, de cube timer in je browser": "CubeTimer, the cube timer in your browser",
   "Gratis timer voor speedcubers. WCA-scrambles, inspectie, statistieken en smart cubes, zonder account of installatie.": "A free timer for speedcubers. WCA scrambles, inspection, stats and smart cubes, no account or install needed.",
   "Het logo van CubeTimer met de tekst: online speedcubing-timer": "The CubeTimer logo with the text: online speedcubing timer",
   "Gratis timer voor speedcubers met WCA-scrambles, inspectietijd, statistieken en smart cubes. Werkt in de browser, ook zonder account.": "A free timer for speedcubers with WCA scrambles, inspection time, statistics and smart cubes. Runs in your browser, with or without an account.",
@@ -47,7 +46,6 @@
   "Iets melden": "Send feedback",
   "Instellingen": "Settings",
   "Inloggen": "Log in",
-  "Wissel tussen licht en donker thema": "Switch between light and dark theme",
   "Je volgende solve telt.": "Your next solve counts.",
   "Stand": "Standings",
   "Spelmodus": "Game mode",
@@ -228,8 +226,7 @@
   "Oké": "OK",
   "Leer de Rubik's kubus oplossen, van de eerste laag tot CFOP. De beginnersmethode stap voor stap, F2L en alle 57 OLL- en 21 PLL-algoritmes met plaatjes.": "Learn to solve the Rubik's cube, from the first layer to CFOP. The beginner's method step by step, F2L and all 57 OLL and 21 PLL algorithms with diagrams.",
   "rubiks kubus oplossen, rubik's cube oplossen, beginnersmethode, f2l, oll, pll, cfop, algoritmes, speedcubing leren": "how to solve a rubik's cube, rubik's cube tutorial, beginner method, f2l, oll, pll, cfop, algorithms, learn speedcubing",
-  "Rubik's kubus oplossen: beginnersmethode, F2L, OLL en PLL": "How to solve a Rubik's cube: beginner method, F2L, OLL, PLL",
-  "De Rubik's kubus leren oplossen": "Learn to solve the Rubik's cube",
+  "Rubik's kubus leren oplossen | cubetimer.nl": "Learn to solve a Rubik's cube | cubetimer.nl",
   "Van je eerste oplossing tot CFOP: de beginnersmethode, F2L en alle OLL- en PLL-algoritmes, met een oefenknop.": "From your first solve to CFOP: the beginner's method, F2L and every OLL and PLL algorithm, with a practice button.",
   "Rubik's kubus leren oplossen": "Learn to solve the Rubik's cube",
   "De beginnersmethode stap voor stap, uitleg over F2L, en alle 57 OLL- en 21 PLL-algoritmes met plaatjes.": "The beginner's method step by step, an explanation of F2L, and all 57 OLL and 21 PLL algorithms with diagrams.",
@@ -285,5 +282,6 @@
   "Herkennen doe je aan de zijkanten, niet aan de bovenkant: twee vakjes van dezelfde kleur naast elkaar zijn <em>koplampen</em>, drie op een rij is een <em>blok</em>. In het plaatje zijn de zijkanten daarom gekleurd, met pijlen erbij die laten zien welk stuk waarheen moet.": "You recognise them by the sides, not the top: two stickers of the same colour next to each other are <em>headlights</em>, three in a row is a <em>bar</em>. That's why the sides are coloured in the diagram, with arrows showing which piece goes where.",
   "Begin met de <strong>alleen randen</strong>-groep en de T- en J-perm: daarmee dek je al een groot deel van je solves af, en de rest kun je er rustig bij leren.": "Start with the <strong>edges only</strong> group and the T and J perms: they already cover a large share of your solves, and you can pick up the rest at your own pace.",
   "Sessie PR": "Session PB",
-  "Uitleg": "FAQ"
+  "Taal": "Language",
+  "De hele site, ook meldingen en mails.": "The whole site, including messages and emails."
 }

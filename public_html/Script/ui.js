@@ -594,9 +594,10 @@
      * Taalknop en taalsuggestie
      * ------------------------------------------------------------------ */
 
-    // De taalknop onthoudt de keuze (het inline script in de <head> doet dat
-    // ook via #taal=..., voor als dit script nog niet geladen is) en neemt een
-    // querystring mee, zoals ?oefen=OLL-27.
+    // De taallink onderaan de losse pagina's onthoudt de keuze (het inline
+    // script in de <head> doet dat ook via #taal=..., voor als dit script nog
+    // niet geladen is) en neemt een querystring mee. Op de timer staat de
+    // taal in Instellingen (settings.js).
     document.addEventListener('click', event => {
         const knop = event.target.closest && event.target.closest('[data-taalwissel]');
         if (!knop) return;
@@ -619,13 +620,14 @@
             } catch (err) { /* geen opslag: niet elke keer vragen */ }
             const talen = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'nl'];
             if (gevraagd || talen.some(taal => /^nl\b/i.test(taal))) return;
-            const naarEngels = document.querySelector('[data-taalwissel="en"]');
+            const naarEngels = document.querySelector('link[rel="alternate"][hreflang="en"]');
             if (!naarEngels) return;
+            const doel = new URL(naarEngels.getAttribute('href'), location.href);
             try { localStorage.setItem('cubetimer_taal_gevraagd', '1'); } catch (err) { /* idem */ }
             toast('This site is also available in English.', { // niet vertalen: altijd Engels
                 type: 'info',
                 duration: 10000,
-                link: { href: naarEngels.href, label: 'Switch to English', sameTab: true } // niet vertalen
+                link: { href: doel.pathname + location.search + '#taal=en', label: 'Switch to English', sameTab: true } // niet vertalen
             });
         });
     }

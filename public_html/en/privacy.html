@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
-    <title>Privacy policy – CubeTimer</title>
+    <title>Privacy policy | cubetimer.nl</title>
     <meta name="description" content="What data CubeTimer keeps, why, for how long and who it's shared with. About your account, your times, cookies, ads and your rights under the GDPR." />
     <link rel="canonical" href="https://cubetimer.nl/en/privacy.html" />
     <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/privacy.html" />
@@ -23,7 +23,7 @@
     <meta property="og:site_name" content="CubeTimer" />
     <meta property="og:locale" content="en_GB" />
     <meta property="og:url" content="https://cubetimer.nl/en/privacy.html" />
-    <meta property="og:title" content="Privacy policy — CubeTimer" />
+    <meta property="og:title" content="Privacy policy | cubetimer.nl" />
     <meta property="og:description" content="What data CubeTimer keeps, why, for how long and who it's shared with." />
     <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -61,7 +61,10 @@
             try {
                 var stored = localStorage.getItem('cubetimer_theme');
                 var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
-                if (gekozen) localStorage.setItem('cubetimer_taal', gekozen[1]);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
                 if (stored !== 'light' && stored !== 'dark') {
                     stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
                 }
@@ -76,9 +79,6 @@
             <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
         </a>
         <div class="profile-topbar__actions">
-            <a class="btn-icon lang-switch" href="/privacy.html#taal=nl" hreflang="nl" lang="nl" title="Nederlands" aria-label="Nederlands">
-                <span class="lang-switch__code">NL</span>
-            </a>
             <a class="btn btn--primary" href="/en/">Go to the timer</a>
         </div>
     </header>
@@ -290,6 +290,7 @@
         <a href="/en/privacy.html" aria-current="page">Privacy</a>
         <a href="/en/terms.html">Terms</a>
         <a href="/en/#cookie-instellingen">Cookie settings</a>
+        <a href="/privacy.html#taal=nl" hreflang="nl" lang="nl" data-taalwissel="nl">Nederlands</a>
     </footer>
 </body>
 </html>
