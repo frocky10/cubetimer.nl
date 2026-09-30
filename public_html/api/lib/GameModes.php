@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/Ranking.php';
 
@@ -372,10 +373,10 @@ final class GameModes
     public static function scoreLabel(string $mode, int $variant, int $score): string
     {
         return match ($mode) {
-            'streak'   => $score . ' op rij',
-            'survival' => $score . ' overleefd',
-            'ladder'   => $score . ($score === 1 ? ' trede' : ' treden'),
-            'speedrun' => $score . ' van ' . $variant . ' cubes',
+            'streak'   => Taal::t('{n} op rij', ['n' => $score]),
+            'survival' => Taal::t('{n} overleefd', ['n' => $score]),
+            'ladder'   => $score === 1 ? Taal::t('1 trede') : Taal::t('{n} treden', ['n' => $score]),
+            'speedrun' => Taal::t('{n} van {totaal} cubes', ['n' => $score, 'totaal' => $variant]),
             default    => (string) $score,
         };
     }
@@ -383,7 +384,8 @@ final class GameModes
     /** 15000 wordt "15 s", 12500 wordt "12,5 s". */
     private static function seconds(int $ms): string
     {
-        $tekst = rtrim(rtrim(number_format($ms / 1000, 2, ',', ''), '0'), ',');
+        $punt = Taal::isEngels() ? '.' : ',';
+        $tekst = rtrim(rtrim(number_format($ms / 1000, 2, $punt, ''), '0'), $punt);
         return $tekst . ' s';
     }
 }

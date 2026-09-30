@@ -94,7 +94,7 @@ Http::ok([
     'recentXp'  => array_map(static fn ($row) => [
         'type'   => $row['type'],
         'amount' => (int) $row['amount'],
-        'detail' => $row['detail'],
+        'detail' => Xp::detailTekst($row['detail']),
         'at'     => str_replace(' ', 'T', (string) $row['created_at']) . 'Z',
     ], $recenteXp),
     'pendingFlags' => (int) ($openMarkeringen['aantal'] ?? 0),

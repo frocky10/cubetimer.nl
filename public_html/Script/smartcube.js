@@ -31,9 +31,9 @@
      * Analyse in het solve-venster
      * ================================================================== */
 
-    const FASE_NAMEN = { cross: 'Kruis', f2l: 'F2L', oll: 'OLL', pll: 'PLL' };
-    const KLEUR_NAMEN = { U: 'wit', D: 'geel', F: 'groen', B: 'blauw', R: 'rood', L: 'oranje' };
-    const getal = (n, decimalen = 2) => Number(n).toLocaleString('nl-NL', {
+    const FASE_NAMEN = { cross: UI.t('Kruis'), f2l: 'F2L', oll: 'OLL', pll: 'PLL' };
+    const KLEUR_NAMEN = { U: UI.t('wit'), D: UI.t('geel'), F: UI.t('groen'), B: UI.t('blauw'), R: UI.t('rood'), L: UI.t('oranje') };
+    const getal = (n, decimalen = 2) => Number(n).toLocaleString(UI.locale, {
         minimumFractionDigits: decimalen,
         maximumFractionDigits: decimalen
     });
@@ -53,7 +53,7 @@
         const totaal = fases.reduce((s, f) => s + (f.ms || 0), 0);
 
         const balk = totaal > 0 ? `
-            <div class="solve-analysis__bar" role="img" aria-label="Verdeling van de tijd over de fases">
+            <div class="solve-analysis__bar" role="img" aria-label="${escapeHtml(UI.t('Verdeling van de tijd over de fases'))}">
                 ${fases.map(f => `<span class="solve-analysis__seg solve-analysis__seg--${escapeHtml(f.key)}"
                     style="flex-grow:${Math.max(f.ms, 1)}" title="${escapeHtml(FASE_NAMEN[f.key] || f.key)}"></span>`).join('')}
             </div>` : '';
@@ -62,21 +62,20 @@
             <tr>
                 <th scope="row"><span class="solve-analysis__key solve-analysis__key--${escapeHtml(f.key)}"></span>${escapeHtml(FASE_NAMEN[f.key] || f.key)}</th>
                 <td>${escapeHtml(UI.formatTime ? UI.formatTime(f.ms) : api.formatTime(f.ms))}</td>
-                <td>${Number(f.moves) || 0} ${Number(f.moves) === 1 ? 'zet' : 'zetten'}</td>
+                <td>${Number(f.moves) === 1 ? UI.t('1 zet') : UI.t('{n} zetten', { n: Number(f.moves) || 0 })}</td>
             </tr>`).join('');
 
         const kruis = analysis.crossFace && KLEUR_NAMEN[analysis.crossFace]
-            ? ` · kruis op ${KLEUR_NAMEN[analysis.crossFace]}` : '';
+            ? ' · ' + escapeHtml(UI.t('kruis op {kleur}', { kleur: KLEUR_NAMEN[analysis.crossFace] })) : '';
 
         container.innerHTML = `
             <span class="field__label">Smart cube</span>
             <p class="solve-analysis__headline">
-                <strong>${Number(analysis.moves) || 0}</strong> zetten ·
-                <strong>${getal(analysis.tps || 0)}</strong> per seconde${kruis}
+                ${UI.t('<strong>{zetten}</strong> zetten · <strong>{tps}</strong> per seconde', { zetten: Number(analysis.moves) || 0, tps: getal(analysis.tps || 0) })}${kruis}
             </p>
             ${balk}
             ${rijen ? `<table class="solve-analysis__table"><tbody>${rijen}</tbody></table>` : ''}
-            ${analysis.solution ? `<details class="solve-analysis__solution"><summary>Oplossing</summary><p>${escapeHtml(analysis.solution)}</p></details>` : ''}
+            ${analysis.solution ? `<details class="solve-analysis__solution"><summary>${escapeHtml(UI.t('Oplossing'))}</summary><p>${escapeHtml(analysis.solution)}</p></details>` : ''}
         `;
         container.hidden = false;
     }
@@ -100,10 +99,10 @@
 
     // Per bestand de naam die het achterlaat, zodat we weten of het al klaar is.
     const BIBLIOTHEKEN = [
-        ['Script/vendor/aes.js', 'aesjs'],
-        ['Script/cube.js', 'CubeTimerCube'],
-        ['Script/smartcube-protocols.js', 'CubeTimerSmartCube'],
-        ['Script/smartcube-engine.js', 'CubeTimerSmartEngine']
+        ['/Script/vendor/aes.js', 'aesjs'],
+        ['/Script/cube.js', 'CubeTimerCube'],
+        ['/Script/smartcube-protocols.js', 'CubeTimerSmartCube'],
+        ['/Script/smartcube-engine.js', 'CubeTimerSmartEngine']
     ];
     let geladen = null;
 
@@ -118,13 +117,13 @@
                 if (bestaand) {
                     // Wordt al geladen (bijvoorbeeld cube.js door de oefenknop).
                     bestaand.addEventListener('load', () => klaar(), { once: true });
-                    bestaand.addEventListener('error', () => mislukt(new Error('Kon ' + src + ' niet laden')), { once: true });
+                    bestaand.addEventListener('error', () => mislukt(new Error('Kon ' + src + ' niet laden')), { once: true }); // niet vertalen
                     return;
                 }
                 const el = document.createElement('script');
                 el.src = src;
                 el.onload = () => klaar();
-                el.onerror = () => mislukt(new Error('Kon ' + src + ' niet laden'));
+                el.onerror = () => mislukt(new Error('Kon ' + src + ' niet laden')); // niet vertalen
                 document.head.appendChild(el);
             })), Promise.resolve()).catch(err => {
                 geladen = null;
@@ -175,10 +174,10 @@
     function toonView(naam) {
         modal.querySelectorAll('[data-sc-view]').forEach(el => { el.hidden = el.dataset.scView !== naam; });
         const titels = {
-            idle: 'Verbind je smart cube',
-            busy: 'Verbinden…',
-            mac: 'Nog één ding nodig',
-            connected: 'Verbonden'
+            idle: UI.t('Verbind je smart cube'),
+            busy: UI.t('Verbinden…'),
+            mac: UI.t('Nog één ding nodig'),
+            connected: UI.t('Verbonden')
         };
         $('smartcube-title').textContent = titels[naam] || 'Smart cube';
         $('smartcube-subtitle').hidden = naam !== 'idle';
@@ -202,14 +201,14 @@
 
     function zetKnopStand(stand) {
         knop.dataset.state = stand;
-        const teksten = { off: 'Smart cube', busy: 'Smart cube: verbinden…', on: 'Smart cube verbonden' };
+        const teksten = { off: 'Smart cube', busy: UI.t('Smart cube: verbinden…'), on: UI.t('Smart cube verbonden') };
         knop.title = teksten[stand] || 'Smart cube';
     }
 
     function openVenster() {
         UI.openModal(modal);
         if (!conn && !verbindenBezig) toonView('idle');
-        laad().catch(() => toonFout('De smart-cubeonderdelen konden niet geladen worden. Ververs de pagina.'));
+        laad().catch(() => toonFout(UI.t('De smart-cubeonderdelen konden niet geladen worden. Ververs de pagina.')));
     }
 
     function sluitVenster() {
@@ -283,16 +282,16 @@
     const stage = $('smartcube-stage');
 
     function statusTekst(p) {
-        if (!beginGehad) return ['Verbonden', 'Even de stand van de cube ophalen…'];
-        if (!is333()) return ['Alleen voor 3x3', 'Kies een 3x3-sessie om met je smart cube te timen.'];
-        if (p.phase === 'solving') return ['Solve loopt', 'De timer stopt vanzelf als de cube opgelost is.'];
-        if (!p.total) return ['Wacht op scramble', 'Zodra de scramble er is, kun je beginnen.'];
+        if (!beginGehad) return [UI.t('Verbonden'), UI.t('Even de stand van de cube ophalen…')];
+        if (!is333()) return [UI.t('Alleen voor 3x3'), UI.t('Kies een 3x3-sessie om met je smart cube te timen.')];
+        if (p.phase === 'solving') return [UI.t('Solve loopt'), UI.t('De timer stopt vanzelf als de cube opgelost is.')];
+        if (!p.total) return [UI.t('Wacht op scramble'), UI.t('Zodra de scramble er is, kun je beginnen.')];
         switch (p.status) {
-            case 'klaar': return ['Klaar', 'Je eerste draai start de timer.'];
-            case 'afwijking': return ['Klopt niet meer', 'Draai je laatste zetten terug, of los de cube op en begin opnieuw.'];
-            case 'eerst-oplossen': return ['Eerst oplossen', 'De cube is niet opgelost. Los hem op, dan kun je scramblen.'];
-            case 'bezig': return ['Scramble ' + p.done + ' van ' + p.total, p.half ? 'Nog een kwartslag voor deze zet.' : 'Ga zo door.'];
-            default: return ['Scramble', 'Volg de scramble op je cube.'];
+            case 'klaar': return [UI.t('Klaar'), UI.t('Je eerste draai start de timer.')];
+            case 'afwijking': return [UI.t('Klopt niet meer'), UI.t('Draai je laatste zetten terug, of los de cube op en begin opnieuw.')];
+            case 'eerst-oplossen': return [UI.t('Eerst oplossen'), UI.t('De cube is niet opgelost. Los hem op, dan kun je scramblen.')];
+            case 'bezig': return [UI.t('Scramble {gedaan} van {totaal}', { gedaan: p.done, totaal: p.total }), p.half ? UI.t('Nog een kwartslag voor deze zet.') : UI.t('Ga zo door.')];
+            default: return ['Scramble', UI.t('Volg de scramble op je cube.')];
         }
     }
 
@@ -335,7 +334,7 @@
 
         // In het venster
         $('smartcube-cube').innerHTML = tekenKubus(tracker.state);
-        $('smartcube-state').textContent = !beginGehad ? 'ophalen…' : tracker.isSolved ? 'Opgelost' : p.phase === 'solving' ? 'Bezig met solve' : 'Door elkaar';
+        $('smartcube-state').textContent = !beginGehad ? UI.t('ophalen…') : tracker.isSolved ? UI.t('Opgelost') : p.phase === 'solving' ? UI.t('Bezig met solve') : UI.t('Door elkaar');
         $('smartcube-event-hint').hidden = is333();
     }
 
@@ -422,7 +421,7 @@
         } else if (type === 'hardware' && data.name) {
             $('smartcube-name').textContent = conn ? conn.name + ' (' + data.name + ')' : data.name;
         } else if (type === 'keyError') opSleutelfout(data.reason);
-        else if (type === 'disconnect') verbreek('De cube heeft de verbinding verbroken.');
+        else if (type === 'disconnect') verbreek(UI.t('De cube heeft de verbinding verbroken.'));
     }
 
     /** Verkeerd MAC-adres: vragen om het juiste, zonder opnieuw te verbinden. */
@@ -439,7 +438,7 @@
         });
         sleutelfoutBezig = false;
         if (!mac || !conn) {
-            verbreek('Verbinding gestopt: zonder het juiste MAC-adres kan de cube niet praten.');
+            verbreek(UI.t('Verbinding gestopt: zonder het juiste MAC-adres kan de cube niet praten.'));
             return;
         }
         toonView('busy');
@@ -456,8 +455,10 @@
         toonView('mac');
         const lead = $('smartcube-mac-lead');
         lead.textContent = reden === 'verkeerd'
-            ? `Het MAC-adres ${voorstel ? '(' + voorstel + ') ' : ''}werkt niet voor ${naam}. Vul het juiste adres in.`
-            : `${naam} versleutelt wat hij stuurt met zijn eigen MAC-adres, en dat kan de browser niet zelf uitlezen. Vul het één keer in.`;
+            ? (voorstel
+                ? UI.t('Het MAC-adres ({mac}) werkt niet voor {naam}. Vul het juiste adres in.', { mac: voorstel, naam })
+                : UI.t('Het MAC-adres werkt niet voor {naam}. Vul het juiste adres in.', { naam }))
+            : UI.t('{naam} versleutelt wat hij stuurt met zijn eigen MAC-adres, en dat kan de browser niet zelf uitlezen. Vul het één keer in.', { naam });
         const input = $('smartcube-mac-input');
         input.value = '';
         $('smartcube-mac-error').textContent = '';
@@ -482,7 +483,7 @@
         const waarde = $('smartcube-mac-input').value.trim();
         const Smart = window.CubeTimerSmartCube;
         if (!Smart || !Smart.parseMac(waarde)) {
-            $('smartcube-mac-error').textContent = 'Dat is geen MAC-adres. Het ziet eruit als AB:12:34:CD:56:EF.';
+            $('smartcube-mac-error').textContent = UI.t('Dat is geen MAC-adres. Het ziet eruit als AB:12:34:CD:56:EF.');
             return;
         }
         toonView('busy');
@@ -499,18 +500,19 @@
         const naam = err && err.name;
         const tekst = String(err && err.message || err || '');
         if (naam === 'NotFoundError' && /cancel/i.test(tekst)) return null;          // zelf geannuleerd
-        if (naam === 'NotFoundError') return 'Geen cube gevonden. Staat hij aan en is hij niet met een andere app of tab verbonden?';
-        if (naam === 'SecurityError') return 'De browser staat Bluetooth hier niet toe. Het werkt alleen via https.';
-        if (naam === 'NetworkError') return 'De verbinding viel weg tijdens het verbinden. Draai even aan de cube en probeer het opnieuw.';
-        if (/user gesture/i.test(tekst)) return 'De browser wil dat je nog een keer op Verbinden klikt.';
-        return tekst || 'Verbinden is niet gelukt.';
+        if (naam === 'NotFoundError') return UI.t('Geen cube gevonden. Staat hij aan en is hij niet met een andere app of tab verbonden?');
+        if (naam === 'SecurityError') return UI.t('De browser staat Bluetooth hier niet toe. Het werkt alleen via https.');
+        if (naam === 'NetworkError') return UI.t('De verbinding viel weg tijdens het verbinden. Draai even aan de cube en probeer het opnieuw.');
+        if (/user gesture/i.test(tekst)) return UI.t('De browser wil dat je nog een keer op Verbinden klikt.');
+        // Meldingen uit smartcube-protocols.js zijn Nederlandse zinnen; die staan ook in taal/en/js.json.
+        return tekst ? UI.t(tekst) : UI.t('Verbinden is niet gelukt.');
     }
 
     async function verbind() {
         const Smart = window.CubeTimerSmartCube;
         const Engine = window.CubeTimerSmartEngine;
         if (!Smart || !Engine) {
-            toonFout('Even geduld, de onderdelen worden nog geladen. Klik zo nog een keer.');
+            toonFout(UI.t('Even geduld, de onderdelen worden nog geladen. Klik zo nog een keer.'));
             laad().catch(() => {});
             return;
         }
@@ -536,7 +538,7 @@
                 askMac: ({ naam, reden, voorstel }) => vraagMac({ naam, reden, voorstel }),
                 log: tekst => console.debug(tekst)
             });
-            conn.device.addEventListener('gattserverdisconnected', () => verbreek('De verbinding met de cube is weggevallen.'), { once: true });
+            conn.device.addEventListener('gattserverdisconnected', () => verbreek(UI.t('De verbinding met de cube is weggevallen.')), { once: true });
 
             $('smartcube-name').textContent = conn.name;
             $('smartcube-protocol').textContent = conn.protocol;
@@ -545,7 +547,7 @@
             werkBatterijBij();
             conn.request('battery');
             toonView('connected');
-            UI.toast(conn.name + ' is verbonden.', { type: 'success' });
+            UI.toast(UI.t('{naam} is verbonden.', { naam: conn.name }), { type: 'success' });
         } catch (err) {
             if (conn) {
                 try { await conn.close(); } catch (e) { /* al weg */ }
@@ -579,7 +581,7 @@
     }
 
     $('smartcube-connect').addEventListener('click', verbind);
-    $('smartcube-disconnect').addEventListener('click', () => verbreek('Smart cube losgekoppeld.'));
+    $('smartcube-disconnect').addEventListener('click', () => verbreek(UI.t('Smart cube losgekoppeld.')));
 
     $('smartcube-solved').addEventListener('click', async () => {
         if (!conn || !tracker) return;
@@ -589,7 +591,7 @@
         tracker.reset(null);
         tracker.setScramble(is333() ? window.currentScramble || '' : '');
         werkBij();
-        UI.toast('De stand staat weer op opgelost.', { type: 'success' });
+        UI.toast(UI.t('De stand staat weer op opgelost.'), { type: 'success' });
     });
 
     $('smartcube-change-mac').addEventListener('click', async () => {
@@ -608,7 +610,7 @@
     $('smartcube-flip').addEventListener('click', event => {
         achterkant = !achterkant;
         event.currentTarget.setAttribute('aria-pressed', achterkant ? 'true' : 'false');
-        event.currentTarget.textContent = achterkant ? 'Voorkant' : 'Achterkant';
+        event.currentTarget.textContent = achterkant ? UI.t('Voorkant') : UI.t('Achterkant');
         werkBij();
     });
 

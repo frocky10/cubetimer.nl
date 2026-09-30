@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/Averages.php';
 require_once __DIR__ . '/TournamentField.php';
@@ -85,9 +86,21 @@ final class Tournaments
     public static function typeLabel(string $type): string
     {
         if ($type === self::WCA_TYPE) {
-            return 'Historische comp';
+            return Taal::t('Historische comp');
         }
-        return self::DIFFICULTIES[$type]['label'] ?? $type;
+        return Taal::t(self::DIFFICULTIES[$type]['label'] ?? $type);
+    }
+
+    /**
+     * De naam van een ronde in de taal van het verzoek. In de database staat
+     * hij in het Nederlands ("Halve finale", "Ronde 4").
+     */
+    public static function rondeNaam(string $naam): string
+    {
+        if (preg_match('/^Ronde (\d+)$/', $naam, $m) === 1) {
+            return Taal::t('Ronde {n}', ['n' => $m[1]]);
+        }
+        return Taal::t($naam);
     }
 
     /** Rondeopzet: hoeveel er doorgaan naar de volgende ronde. */
@@ -993,7 +1006,7 @@ final class Tournaments
             $scrambles = $momentopname['rounds'][(int) $ronde['round_number'] - 1]['scrambles'] ?? null;
             $uit['round'] = [
                 'number'       => (int) $ronde['round_number'],
-                'name'         => $ronde['name'],
+                'name'         => self::rondeNaam((string) $ronde['name']),
                 'entrants'     => (int) $ronde['entrants'],
                 'advancing'    => (int) $ronde['advancing'],
                 'format'       => $format,
@@ -1052,7 +1065,7 @@ final class Tournaments
             $tijden = json_decode((string) ($rij['times_json'] ?? '[]'), true);
             $perRonde[$nummer][] = [
                 'position' => (int) $rij['position'],
-                'name'     => $rij['competitor_id'] === null ? 'Jij' : (string) $rij['name'],
+                'name'     => $rij['competitor_id'] === null ? Taal::t('Jij') : (string) $rij['name'],
                 'kind'     => $rij['competitor_id'] === null ? 'player' : (string) $rij['kind'],
                 'country'  => $rij['country_code'],
                 'wcaId'    => $rij['wca_id'] ?? null,
@@ -1070,7 +1083,7 @@ final class Tournaments
             $nummer = (int) $ronde['round_number'];
             $uit[] = [
                 'number'      => $nummer,
-                'name'        => $ronde['name'],
+                'name'        => self::rondeNaam((string) $ronde['name']),
                 'entrants'    => (int) $ronde['entrants'],
                 'advancing'   => (int) $ronde['advancing'],
                 'format'      => (string) ($ronde['format'] ?? 'a'),
@@ -1227,8 +1240,8 @@ final class Tournaments
         foreach (self::DIFFICULTIES as $sleutel => $instelling) {
             $uit[] = [
                 'id'          => $sleutel,
-                'label'       => $instelling['label'],
-                'description' => $instelling['description'],
+                'label'       => Taal::t($instelling['label']),
+                'description' => Taal::t($instelling['description']),
                 'fieldSize'   => $instelling['field'],
                 'referenceMs' => $instelling['reference'],
             ];

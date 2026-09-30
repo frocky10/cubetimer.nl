@@ -125,7 +125,7 @@
         const loggedIn = currentUser !== null;
 
         chip.hidden = !accountsAvailable;
-        chipName.textContent = loggedIn ? currentUser.displayName || currentUser.username : 'Inloggen';
+        chipName.textContent = loggedIn ? currentUser.displayName || currentUser.username : UI.t('Inloggen');
         chipAvatar.textContent = loggedIn ? initials(currentUser.username) : '↪';
 
         // Zodra we een positie kennen, komt de rangbadge in de plaats van de
@@ -146,12 +146,12 @@
         unavailablePanel.hidden = accountsAvailable;
         if (forgotOpen) forgotOpen.hidden = !mailAvailable;
 
-        modalTitle.textContent = herstellen ? 'Nieuw wachtwoord' : (loggedIn ? 'Je account' : 'Inloggen');
+        modalTitle.textContent = herstellen ? UI.t('Nieuw wachtwoord') : (loggedIn ? UI.t('Je account') : UI.t('Inloggen'));
         modalSubtitle.textContent = herstellen
-            ? 'Kies een nieuw wachtwoord voor je account.'
+            ? UI.t('Kies een nieuw wachtwoord voor je account.')
             : loggedIn
-                ? 'Je tijden staan veilig op de server.'
-                : 'Bewaar je tijden en neem ze mee naar elk apparaat.';
+                ? UI.t('Je tijden staan veilig op de server.')
+                : UI.t('Bewaar je tijden en neem ze mee naar elk apparaat.');
 
         if (loggedIn) {
             summaryName.textContent = currentUser.displayName || currentUser.username;
@@ -163,8 +163,7 @@
         const onbevestigd = loggedIn && verificationAvailable && currentUser.emailVerified === false;
         if (verifyBox) verifyBox.hidden = !onbevestigd;
         if (onbevestigd && verifyText) {
-            verifyText.textContent = `Bevestig je e-mailadres (${currentUser.email}); dan kunnen we je helpen als je `
-                + 'ooit je wachtwoord vergeet.';
+            verifyText.textContent = UI.t('Bevestig je e-mailadres ({email}); dan kunnen we je helpen als je ooit je wachtwoord vergeet.', { email: currentUser.email });
         }
     }
 
@@ -173,7 +172,7 @@
      * ------------------------------------------------------------------ */
 
     const CATEGORY_LABELS = {
-        single: 'Beste', worst_single: 'Slechtste', mo3: 'Mo3',
+        single: UI.t('Beste'), worst_single: UI.t('Slechtste'), mo3: 'Mo3',
         ao5: 'Ao5', ao12: 'Ao12', ao50: 'Ao50', ao100: 'Ao100'
     };
     const CATEGORY_ORDER = ['single', 'mo3', 'ao5', 'ao12', 'ao50', 'ao100', 'worst_single'];
@@ -199,12 +198,12 @@
         summaryRank.textContent = profile.rank ? profile.rank.label : '--';
         summaryLevel.textContent = 'Lv. ' + profile.xp.level;
         summaryRankLine.textContent = profile.rank
-            ? `${profile.rank.label} van ${profile.rank.total} op ${profile.mainEvent.label} · ${UI.formatTime(profile.rank.valueMs)}`
-            : `Nog geen positie op ${profile.mainEvent.label}. Synchroniseer een paar solves.`;
+            ? UI.t('{plek} van {totaal} op {event}', { plek: profile.rank.label, totaal: UI.getal(profile.rank.total), event: profile.mainEvent.label }) + ' · ' + UI.formatTime(profile.rank.valueMs)
+            : UI.t('Nog geen positie op {event}. Synchroniseer een paar solves.', { event: profile.mainEvent.label });
 
         xpLevelLabel.textContent = `Level ${profile.xp.level} · ${tier.name}`;
         xpProgressLabel.textContent = `${profile.xp.inLevel} / ${profile.xp.neededForNext} XP`;
-        xpTotalLabel.textContent = `${profile.xp.total.toLocaleString('nl-NL')} XP verdiend`;
+        xpTotalLabel.textContent = UI.t('{xp} XP verdiend', { xp: UI.getal(profile.xp.total) });
         xpFill.style.width = Math.min(100, Math.round(profile.xp.inLevel / profile.xp.neededForNext * 100)) + '%';
 
         statStreak.textContent = String(profile.streak.current);
@@ -240,8 +239,8 @@
         flagNotice.hidden = profile.pendingFlags === 0;
         if (profile.pendingFlags > 0) {
             flagNotice.textContent = profile.pendingFlags === 1
-                ? 'Een van je tijden wordt nog nagekeken en telt zolang niet mee voor de ranglijsten.'
-                : `${profile.pendingFlags} van je tijden worden nog nagekeken en tellen zolang niet mee voor de ranglijsten.`;
+                ? UI.t('Een van je tijden wordt nog nagekeken en telt zolang niet mee voor de ranglijsten.')
+                : UI.t('{n} van je tijden worden nog nagekeken en tellen zolang niet mee voor de ranglijsten.', { n: profile.pendingFlags });
         }
     }
 
@@ -251,7 +250,7 @@
         if (!profile.events.length) {
             const leeg = document.createElement('p');
             leeg.className = 'table-empty';
-            leeg.textContent = 'Nog geen records. Synchroniseer eerst je tijden.';
+            leeg.textContent = UI.t('Nog geen records. Synchroniseer eerst je tijden.');
             recordsHost.appendChild(leeg);
             return;
         }
@@ -273,7 +272,7 @@
                 if (!record) return;
 
                 const cel = document.createElement('div');
-                cel.className = 'records-cell' + (category === 'single' ? ' records-cell--best' : '');
+                cel.className = 'records-cell' + (category === 'single' ? ' records-cell--best' : ''); // niet vertalen
 
                 const label = document.createElement('span');
                 label.className = 'records-cell__label';
@@ -315,7 +314,7 @@
 
     /** De deelbare URL van een profiel. */
     function profileUrl(username) {
-        return new URL('profiel.php?u=' + encodeURIComponent(username), window.location.href).href;
+        return new URL(UI.profielUrl(username), window.location.href).href;
     }
 
     function fillCountries() {
@@ -323,7 +322,7 @@
 
         const leeg = document.createElement('option');
         leeg.value = '';
-        leeg.textContent = 'Niet ingesteld';
+        leeg.textContent = UI.t('Niet ingesteld');
         countrySelect.appendChild(leeg);
 
         UI.countries().forEach(land => {
@@ -356,16 +355,16 @@
             window.CubeTimerLeaderboard?.reload?.();
             if (melding) UI.toast(melding, { type: 'success' });
         } catch (err) {
-            UI.toast(err.message || 'Opslaan is niet gelukt.', { type: 'error' });
+            UI.toast(err.message || UI.t('Opslaan is niet gelukt.'), { type: 'error' });
         }
     }
 
     mainEventSelect?.addEventListener('change', () => {
-        saveProfileSetting({ mainEvent: mainEventSelect.value }, 'Hoofd-event bijgewerkt.');
+        saveProfileSetting({ mainEvent: mainEventSelect.value }, UI.t('Hoofd-event bijgewerkt.'));
     });
 
     countrySelect?.addEventListener('change', () => {
-        saveProfileSetting({ country: countrySelect.value }, 'Land bijgewerkt.');
+        saveProfileSetting({ country: countrySelect.value }, UI.t('Land bijgewerkt.'));
     });
 
     copyProfileButton?.addEventListener('click', async () => {
@@ -373,10 +372,10 @@
         const url = profileUrl(currentUser.username);
         try {
             await navigator.clipboard.writeText(url);
-            UI.toast('Profiellink gekopieerd.', { type: 'success' });
+            UI.toast(UI.t('Profiellink gekopieerd.'), { type: 'success' });
         } catch (err) {
             // Zonder toestemming voor het klembord: de link dan maar tonen.
-            UI.toast(url, { type: 'info', duration: 9000, link: { href: url, label: 'Openen' } });
+            UI.toast(url, { type: 'info', duration: 9000, link: { href: url, label: UI.t('Openen') } });
         }
     });
 
@@ -384,8 +383,8 @@
         saveProfileSetting(
             { showOnLeaderboard: showOnLeaderboard.checked },
             showOnLeaderboard.checked
-                ? 'Je doet weer mee aan de ranglijsten.'
-                : 'Je staat niet meer in de ranglijsten.'
+                ? UI.t('Je doet weer mee aan de ranglijsten.')
+                : UI.t('Je staat niet meer in de ranglijsten.')
         );
     });
 
@@ -415,10 +414,8 @@
         if (looseBox.hidden || !looseText) return;
 
         looseText.textContent = looseSolves === 1
-            ? 'Er staat 1 tijd op je account die niet in een sessie zit. Hij telt gewoon mee voor je '
-                + 'records en ranglijsten.'
-            : `Er staan ${looseSolves} tijden op je account die niet in een sessie zitten. Ze tellen `
-                + 'gewoon mee voor je records en ranglijsten.';
+            ? UI.t('Er staat 1 tijd op je account die niet in een sessie zit. Hij telt gewoon mee voor je records en ranglijsten.')
+            : UI.t('Er staan {n} tijden op je account die niet in een sessie zitten. Ze tellen gewoon mee voor je records en ranglijsten.', { n: looseSolves });
     }
 
     /** Vraagt de server hoeveel losse tijden er zijn. */
@@ -444,7 +441,7 @@
             const aantal = Number(antwoord.restored) || 0;
             const sessies = Number(antwoord.sessions) || 0;
             if (!aantal) {
-                UI.toast('Er was niets meer om terug te halen.', { type: 'info' });
+                UI.toast(UI.t('Er was niets meer om terug te halen.'), { type: 'info' });
             } else {
                 // Opnieuw ophalen, want de server heeft er sessies omheen gezet.
                 const verse = await UI.api('sync/pull.php');
@@ -453,12 +450,14 @@
                 }
                 looseSolves = Number(verse.looseSolves) || 0;
                 renderCounts();
-                UI.toast(`${aantal} ${aantal === 1 ? 'tijd' : 'tijden'} teruggehaald in `
-                    + `${sessies} ${sessies === 1 ? 'sessie' : 'sessies'}.`, { type: 'success' });
+                const waar = { n: aantal, sessies: sessies === 1 ? UI.t('1 sessie') : UI.t('{n} sessies', { n: sessies }) };
+                UI.toast(aantal === 1
+                    ? UI.t('1 tijd teruggehaald in {sessies}.', waar)
+                    : UI.t('{n} tijden teruggehaald in {sessies}.', waar), { type: 'success' });
             }
             renderLooseSolves();
         } catch (err) {
-            UI.toast('Terughalen is niet gelukt: ' + err.message, { type: 'error' });
+            UI.toast(UI.t('Terughalen is niet gelukt: {fout}', { fout: err.message }), { type: 'error' });
         } finally {
             looseRestore.disabled = false;
         }
@@ -467,11 +466,11 @@
     looseClear?.addEventListener('click', async () => {
         const aantal = looseSolves;
         const akkoord = await UI.ask({
-            title: 'Losse tijden wissen?',
-            message: `${aantal} ${aantal === 1 ? 'tijd verdwijnt' : 'tijden verdwijnen'} definitief van je `
-                + 'account. Je records worden daarna opnieuw uitgerekend, dus een persoonlijk record kan '
-                + 'hierdoor vervallen. Dit kun je niet ongedaan maken.',
-            confirmLabel: 'Definitief wissen',
+            title: UI.t('Losse tijden wissen?'),
+            message: aantal === 1
+                ? UI.t('1 tijd verdwijnt definitief van je account. Je records worden daarna opnieuw uitgerekend, dus een persoonlijk record kan hierdoor vervallen. Dit kun je niet ongedaan maken.')
+                : UI.t('{n} tijden verdwijnen definitief van je account. Je records worden daarna opnieuw uitgerekend, dus een persoonlijk record kan hierdoor vervallen. Dit kun je niet ongedaan maken.', { n: aantal }),
+            confirmLabel: UI.t('Definitief wissen'),
             danger: true
         });
         if (akkoord !== true) return;
@@ -483,9 +482,9 @@
             looseSolves = 0;
             renderLooseSolves();
             await loadProfile();
-            UI.toast(`${weg} ${weg === 1 ? 'tijd' : 'tijden'} van je account verwijderd.`, { type: 'success' });
+            UI.toast(weg === 1 ? UI.t('1 tijd van je account verwijderd.') : UI.t('{n} tijden van je account verwijderd.', { n: weg }), { type: 'success' });
         } catch (err) {
-            UI.toast('Wissen is niet gelukt: ' + err.message, { type: 'error' });
+            UI.toast(UI.t('Wissen is niet gelukt: {fout}', { fout: err.message }), { type: 'error' });
         } finally {
             looseClear.disabled = false;
         }
@@ -559,7 +558,7 @@
         forgotError.textContent = '';
         forgotDone.hidden = true;
         if (!identifier) {
-            forgotError.textContent = 'Vul je e-mailadres of gebruikersnaam in.';
+            forgotError.textContent = UI.t('Vul je e-mailadres of gebruikersnaam in.');
             return;
         }
         knop.disabled = true;
@@ -580,11 +579,11 @@
         const herhaling = document.getElementById('reset-password-repeat').value;
         resetError.textContent = '';
         if (password.length < 8) {
-            resetError.textContent = 'Je wachtwoord moet minstens 8 tekens lang zijn.';
+            resetError.textContent = UI.t('Je wachtwoord moet minstens 8 tekens lang zijn.');
             return;
         }
         if (password !== herhaling) {
-            resetError.textContent = 'De twee wachtwoorden zijn niet hetzelfde.';
+            resetError.textContent = UI.t('De twee wachtwoorden zijn niet hetzelfde.');
             return;
         }
 
@@ -649,7 +648,7 @@
             }
             UI.toast(antwoord.message, { type: 'success' });
         } catch (err) {
-            UI.toast(err.message || 'Deze link werkt niet (meer).', { type: 'error', duration: 8000 });
+            UI.toast(err.message || UI.t('Deze link werkt niet (meer).'), { type: 'error', duration: 8000 });
         }
     }
 
@@ -675,7 +674,7 @@
 
         syncing = true;
         pendingChanges = false;
-        setSyncState('syncing', 'Bezig met opslaan…');
+        setSyncState('syncing', UI.t('Bezig met opslaan…'));
 
         // Tijden die de gebruiker ook van zijn account af wil. Pas opruimen als
         // de server ze heeft gehad; bij een mislukte push gaan ze dus gewoon mee
@@ -701,8 +700,9 @@
                 }));
             }
 
-            setSyncState('synced', 'Je tijden staan op de server, bijgewerkt om ' +
-                new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) + '.');
+            setSyncState('synced', UI.t('Je tijden staan op de server, bijgewerkt om {tijd}.', {
+                tijd: new Date().toLocaleTimeString(UI.locale, { hour: '2-digit', minute: '2-digit' })
+            }));
             renderCounts();
 
             // De server heeft net records, XP en challenges herberekend.
@@ -714,10 +714,10 @@
                 currentUser = null;
                 renderAccount();
                 setSyncState('error', '');
-                UI.toast('Je bent uitgelogd. Je tijden staan nog in deze browser.', { type: 'warning' });
+                UI.toast(UI.t('Je bent uitgelogd. Je tijden staan nog in deze browser.'), { type: 'warning' });
                 return;
             }
-            setSyncState('error', 'Opslaan is niet gelukt: ' + err.message);
+            setSyncState('error', UI.t('Opslaan is niet gelukt: {fout}', { fout: err.message }));
         } finally {
             syncing = false;
             if (pendingChanges) scheduleSync();
@@ -741,7 +741,7 @@
      * wat er in de browser ligt.
      */
     async function syncAfterLogin() {
-        setSyncState('syncing', 'Je tijden ophalen…');
+        setSyncState('syncing', UI.t('Je tijden ophalen…'));
         try {
             const remote = await UI.api('sync/pull.php');
             const serverSessions = Array.isArray(remote.sessions) ? remote.sessions : [];
@@ -750,8 +750,8 @@
             if (serverSessions.length) {
                 api.replaceSessions(serverSessions, api.getActiveSessionId());
                 const solves = serverSessions.reduce((totaal, sessie) => totaal + sessie.times.length, 0);
-                UI.toast(`Welkom terug! ${solves} ${solves === 1 ? 'solve' : 'solves'} opgehaald.`, { type: 'success' });
-                setSyncState('synced', 'Je tijden komen van je account.');
+                UI.toast(solves === 1 ? UI.t('Welkom terug! 1 solve opgehaald.') : UI.t('Welkom terug! {n} solves opgehaald.', { n: UI.getal(solves) }), { type: 'success' });
+                setSyncState('synced', UI.t('Je tijden komen van je account.'));
                 renderCounts();
                 renderLooseSolves();
             } else {
@@ -760,15 +760,15 @@
                 const solves = lokaal.reduce((totaal, sessie) => totaal + sessie.times.length, 0);
                 await pushNow();
                 UI.toast(solves
-                    ? `Je ${solves} ${solves === 1 ? 'solve staat' : 'solves staan'} nu op je account.`
-                    : 'Je account is klaar voor gebruik.', { type: 'success' });
+                    ? (solves === 1 ? UI.t('Je solve staat nu op je account.') : UI.t('Je {n} solves staan nu op je account.', { n: UI.getal(solves) }))
+                    : UI.t('Je account is klaar voor gebruik.'), { type: 'success' });
             }
 
             await loadProfile();
             window.dispatchEvent(new CustomEvent('cubetimer:synced'));
         } catch (err) {
-            setSyncState('error', 'Synchroniseren is niet gelukt: ' + err.message);
-            UI.toast('Synchroniseren is niet gelukt. Je tijden staan nog in deze browser.', { type: 'error' });
+            setSyncState('error', UI.t('Synchroniseren is niet gelukt: {fout}', { fout: err.message }));
+            UI.toast(UI.t('Synchroniseren is niet gelukt. Je tijden staan nog in deze browser.'), { type: 'error' });
         }
     }
 
@@ -816,7 +816,7 @@
         errorField.textContent = '';
         const originalLabel = button.textContent;
         button.disabled = true;
-        button.textContent = 'Even geduld…';
+        button.textContent = UI.t('Even geduld…');
 
         try {
             const response = await request();
@@ -825,7 +825,7 @@
             UI.closeModal(modal);
             form.reset();
             if (response.verificationSent) {
-                UI.toast(`We stuurden een mail naar ${currentUser.email} om je adres te bevestigen.`, { type: 'info', duration: 7000 });
+                UI.toast(UI.t('We stuurden een mail naar {email} om je adres te bevestigen.', { email: currentUser.email }), { type: 'info', duration: 7000 });
             }
             await announceAuthChange();
             await syncAfterLogin();
@@ -847,7 +847,7 @@
         const password = document.getElementById('login-password').value;
 
         if (!login || !password) {
-            loginError.textContent = 'Vul je gebruikersnaam en wachtwoord in.';
+            loginError.textContent = UI.t('Vul je gebruikersnaam en wachtwoord in.');
             return;
         }
 
@@ -862,7 +862,7 @@
         const password = document.getElementById('register-password').value;
 
         if (password.length < 8) {
-            registerError.textContent = 'Je wachtwoord moet minstens 8 tekens lang zijn.';
+            registerError.textContent = UI.t('Je wachtwoord moet minstens 8 tekens lang zijn.');
             return;
         }
 
@@ -872,9 +872,9 @@
 
     document.getElementById('account-logout')?.addEventListener('click', async () => {
         const confirmed = await UI.ask({
-            title: 'Uitloggen?',
-            message: 'Je tijden blijven in deze browser staan. Bij de volgende login komen ze weer van je account.',
-            confirmLabel: 'Uitloggen',
+            title: UI.t('Uitloggen?'),
+            message: UI.t('Je tijden blijven in deze browser staan. Bij de volgende login komen ze weer van je account.'),
+            confirmLabel: UI.t('Uitloggen'),
             danger: true
         });
         if (!confirmed) return;
@@ -897,7 +897,7 @@
         renderLooseSolves();
         UI.closeModal(modal);
         await announceAuthChange();
-        UI.toast('Je bent uitgelogd.', { type: 'info' });
+        UI.toast(UI.t('Je bent uitgelogd.'), { type: 'info' });
     });
 
     /* =====================================================================
@@ -910,13 +910,13 @@
         const knop = event.currentTarget;
         knop.disabled = true;
         try {
-            const antwoord = await fetch('api/account/export.php', {
+            const antwoord = await fetch('/api/account/export.php', {
                 credentials: 'same-origin',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-Taal': UI.lang }
             });
             if (!antwoord.ok) {
                 const fout = await antwoord.json().catch(() => null);
-                throw new Error((fout && fout.message) || 'Downloaden lukte niet.');
+                throw new Error((fout && fout.message) || UI.t('Downloaden lukte niet.'));
             }
             const naam = (/filename="([^"]+)"/.exec(antwoord.headers.get('Content-Disposition') || '') || [])[1]
                 || 'cubetimer-gegevens.json';
@@ -929,7 +929,7 @@
             link.remove();
             window.setTimeout(() => URL.revokeObjectURL(url), 10000);
         } catch (err) {
-            UI.toast(err.message || 'Downloaden lukte niet.', { type: 'error' });
+            UI.toast(err.message || UI.t('Downloaden lukte niet.'), { type: 'error' });
         } finally {
             knop.disabled = false;
         }
@@ -938,20 +938,18 @@
     document.getElementById('account-delete')?.addEventListener('click', async () => {
         if (!currentUser) return;
         const zeker = await UI.ask({
-            title: 'Account verwijderen?',
-            message: `Je account ${currentUser.username} wordt meteen verwijderd, met al je tijden op de server, `
-                + 'records, XP, achievements, toernooien, duels en volgers. Dat kan niet ongedaan worden gemaakt. '
-                + 'Wil je een kopie? Download dan eerst je gegevens. De tijden in deze browser blijven staan.',
-            confirmLabel: 'Verder',
+            title: UI.t('Account verwijderen?'),
+            message: UI.t('Je account {naam} wordt meteen verwijderd, met al je tijden op de server, records, XP, achievements, toernooien, duels en volgers. Dat kan niet ongedaan worden gemaakt. Wil je een kopie? Download dan eerst je gegevens. De tijden in deze browser blijven staan.', { naam: currentUser.username }),
+            confirmLabel: UI.t('Verder'),
             danger: true
         });
         if (!zeker) return;
 
         const password = await UI.ask({
-            title: 'Bevestig met je wachtwoord',
-            message: 'Vul je wachtwoord in om je account definitief te verwijderen.',
-            input: { label: 'Wachtwoord', type: 'password' },
-            confirmLabel: 'Account verwijderen',
+            title: UI.t('Bevestig met je wachtwoord'),
+            message: UI.t('Vul je wachtwoord in om je account definitief te verwijderen.'),
+            input: { label: UI.t('Wachtwoord'), type: 'password' },
+            confirmLabel: UI.t('Account verwijderen'),
             danger: true
         });
         if (!password) return;

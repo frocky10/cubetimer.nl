@@ -49,27 +49,23 @@
     const MODES = {
         streak: {
             label: 'Streak',
-            description: 'Zet een doel en kijk hoe vaak je er achter elkaar onder blijft. '
-                + 'De eerste solve erboven, of een DNF, stopt de reeks.'
+            description: UI.t('Zet een doel en kijk hoe vaak je er achter elkaar onder blijft. De eerste solve erboven, of een DNF, stopt de reeks.')
         },
         survival: {
             label: 'Survival',
-            description: 'Je begint met een ruime limiet, en na elke geslaagde solve gaat er een stukje af. '
-                + 'Hoe lang houd je het vol?'
+            description: UI.t('Je begint met een ruime limiet, en na elke geslaagde solve gaat er een stukje af. Hoe lang houd je het vol?')
         },
         ladder: {
             label: 'Ladder',
-            description: 'Elke solve moet sneller zijn dan de vorige. De eerste is gratis. Hoe hoog klim je?'
+            description: UI.t('Elke solve moet sneller zijn dan de vorige. De eerste is gratis. Hoe hoog klim je?')
         },
         speedrun: {
             label: 'Speedrun',
-            description: 'Zoveel mogelijk cubes oplossen in vijf minuten. Je scrambelt ze allemaal van tevoren, '
-                + 'dus je hebt meerdere cubes nodig.'
+            description: UI.t('Zoveel mogelijk cubes oplossen in vijf minuten. Je scrambelt ze allemaal van tevoren, dus je hebt meerdere cubes nodig.')
         },
         duel: {
             label: 'Duel',
-            description: 'Daag een vriend uit op dezelfde scrambles. Ieder speelt wanneer het uitkomt, '
-                + 'en je ziet elkaars tijden pas als jullie allebei klaar zijn.'
+            description: UI.t('Daag een vriend uit op dezelfde scrambles. Ieder speelt wanneer het uitkomt, en je ziet elkaars tijden pas als jullie allebei klaar zijn.')
         }
     };
 
@@ -101,7 +97,7 @@
 
     /** 15000 wordt "15 s", 12500 wordt "12,5 s". Zelfde als op de server. */
     function seconden(ms) {
-        return (Math.round(ms / 10) / 100).toFixed(2).replace(/\.?0+$/, '').replace('.', ',') + ' s';
+        return (Math.round(ms / 10) / 100).toFixed(2).replace(/\.?0+$/, '').replace('.', UI.lang === 'en' ? '.' : ',') + ' s';
     }
 
     function tijd(ms) {
@@ -175,7 +171,7 @@
         const klaar = () => window.generateScrambles(event, aantal);
         if (typeof window.generateScrambles === 'function') return klaar();
         return new Promise((resolve, reject) => {
-            const wacht = setTimeout(() => reject(new Error('De scrambles laden niet.')), 20000);
+            const wacht = setTimeout(() => reject(new Error(UI.t('De scrambles laden niet.'))), 20000);
             window.addEventListener('cubetimer:scrambler-ready', () => {
                 clearTimeout(wacht);
                 klaar().then(resolve, reject);
@@ -239,7 +235,7 @@
     function render() {
         body.innerHTML = '';
         footnote.textContent = '';
-        title.textContent = 'Spelmodi';
+        title.textContent = UI.t('Spelmodi');
 
         switch (view.name) {
             case 'setup': renderSetup(view.mode); break;
@@ -260,21 +256,21 @@
     }
 
     function renderMenu() {
-        subtitle.textContent = 'Een andere manier van timen, met een eigen record per modus.';
+        subtitle.textContent = UI.t('Een andere manier van timen, met een eigen record per modus.');
         const wrap = el('div', 'games');
 
         if (run || duelRun) {
             const lopend = el('p', 'notice');
             lopend.textContent = run
-                ? `Je ${MODES[run.mode].label.toLowerCase()} loopt nog. Sluit dit venster om verder te gaan.`
-                : `Je duel tegen ${duelRun.them.username} loopt nog. Sluit dit venster om verder te gaan.`;
+                ? UI.t('Je {modus} loopt nog. Sluit dit venster om verder te gaan.', { modus: MODES[run.mode].label.toLowerCase() })
+                : UI.t('Je duel tegen {naam} loopt nog. Sluit dit venster om verder te gaan.', { naam: duelRun.them.username });
             wrap.appendChild(lopend);
         }
 
         if (!magBewaren()) {
             wrap.appendChild(el('p', 'notice', status.features?.games
-                ? 'Spelen kan zo. Log in om je records te bewaren en vrienden uit te dagen.'
-                : 'Spelen kan zo. Records bewaren is op deze server niet beschikbaar.'));
+                ? UI.t('Spelen kan zo. Log in om je records te bewaren en vrienden uit te dagen.')
+                : UI.t('Spelen kan zo. Records bewaren is op deze server niet beschikbaar.')));
         }
 
         const event = api.getActiveSessionEvent();
@@ -289,14 +285,15 @@
             let meta = '';
             if (mode === 'duel') {
                 const wachtend = overview?.duels?.waiting || 0;
-                if (!status.features?.duels) meta = 'Niet beschikbaar';
-                else if (!status.authenticated) meta = 'Log in om te spelen';
-                else meta = wachtend ? `${wachtend} ${wachtend === 1 ? 'duel wacht' : 'duels wachten'} op jou` : 'Tegen een vriend';
+                if (!status.features?.duels) meta = UI.t('Niet beschikbaar');
+                else if (!status.authenticated) meta = UI.t('Log in om te spelen');
+                else if (!wachtend) meta = UI.t('Tegen een vriend');
+                else meta = wachtend === 1 ? UI.t('1 duel wacht op jou') : UI.t('{n} duels wachten op jou', { n: wachtend });
             } else {
                 const record = recordVoor(mode, event);
                 // Bij de speedrun staat het aantal cubes al in de score.
                 const instelling = record && record.variantLabel && mode !== 'speedrun' ? ` (${record.variantLabel})` : '';
-                meta = record ? `Record ${eventLabel(event)}: ${record.scoreLabel}${instelling}` : eventLabel(event);
+                meta = record ? UI.t('Record {event}: {score}', { event: eventLabel(event), score: record.scoreLabel }) + instelling : eventLabel(event);
             }
             kaart.appendChild(el('span', 'difficulty-card__meta', meta));
 
@@ -346,7 +343,7 @@
     }
 
     function renderRecords(records) {
-        return groep('Jouw records', tabel(['Modus', 'Event', 'Record'], records.map(r => [
+        return groep(UI.t('Jouw records'), tabel([UI.t('Modus'), 'Event', 'Record'], records.map(r => [
             [r.modeLabel + (r.variantLabel ? ' · ' + r.variantLabel : '')],
             [r.eventLabel],
             [r.scoreLabel, 'board-time']
@@ -354,7 +351,7 @@
     }
 
     function renderRecent(recent) {
-        return groep('Laatst gespeeld', tabel(null, recent.map(r => [
+        return groep(UI.t('Laatst gespeeld'), tabel(null, recent.map(r => [
             [new Date(r.at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })],
             [r.modeLabel + (r.variantLabel ? ' · ' + r.variantLabel : '') + ' · ' + r.eventLabel],
             [r.scoreLabel, 'board-time']
@@ -382,9 +379,9 @@
             variantInvoer.inputMode = 'decimal';
             variantInvoer.autocomplete = 'off';
             const standaard = voorkeur(mode + ':variant', mode === 'streak' ? 20000 : 30000);
-            variantInvoer.value = String(standaard / 1000).replace('.', ',');
+            variantInvoer.value = String(standaard / 1000).replace('.', UI.lang === 'en' ? '.' : ',');
             hint = el('p', 'field__hint');
-            const rij = veld(mode === 'streak' ? 'Doel: sub … seconden' : 'Startlimiet in seconden', variantInvoer);
+            const rij = veld(mode === 'streak' ? UI.t('Doel: sub … seconden') : UI.t('Startlimiet in seconden'), variantInvoer);
             rij.appendChild(hint);
             wrap.appendChild(rij);
         } else if (mode === 'speedrun') {
@@ -395,19 +392,19 @@
             variantInvoer.min = String(grenzen.min);
             variantInvoer.max = String(grenzen.max);
             variantInvoer.value = String(voorkeur('speedrun:variant', 5));
-            wrap.appendChild(veld('Aantal cubes', variantInvoer,
-                `Hoeveel cubes je klaar hebt liggen: ${grenzen.min} tot ${grenzen.max}. Je record geldt per aantal.`));
+            wrap.appendChild(veld(UI.t('Aantal cubes'), variantInvoer,
+                UI.t('Hoeveel cubes je klaar hebt liggen: {min} tot {max}. Je record geldt per aantal.', { min: grenzen.min, max: grenzen.max })));
         }
 
         function werkHintBij() {
             if (!hint) return;
             const ms = leesSeconden(variantInvoer.value);
             if (mode === 'streak') {
-                hint.textContent = ms ? `Elke solve onder ${seconden(ms)} telt. Je record geldt per doeltijd.` : '';
+                hint.textContent = ms ? UI.t('Elke solve onder {tijd} telt. Je record geldt per doeltijd.', { tijd: seconden(ms) }) : '';
             } else {
                 const stap = survivalStap(eventKeuze.value);
-                hint.textContent = `Na elke geslaagde solve gaat er ${seconden(stap)} van de limiet af.`
-                    + (ms ? ` Je record geldt per startlimiet.` : '');
+                hint.textContent = UI.t('Na elke geslaagde solve gaat er {tijd} van de limiet af.', { tijd: seconden(stap) })
+                    + (ms ? ' ' + UI.t('Je record geldt per startlimiet.') : '');
             }
         }
         variantInvoer?.addEventListener('input', werkHintBij);
@@ -415,19 +412,19 @@
         werkHintBij();
 
         if (mode === 'ladder') {
-            wrap.appendChild(el('p', 'field__hint', 'Een DNF, of een solve die niet sneller is dan de vorige, stopt de ladder.'));
+            wrap.appendChild(el('p', 'field__hint', UI.t('Een DNF, of een solve die niet sneller is dan de vorige, stopt de ladder.')));
         }
 
         const knoppen = el('div', 'games__actions');
-        knoppen.appendChild(button('Terug', '', () => go('menu')));
-        knoppen.appendChild(button(mode === 'speedrun' ? 'Scrambles maken' : 'Start', 'btn--primary', async event => {
+        knoppen.appendChild(button(UI.t('Terug'), '', () => go('menu')));
+        knoppen.appendChild(button(mode === 'speedrun' ? UI.t('Scrambles maken') : 'Start', 'btn--primary', async event => {
             const event_ = eventKeuze.value;
             let variant = 0;
             if (mode === 'streak' || mode === 'survival') {
                 variant = leesSeconden(variantInvoer.value);
                 const minimum = mode === 'streak' ? 1000 : 3000;
                 if (!variant || variant < minimum) {
-                    UI.toast(`Vul een tijd in van minstens ${minimum / 1000} seconden.`, { type: 'warning' });
+                    UI.toast(UI.t('Vul een tijd in van minstens {n} seconden.', { n: minimum / 1000 }), { type: 'warning' });
                     variantInvoer.focus();
                     return;
                 }
@@ -436,7 +433,7 @@
                 const grenzen = overview?.rules?.speedrunCubes || { min: 2, max: 12 };
                 variant = parseInt(variantInvoer.value, 10);
                 if (!(variant >= grenzen.min && variant <= grenzen.max)) {
-                    UI.toast(`Kies ${grenzen.min} tot ${grenzen.max} cubes.`, { type: 'warning' });
+                    UI.toast(UI.t('Kies {min} tot {max} cubes.', { min: grenzen.min, max: grenzen.max }), { type: 'warning' });
                     return;
                 }
             }
@@ -467,7 +464,7 @@
     function captureVrij() {
         const eigenaar = api.getSolveCaptureOwner?.();
         if (eigenaar && eigenaar !== OWNER) {
-            UI.toast('Er loopt nog een toernooi. Maak dat eerst af, of stop ermee.', { type: 'warning' });
+            UI.toast(UI.t('Er loopt nog een toernooi. Maak dat eerst af, of stop ermee.'), { type: 'warning' });
             return false;
         }
         return true;
@@ -485,7 +482,7 @@
         api.setSolveCapture(onRunSolve, OWNER);
         syncBanner();
         UI.closeModal(modal);
-        UI.toast(`${MODES[mode].label} gestart. Je solves tellen niet mee voor je sessie.`, { type: 'info' });
+        UI.toast(UI.t('{modus} gestart. Je solves tellen niet mee voor je sessie.', { modus: MODES[mode].label }), { type: 'info' });
     }
 
     function onRunSolve(entry) {
@@ -518,9 +515,9 @@
     async function stopRunVraag() {
         if (!run) return;
         const zeker = await UI.ask({
-            title: `${MODES[run.mode].label} stoppen?`,
-            message: run.score > 0 ? `Je score tot nu toe (${run.score}) telt gewoon.` : 'Je hebt nog niets gescoord.',
-            confirmLabel: 'Stoppen'
+            title: UI.t('{modus} stoppen?', { modus: MODES[run.mode].label }),
+            message: run.score > 0 ? UI.t('Je score tot nu toe ({score}) telt gewoon.', { score: run.score }) : UI.t('Je hebt nog niets gescoord.'),
+            confirmLabel: UI.t('Stoppen')
         });
         if (zeker) finishRun('gestopt');
     }
@@ -556,7 +553,7 @@
                 overview.recent = antwoord.recent;
             }
         } catch (err) {
-            resultaat.error = err.message || 'Je ronde kon niet bewaard worden.';
+            resultaat.error = err.message || UI.t('Je ronde kon niet bewaard worden.');
         }
     }
 
@@ -570,10 +567,10 @@
 
     function scoreTekst(mode, score, variant) {
         switch (mode) {
-            case 'streak': return `${score} op rij onder ${seconden(variant)}`;
-            case 'survival': return `${score} overleefd, vanaf ${seconden(variant)}`;
-            case 'ladder': return `${score} ${score === 1 ? 'trede' : 'treden'} geklommen`;
-            case 'speedrun': return `${score} van ${variant} cubes in vijf minuten`;
+            case 'streak': return UI.t('{n} op rij onder {tijd}', { n: score, tijd: seconden(variant) });
+            case 'survival': return UI.t('{n} overleefd, vanaf {tijd}', { n: score, tijd: seconden(variant) });
+            case 'ladder': return score === 1 ? UI.t('1 trede geklommen') : UI.t('{n} treden geklommen', { n: score });
+            case 'speedrun': return UI.t('{n} van {totaal} cubes in vijf minuten', { n: score, totaal: variant });
             default: return String(score);
         }
     }
@@ -588,40 +585,40 @@
         kaart.appendChild(el('p', 'tournament-result__text', scoreTekst(r.mode, r.score, r.variant)));
 
         if (r.run?.isRecord) {
-            kaart.appendChild(el('p', 'game-record', 'Nieuw record!'));
+            kaart.appendChild(el('p', 'game-record', UI.t('Nieuw record!')));
             api.triggerConfetti?.();
         } else if (r.run?.previousRecord) {
-            kaart.appendChild(el('p', 'field__hint', `Je record hier is ${r.run.previousRecord.score}.`));
+            kaart.appendChild(el('p', 'field__hint', UI.t('Je record hier is {score}.', { score: r.run.previousRecord.score })));
         }
         if (r.mode === 'speedrun' && r.laps?.length === r.variant) {
-            kaart.appendChild(el('p', 'field__hint', `Alle cubes klaar in ${UI.formatTime(r.laps[r.laps.length - 1])}.`));
+            kaart.appendChild(el('p', 'field__hint', UI.t('Alle cubes klaar in {tijd}.', { tijd: UI.formatTime(r.laps[r.laps.length - 1]) })));
         }
         wrap.appendChild(kaart);
 
         if (!r.saved) {
             wrap.appendChild(el('p', 'notice', r.error
-                || (status.features?.games ? 'Log in om je records te bewaren.' : 'Records bewaren is op deze server niet beschikbaar.')));
+                || (status.features?.games ? UI.t('Log in om je records te bewaren.') : UI.t('Records bewaren is op deze server niet beschikbaar.'))));
         }
 
         if (r.solves?.length) {
             const rijen = r.solves.map((solve, index) => {
                 let regel = '';
-                if (r.mode === 'survival') regel = 'limiet ' + UI.formatTime(survivalLimiet(r.variant, index, r.event));
-                if (r.mode === 'streak') regel = 'doel ' + seconden(r.variant);
+                if (r.mode === 'survival') regel = UI.t('limiet {tijd}', { tijd: UI.formatTime(survivalLimiet(r.variant, index, r.event)) });
+                if (r.mode === 'streak') regel = UI.t('doel {tijd}', { tijd: seconden(r.variant) });
                 const gelukt = index < r.score;
                 return [[String(index + 1), 'board-position'], [regel], [pogingLabel(solve), 'board-time' + (gelukt ? '' : ' board-time--dnf')]];
             });
-            wrap.appendChild(groep('Je solves', tabel(null, rijen)));
+            wrap.appendChild(groep(UI.t('Je solves'), tabel(null, rijen)));
         }
         if (r.laps?.length) {
-            wrap.appendChild(groep('Rondetijden', tabel(null, r.laps.map((lap, index) => [
-                [`Cube ${index + 1}`], [UI.formatTime(lap - (index ? r.laps[index - 1] : 0))], [UI.formatTime(lap), 'board-time']
+            wrap.appendChild(groep(UI.t('Rondetijden'), tabel(null, r.laps.map((lap, index) => [
+                [UI.t('Cube {n}', { n: index + 1 })], [UI.formatTime(lap - (index ? r.laps[index - 1] : 0))], [UI.formatTime(lap), 'board-time']
             ]))));
         }
 
         const knoppen = el('div', 'games__actions');
         knoppen.appendChild(button('Menu', '', () => go('menu')));
-        knoppen.appendChild(button('Nog een keer', 'btn--primary', () => {
+        knoppen.appendChild(button(UI.t('Nog een keer'), 'btn--primary', () => {
             if (r.mode === 'speedrun') prepareSpeedrun(r.event, r.variant);
             else startRun(r.mode, r.event, r.variant);
         }));
@@ -640,7 +637,7 @@
     async function prepareSpeedrun(event, cubes) {
         if (!captureVrij()) return;
         if (run) {
-            UI.toast('Maak eerst je lopende ronde af.', { type: 'warning' });
+            UI.toast(UI.t('Maak eerst je lopende ronde af.'), { type: 'warning' });
             return;
         }
         speedrun = { event, cubes, scrambles: null, fase: 'laden', start: 0, laps: [], klok: null };
@@ -650,7 +647,7 @@
             speedrun.fase = 'klaar';
         } catch (err) {
             speedrun = null;
-            UI.toast(err.message || 'De scrambles konden niet gemaakt worden.', { type: 'error' });
+            UI.toast(err.message || UI.t('De scrambles konden niet gemaakt worden.'), { type: 'error' });
             go('setup', { mode: 'speedrun' });
             return;
         }
@@ -668,12 +665,12 @@
             go('menu');
             return;
         }
-        subtitle.textContent = `${s.cubes} cubes · ${eventLabel(s.event)} · vijf minuten`;
+        subtitle.textContent = UI.t('{n} cubes', { n: s.cubes }) + ' · ' + eventLabel(s.event) + ' · ' + UI.t('vijf minuten');
 
         const wrap = el('div', 'games speedrun');
 
         if (s.fase === 'laden') {
-            wrap.appendChild(el('p', 'table-empty', 'Scrambles maken…'));
+            wrap.appendChild(el('p', 'table-empty', UI.t('Scrambles maken…')));
             body.appendChild(wrap);
             return;
         }
@@ -695,26 +692,25 @@
         });
 
         if (s.fase === 'klaar') {
-            wrap.appendChild(el('p', 'notice', 'Scramble alle cubes en leg ze op volgorde klaar. '
-                + 'Druk dan op Start (of de spatiebalk). Na elke cube druk je nog een keer.'));
+            wrap.appendChild(el('p', 'notice', UI.t('Scramble alle cubes en leg ze op volgorde klaar. Druk dan op Start (of de spatiebalk). Na elke cube druk je nog een keer.')));
             wrap.appendChild(lijst);
             const knoppen = el('div', 'games__actions');
-            knoppen.appendChild(button('Andere scrambles', '', () => prepareSpeedrun(s.event, s.cubes)));
+            knoppen.appendChild(button(UI.t('Andere scrambles'), '', () => prepareSpeedrun(s.event, s.cubes)));
             knoppen.appendChild(button('Start', 'btn--primary', startSpeedrun));
             wrap.appendChild(knoppen);
         } else {
-            const groot = button(`Cube ${s.laps.length + 1} klaar`, 'btn--primary btn--block speedrun__lap-button', lapSpeedrun);
+            const groot = button(UI.t('Cube {n} klaar', { n: s.laps.length + 1 }), 'btn--primary btn--block speedrun__lap-button', lapSpeedrun);
             wrap.appendChild(groot);
             wrap.appendChild(lijst);
             const knoppen = el('div', 'games__actions');
-            const ongedaan = button('Laatste ongedaan', '', () => {
+            const ongedaan = button(UI.t('Laatste ongedaan'), '', () => {
                 if (!speedrun?.laps.length) return;
                 speedrun.laps.pop();
                 render();
             });
             ongedaan.disabled = !s.laps.length;
             knoppen.appendChild(ongedaan);
-            knoppen.appendChild(button('Stoppen', 'btn--danger', () => stopSpeedrunVraag()));
+            knoppen.appendChild(button(UI.t('Stoppen'), 'btn--danger', () => stopSpeedrunVraag()));
             wrap.appendChild(knoppen);
         }
 
@@ -762,9 +758,9 @@
 
     async function stopSpeedrunVraag() {
         const zeker = await UI.ask({
-            title: 'Speedrun stoppen?',
-            message: 'De cubes die je al klaar had, tellen gewoon.',
-            confirmLabel: 'Stoppen'
+            title: UI.t('Speedrun stoppen?'),
+            message: UI.t('De cubes die je al klaar had, tellen gewoon.'),
+            confirmLabel: UI.t('Stoppen')
         });
         if (zeker && speedrunLoopt()) finishSpeedrun();
     }
@@ -810,14 +806,14 @@
         const duels = overview?.duels;
 
         if (!duels) {
-            wrap.appendChild(el('p', 'notice', 'Log in om een vriend uit te dagen.'));
-            wrap.appendChild(button('Terug', '', () => go('menu')));
+            wrap.appendChild(el('p', 'notice', UI.t('Log in om een vriend uit te dagen.')));
+            wrap.appendChild(button(UI.t('Terug'), '', () => go('menu')));
             body.appendChild(wrap);
             return;
         }
 
         const totalen = el('div', 'stat-grid');
-        [['Gewonnen', duels.totals.won, 'stat--success'], ['Verloren', duels.totals.lost, ''], ['Gelijk', duels.totals.drawn, '']]
+        [[UI.t('Gewonnen'), duels.totals.won, 'stat--success'], [UI.t('Verloren'), duels.totals.lost, ''], [UI.t('Gelijk'), duels.totals.drawn, '']]
             .forEach(([label, waarde, extra]) => {
                 const tegel = el('div', 'stat ' + extra);
                 tegel.appendChild(el('span', 'stat__label', label));
@@ -829,8 +825,7 @@
         // --- uitdagen
         const formulier = el('div', 'duel-form');
         if (!duels.friends.length) {
-            formulier.appendChild(el('p', 'notice', 'Je hebt nog geen vrienden om uit te dagen. Volg iemand via de ranglijst '
-                + 'of zijn profiel; zodra jullie elkaar allebei volgen, zijn jullie vrienden.'));
+            formulier.appendChild(el('p', 'notice', UI.t('Je hebt nog geen vrienden om uit te dagen. Volg iemand via de ranglijst of een profiel; zodra jullie elkaar allebei volgen, zijn jullie vrienden.')));
         } else {
             const vriend = el('select', 'select');
             vriend.id = 'duel-friend';
@@ -841,30 +836,29 @@
             });
             const eventKeuze = eventSelect('duel-event', api.getActiveSessionEvent());
             const rij = el('div', 'duel-form__row');
-            rij.appendChild(veld('Vriend', vriend));
+            rij.appendChild(veld(UI.t('Vriend'), vriend));
             rij.appendChild(veld('Event', eventKeuze));
             formulier.appendChild(rij);
-            const knop = button('Uitdagen', 'btn--primary', () => createDuel(vriend.value, eventKeuze.value, knop));
+            const knop = button(UI.t('Uitdagen'), 'btn--primary', () => createDuel(vriend.value, eventKeuze.value, knop));
             formulier.appendChild(knop);
-            formulier.appendChild(el('p', 'field__hint', `Jullie krijgen dezelfde scrambles. Na ${overview.rules.duelDays} dagen `
-                + 'vervalt een duel; wie dan klaar was, wint.'));
+            formulier.appendChild(el('p', 'field__hint', UI.t('Jullie krijgen dezelfde scrambles. Na {n} dagen vervalt een duel; wie dan klaar was, wint.', { n: overview.rules.duelDays })));
         }
-        wrap.appendChild(groep('Iemand uitdagen', formulier));
+        wrap.appendChild(groep(UI.t('Iemand uitdagen'), formulier));
 
         // --- open duels
         if (duels.open.length) {
             const lijst = el('div', 'duel-list');
             duels.open.forEach(duel => lijst.appendChild(duelKaart(duel)));
-            wrap.appendChild(groep('Open duels', lijst));
+            wrap.appendChild(groep(UI.t('Open duels'), lijst));
         }
 
         if (duels.recent.length) {
             const lijst = el('div', 'duel-list');
             duels.recent.forEach(duel => lijst.appendChild(duelKaart(duel)));
-            wrap.appendChild(groep('Afgelopen', lijst));
+            wrap.appendChild(groep(UI.t('Afgelopen'), lijst));
         }
 
-        wrap.appendChild(button('Terug', '', () => go('menu')));
+        wrap.appendChild(button(UI.t('Terug'), '', () => go('menu')));
         body.appendChild(wrap);
     }
 
@@ -873,15 +867,15 @@
         if (duel.result) kaart.dataset.result = duel.result;
 
         const tekst = el('div', 'duel-card__text');
-        tekst.appendChild(el('strong', null, `${duel.role === 'challenger' ? 'Jij tegen' : 'Uitdaging van'} ${duel.them.username}`));
+        tekst.appendChild(el('strong', null, duel.role === 'challenger' ? UI.t('Jij tegen {naam}', { naam: duel.them.username }) : UI.t('Uitdaging van {naam}', { naam: duel.them.username })));
 
         let regel = `${duel.eventLabel} · ${duel.formatLabel}`;
         if (duel.status === 'open') {
-            regel += ` · jij ${duel.you.attempts.length}/${duel.attemptsTotal} · ${duel.them.username} `
-                + (duel.them.done ? 'klaar' : `${duel.them.attemptsDone}/${duel.attemptsTotal}`);
+            regel += ' · ' + UI.t('jij {n}', { n: `${duel.you.attempts.length}/${duel.attemptsTotal}` }) + ` · ${duel.them.username} `
+                + (duel.them.done ? UI.t('klaar') : `${duel.them.attemptsDone}/${duel.attemptsTotal}`);
         } else if (duel.result) {
-            const woord = { win: 'Gewonnen', loss: 'Verloren', draw: 'Gelijk' }[duel.result];
-            regel += ` · ${woord}: ${duelScore(duel, duel.you)} tegen ${duelScore(duel, duel.them)}`;
+            const woord = { win: UI.t('Gewonnen'), loss: UI.t('Verloren'), draw: UI.t('Gelijk') }[duel.result];
+            regel += ' · ' + UI.t('{uitslag}: {jij} tegen {ander}', { uitslag: woord, jij: duelScore(duel, duel.you), ander: duelScore(duel, duel.them) });
         } else {
             regel += ` · ${{ expired: 'verlopen', declined: 'afgewezen', cancelled: 'ingetrokken' }[duel.status] || duel.status}`;
         }
@@ -890,14 +884,14 @@
 
         const knoppen = el('div', 'duel-card__actions');
         if (duel.status === 'open' && !duel.you.done) {
-            knoppen.appendChild(button(duel.you.attempts.length ? 'Verder' : 'Speel', 'btn--primary btn--sm', () => startDuel(duel)));
+            knoppen.appendChild(button(duel.you.attempts.length ? UI.t('Verder') : UI.t('Speel'), 'btn--primary btn--sm', () => startDuel(duel)));
         }
         const magAfwijzen = duel.status === 'open' && (duel.role === 'opponent' ? !duel.you.done : duel.them.attemptsDone === 0);
         if (magAfwijzen) {
-            knoppen.appendChild(button(duel.role === 'opponent' ? 'Afwijzen' : 'Intrekken', 'btn--sm', () => declineDuel(duel)));
+            knoppen.appendChild(button(duel.role === 'opponent' ? UI.t('Afwijzen') : UI.t('Intrekken'), 'btn--sm', () => declineDuel(duel)));
         }
         if (duel.status !== 'open' && duel.them.attempts) {
-            knoppen.appendChild(button('Bekijk', 'btn--sm', () => go('duel-result', { duel })));
+            knoppen.appendChild(button(UI.t('Bekijk'), 'btn--sm', () => go('duel-result', { duel })));
         }
         kaart.appendChild(knoppen);
         return kaart;
@@ -907,30 +901,30 @@
         const gemiddelde = duel.format === 'a' || duel.format === 'm';
         if (gemiddelde && kant.average !== null) return UI.formatTime(kant.average);
         if (kant.best !== null && kant.best !== undefined) return (gemiddelde ? 'DNF (' + UI.formatTime(kant.best) + ')' : UI.formatTime(kant.best));
-        return kant.done === false ? 'niet gespeeld' : 'DNF';
+        return kant.done === false ? UI.t('niet gespeeld') : 'DNF';
     }
 
     async function createDuel(vriend, event, knop) {
         knop.disabled = true;
-        knop.textContent = 'Scrambles maken…';
+        knop.textContent = UI.t('Scrambles maken…');
         try {
             const scrambles = await maakScrambles(event, duelPogingen(event));
             const antwoord = await UI.api('duels/create.php', { body: { opponent: vriend, event, scrambles } });
-            UI.toast(`${vriend} is uitgedaagd. Speel jij alvast?`, { type: 'success' });
+            UI.toast(UI.t('{naam} is uitgedaagd. Speel jij alvast?', { naam: vriend }), { type: 'success' });
             await load();
             startDuel(antwoord.duel);
         } catch (err) {
-            UI.toast(err.message || 'Het duel kon niet aangemaakt worden.', { type: 'error' });
+            UI.toast(err.message || UI.t('Het duel kon niet aangemaakt worden.'), { type: 'error' });
             knop.disabled = false;
-            knop.textContent = 'Uitdagen';
+            knop.textContent = UI.t('Uitdagen');
         }
     }
 
     async function declineDuel(duel) {
         const zeker = await UI.ask({
-            title: duel.role === 'opponent' ? 'Duel afwijzen?' : 'Duel intrekken?',
-            message: duel.role === 'opponent' ? `${duel.them.username} ziet dat je niet meedoet.` : 'Het duel verdwijnt voor jullie allebei.',
-            confirmLabel: duel.role === 'opponent' ? 'Afwijzen' : 'Intrekken',
+            title: duel.role === 'opponent' ? UI.t('Duel afwijzen?') : UI.t('Duel intrekken?'),
+            message: duel.role === 'opponent' ? UI.t('{naam} ziet dat je niet meedoet.', { naam: duel.them.username }) : UI.t('Het duel verdwijnt voor jullie allebei.'),
+            confirmLabel: duel.role === 'opponent' ? UI.t('Afwijzen') : UI.t('Intrekken'),
             danger: true
         });
         if (!zeker) return;
@@ -940,14 +934,14 @@
             if (duelRun?.id === duel.id) stopDuel(false);
             await load();
         } catch (err) {
-            UI.toast(err.message || 'Dat is niet gelukt.', { type: 'error' });
+            UI.toast(err.message || UI.t('Dat is niet gelukt.'), { type: 'error' });
         }
     }
 
     function startDuel(duel) {
         if (!captureVrij()) return;
         if (run) {
-            UI.toast('Maak eerst je lopende ronde af.', { type: 'warning' });
+            UI.toast(UI.t('Maak eerst je lopende ronde af.'), { type: 'warning' });
             return;
         }
         if (!duel.nextScramble) return;
@@ -959,14 +953,14 @@
         api.setScrambleOverride(duel.nextScramble);
         syncBanner();
         UI.closeModal(modal);
-        UI.toast(`Duel tegen ${duel.them.username}: poging ${duel.you.attempts.length + 1} van ${duel.attemptsTotal}.`, { type: 'info' });
+        UI.toast(UI.t('Duel tegen {naam}: poging {n} van {totaal}.', { naam: duel.them.username, n: duel.you.attempts.length + 1, totaal: duel.attemptsTotal }), { type: 'info' });
     }
 
     async function onDuelSolve(entry) {
         if (!duelRun || bezig) return;
         bezig = true;
         const duel = duelRun;
-        bannerHint.textContent = 'Opslaan…';
+        bannerHint.textContent = UI.t('Opslaan…');
         try {
             const antwoord = await UI.api('duels/solve.php', {
                 body: {
@@ -988,7 +982,7 @@
             syncBanner();
         } catch (err) {
             stopDuel(false);
-            UI.toast(err.message || 'Je poging kon niet worden opgeslagen.', { type: 'error' });
+            UI.toast(err.message || UI.t('Je poging kon niet worden opgeslagen.'), { type: 'error' });
             await load();
         } finally {
             bezig = false;
@@ -1002,22 +996,21 @@
         api.setScrambleOverride(null);
         loslaten();
         syncBanner();
-        if (melden) UI.toast(`Duel onderbroken. Je kunt later verder bij poging ${duel.you.attempts.length + 1}.`, { type: 'info' });
+        if (melden) UI.toast(UI.t('Duel onderbroken. Je kunt later verder bij poging {n}.', { n: duel.you.attempts.length + 1 }), { type: 'info' });
     }
 
     function renderDuelResult(duel) {
         title.textContent = 'Duel';
-        subtitle.textContent = `${duel.eventLabel} · ${duel.formatLabel} · tegen ${duel.them.username}`;
+        subtitle.textContent = `${duel.eventLabel} · ${duel.formatLabel} · ` + UI.t('tegen {naam}', { naam: duel.them.username });
         const wrap = el('div', 'games');
 
         const kaart = el('div', 'tournament-result');
         if (duel.status === 'open') {
-            kaart.appendChild(el('p', 'tournament-result__text', 'Klaar!'));
-            kaart.appendChild(el('p', 'field__hint', `Nu is ${duel.them.username} aan de beurt. `
-                + 'Je ziet de uitslag zodra die ook klaar is.'));
+            kaart.appendChild(el('p', 'tournament-result__text', UI.t('Klaar!')));
+            kaart.appendChild(el('p', 'field__hint', UI.t('Nu is {naam} aan de beurt. Je ziet de uitslag zodra die ook klaar is.', { naam: duel.them.username })));
             kaart.appendChild(el('p', 'tournament-result__position', duelScore(duel, duel.you)));
         } else {
-            const woord = { win: 'Gewonnen!', loss: 'Verloren', draw: 'Gelijkspel' }[duel.result] || 'Afgelopen';
+            const woord = { win: UI.t('Gewonnen!'), loss: UI.t('Verloren'), draw: UI.t('Gelijkspel') }[duel.result] || UI.t('Afgelopen');
             kaart.appendChild(el('p', 'tournament-result__text', woord));
             kaart.appendChild(el('p', 'tournament-result__position',
                 `${duelScore(duel, duel.you)}`));
@@ -1034,7 +1027,7 @@
                 [duel.them.attempts ? (duel.them.attempts[i] ? pogingLabel(duel.them.attempts[i]) : '--') : '?', 'board-time']
             ]);
         }
-        wrap.appendChild(groep('Pogingen', tabel(['#', 'Jij', duel.them.username], rijen)));
+        wrap.appendChild(groep(UI.t('Pogingen'), tabel(['#', UI.t('Jij'), duel.them.username], rijen)));
 
         if (duel.scrambles) {
             const lijst = el('ol', 'speedrun__list');
@@ -1048,7 +1041,7 @@
         }
 
         const knoppen = el('div', 'games__actions');
-        knoppen.appendChild(button('Naar de duels', 'btn--primary', () => go('duels')));
+        knoppen.appendChild(button(UI.t('Naar de duels'), 'btn--primary', () => go('duels')));
         wrap.appendChild(knoppen);
         body.appendChild(wrap);
     }
@@ -1063,27 +1056,27 @@
             const info = MODES[run.mode];
             if (run.mode === 'streak') {
                 bannerTitle.textContent = `${info.label} · sub ${seconden(run.variant)}`;
-                bannerHint.textContent = `${run.score} op rij`;
+                bannerHint.textContent = UI.t('{n} op rij', { n: run.score });
             } else if (run.mode === 'survival') {
-                bannerTitle.textContent = `${info.label} · limiet ${UI.formatTime(survivalLimiet(run.variant, run.solves.length, run.event))}`;
-                bannerHint.textContent = `${run.score} overleefd`;
+                bannerTitle.textContent = `${info.label} · ` + UI.t('limiet {tijd}', { tijd: UI.formatTime(survivalLimiet(run.variant, run.solves.length, run.event)) });
+                bannerHint.textContent = UI.t('{n} overleefd', { n: run.score });
             } else {
-                bannerTitle.textContent = run.vorige === null ? info.label : `${info.label} · sneller dan ${UI.formatTime(run.vorige)}`;
+                bannerTitle.textContent = run.vorige === null ? info.label : `${info.label} · ` + UI.t('sneller dan {tijd}', { tijd: UI.formatTime(run.vorige) });
                 bannerHint.textContent = `${run.score} ${run.score === 1 ? 'trede' : 'treden'}`;
             }
             const record = recordVoor(run.mode, run.event);
             if (record && (record.variant === run.variant || run.mode === 'ladder')) {
-                bannerHint.textContent += ` · record ${record.score}`;
+                bannerHint.textContent += ' · ' + UI.t('record {score}', { score: record.score });
             }
-            bannerHint.textContent += ' · telt niet mee voor je sessie';
-            bannerStop.textContent = 'Stoppen';
+            bannerHint.textContent += ' · ' + UI.t('telt niet mee voor je sessie');
+            bannerStop.textContent = UI.t('Stoppen');
             return;
         }
         if (duelRun) {
             banner.hidden = false;
-            bannerTitle.textContent = `Duel tegen ${duelRun.them.username} · ${duelRun.eventLabel}`;
-            bannerHint.textContent = `Poging ${duelRun.you.attempts.length + 1} van ${duelRun.attemptsTotal} · telt niet mee voor je sessie`;
-            bannerStop.textContent = 'Onderbreken';
+            bannerTitle.textContent = UI.t('Duel tegen {naam}', { naam: duelRun.them.username }) + ` · ${duelRun.eventLabel}`;
+            bannerHint.textContent = UI.t('Poging {n} van {totaal}', { n: duelRun.you.attempts.length + 1, totaal: duelRun.attemptsTotal }) + ' · ' + UI.t('telt niet mee voor je sessie');
+            bannerStop.textContent = UI.t('Onderbreken');
             return;
         }
         banner.hidden = true;
@@ -1123,7 +1116,7 @@
     // Een ander event kiezen past niet bij een lopende ronde.
     window.addEventListener('cubetimer:event-change', () => {
         if (run && api.getActiveSessionEvent() !== run.event) {
-            UI.toast('Je koos een ander event, dus je ronde is gestopt.', { type: 'info' });
+            UI.toast(UI.t('Je koos een ander event, dus je ronde is gestopt.'), { type: 'info' });
             finishRun('event');
         }
         if (duelRun && api.getActiveSessionEvent() !== duelRun.event) stopDuel(true);

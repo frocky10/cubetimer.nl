@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/Follows.php';
 require_once __DIR__ . '/Ranking.php';
@@ -75,7 +76,7 @@ final class Duels
             [$userId]
         );
         if ((int) ($open['aantal'] ?? 0) >= self::MAX_OPEN) {
-            return ['ok' => false, 'message' => 'Je hebt al ' . self::MAX_OPEN . ' duels openstaan. Speel die eerst uit.'];
+            return ['ok' => false, 'message' => Taal::t('Je hebt al {n} duels openstaan. Speel die eerst uit.', ['n' => self::MAX_OPEN])];
         }
 
         $format = self::formatFor($event);

@@ -34,7 +34,7 @@ $limit = RateLimiter::hit("feedback:{$ipKey}", 5, 3600);
 if (!$limit['allowed']) {
     Http::fail(
         'rate_limited',
-        'Je hebt net al een paar meldingen gestuurd. Probeer het over ' . ceil($limit['retryAfter'] / 60) . ' minuten nog eens.',
+        Taal::t('Je hebt net al een paar meldingen gestuurd. Probeer het over {n} minuten nog eens.', ['n' => (int) ceil($limit['retryAfter'] / 60)]),
         429,
         ['retryAfter' => $limit['retryAfter']]
     );
@@ -188,5 +188,5 @@ Http::ok([
         'number' => $result['number'],
         'url'    => $result['url'],
     ],
-    'message' => 'Bedankt! Je melding staat als issue #' . $result['number'] . ' in GitHub.',
+    'message' => Taal::t('Bedankt! Je melding staat als issue #{nummer} in GitHub.', ['nummer' => $result['number']]),
 ]);

@@ -110,7 +110,7 @@ terug te zien.
 - [x] Lopende Ao5 en Ao12 per solve, volgens de WCA-regels
 - [x] +2, DNF, straf wissen en verwijderen per solve
 - [x] Scramble en datum bewaard bij elke solve
-- [x] Sessiegrafiek van je verloop
+- [x] Sessiegrafiek van je verloop, rechts naast de scramble
 - [x] Confetti bij een nieuw sessierecord
 - [x] Statistieken per sessie, per dag en per week — [#8](https://github.com/frocky10/cubetimer.nl/issues/8)
 - [x] Beste, slechtste, gemiddelde en mediaan per periode
@@ -260,6 +260,14 @@ terug te zien.
 - [x] Beveiligingsheaders: HSTS, clickjacking, referrer, permissions
 - [x] Controlescript (`tools/veiligheid-controleren.php`): geheimen in git en de geschiedenis, CSRF, SQL, cookies, headers
 
+**Engels**
+
+- [x] De hele site ook in het Engels op `/en/`: interface, meldingen, mails, leerpagina, uitleg, privacy en voorwaarden
+- [x] Taalknop in de balk die je keuze onthoudt; nooit automatisch omleiden
+- [x] Engelstalige bezoekers krijgen de Engelse versie één keer aangeboden
+- [x] Openbare profielen ook als `/en/u/naam`
+- [x] Controlescript: elke tekst heeft een vertaling (`php tools/vertalen.php --controleer`)
+
 **Vindbaarheid (SEO)** — [#77](https://github.com/frocky10/cubetimer.nl/issues/77)
 
 - [x] Eén adres: `https://cubetimer.nl`; `www.`, `http://` en `/index.html` sturen door
@@ -272,6 +280,9 @@ terug te zien.
 - [x] Profielen staan niet in Google, maar zijn wel te delen
 - [x] `ads.txt` met beide AdSense-accounts
 - [x] gzip en caching voor plaatjes en lettertypes
+- [x] Titels en omschrijvingen herschreven: voor mensen, met de zoekwoorden gewoon in de zin
+- [x] Uitleg en veelgestelde vragen (`/uitleg.html`, `/en/faq.html`) met FAQ-structured data
+- [x] `hreflang` op elke pagina en in de sitemap, voor beide talen
 - [x] Controlescript (`tools/seo-controleren.php`)
 
 ### Nog te doen
@@ -287,7 +298,7 @@ terug te zien.
 - [x] Wachtwoord vergeten
 - [x] E-mailadres bevestigen bij registratie
 - [x] Paginering op de ranglijsten
-- [ ] Scramble van de dag ook voor Megaminx, Square-1 en Clock (lastige notatie)
+- [x] ~~Scramble van de dag ook voor Megaminx, Square-1 en Clock~~ — besloten: komt er niet
 - [x] ~~Echte vlaggen in plaats van landcodes~~ — besloten: de landcodes blijven
 - [x] ~~`bluetoothCube.js` opschonen~~ — vervangen door de nieuwe smart-cubedrivers
 - [x] ~~Losse tijden per stuk kunnen bekijken~~ — besloten: het aantal plus terughalen of wissen is genoeg
@@ -300,7 +311,8 @@ terug te zien.
 
 - [x] Site aanmelden in Google Search Console en de sitemap insturen
 - [ ] Toestemmingsvenster (Privacy en berichten) aanzetten in AdSense
-- [ ] Mailbox `privacy@cubetimer.nl` aanmaken
+- [x] Mailbox `privacy@cubetimer.nl` aanmaken
+- [ ] Sitemap opnieuw insturen in Search Console (nu met de Engelse pagina's)
 - [ ] Google Ads goed instellen — [#15](https://github.com/frocky10/cubetimer.nl/issues/15)
 
 ---
