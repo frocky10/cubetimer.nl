@@ -5,10 +5,14 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * POST /api/auth/login.php
- * Body: { login, password }   -   `login` is een gebruikersnaam of e-mailadres.
+ * Body: { login, password, website, formToken }
+ * `login` is een gebruikersnaam of e-mailadres; website en formToken: zie BotGuard.
+ * BotGuard staat vóór de limieten, zodat een domme bot niet de limiet van een
+ * echt account opmaakt en de eigenaar buitensluit.
  */
 Http::requireMethod('POST');
 Http::requireAjaxHeader();
+BotGuard::check('login');
 
 $login    = Http::stringInput('login');
 $password = (string) Http::input('password', '');

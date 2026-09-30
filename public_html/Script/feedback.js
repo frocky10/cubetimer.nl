@@ -153,18 +153,16 @@
         submitButton.textContent = 'Versturen…';
 
         try {
-            const response = await UI.api('feedback/report.php', {
-                body: {
-                    type: currentType,
-                    title,
-                    description,
-                    steps: document.getElementById('feedback-steps').value.trim(),
-                    expected: document.getElementById('feedback-expected').value.trim(),
-                    email: document.getElementById('feedback-email').value.trim(),
-                    website: document.getElementById('feedback-website').value,
-                    context: collectContext()
-                }
-            });
+            // protectedApi stuurt het honeypotveld (website) en het formuliertoken mee.
+            const response = await UI.protectedApi('feedback/report.php', {
+                type: currentType,
+                title,
+                description,
+                steps: document.getElementById('feedback-steps').value.trim(),
+                expected: document.getElementById('feedback-expected').value.trim(),
+                email: document.getElementById('feedback-email').value.trim(),
+                context: collectContext()
+            }, form);
 
             form.hidden = true;
             successPanel.hidden = false;

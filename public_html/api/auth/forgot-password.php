@@ -5,7 +5,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * POST /api/auth/forgot-password.php
- * Body: { identifier }   e-mailadres of gebruikersnaam
+ * Body: { identifier, website, formToken }   e-mailadres of gebruikersnaam
  *
  * Stuurt een herstellink. Het antwoord is altijd hetzelfde, of het account nu
  * bestaat of niet: anders kun je hiermee uitzoeken wie er een account heeft.
@@ -14,6 +14,7 @@ require_once __DIR__ . '/../bootstrap.php';
  */
 Http::requireMethod('POST');
 Http::requireAjaxHeader();
+BotGuard::check('forgot');
 
 if (!Mailer::isEnabled()) {
     Http::fail('unavailable', 'Wachtwoord herstellen staat op deze server niet aan.', 503);

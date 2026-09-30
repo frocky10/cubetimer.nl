@@ -564,7 +564,7 @@
         }
         knop.disabled = true;
         try {
-            const antwoord = await UI.api('auth/forgot-password.php', { body: { identifier } });
+            const antwoord = await UI.protectedApi('auth/forgot-password.php', { identifier }, forgotForm);
             forgotDone.textContent = antwoord.message;
             forgotDone.hidden = false;
         } catch (err) {
@@ -852,7 +852,7 @@
         }
 
         submitAuth(loginForm, loginError, document.getElementById('login-submit'),
-            () => UI.api('auth/login.php', { body: { login, password } }));
+            () => UI.protectedApi('auth/login.php', { login, password }, loginForm));
     });
 
     registerForm.addEventListener('submit', event => {
@@ -867,7 +867,7 @@
         }
 
         submitAuth(registerForm, registerError, document.getElementById('register-submit'),
-            () => UI.api('auth/register.php', { body: { username, email, password } }));
+            () => UI.protectedApi('auth/register.php', { username, email, password }, registerForm));
     });
 
     document.getElementById('account-logout')?.addEventListener('click', async () => {
@@ -898,6 +898,82 @@
         UI.closeModal(modal);
         await announceAuthChange();
         UI.toast('Je bent uitgelogd.', { type: 'info' });
+    });
+
+    /* =====================================================================
+     * Je gegevens: downloaden en account verwijderen
+     * ================================================================== */
+
+    // Via fetch in plaats van een gewone link, zodat een fout een nette
+    // melding wordt in plaats van een gedownload foutbestand.
+    document.getElementById('account-export')?.addEventListener('click', async event => {
+        const knop = event.currentTarget;
+        knop.disabled = true;
+        try {
+            const antwoord = await fetch('api/account/export.php', {
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!antwoord.ok) {
+                const fout = await antwoord.json().catch(() => null);
+                throw new Error((fout && fout.message) || 'Downloaden lukte niet.');
+            }
+            const naam = (/filename="([^"]+)"/.exec(antwoord.headers.get('Content-Disposition') || '') || [])[1]
+                || 'cubetimer-gegevens.json';
+            const url = URL.createObjectURL(await antwoord.blob());
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = naam;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.setTimeout(() => URL.revokeObjectURL(url), 10000);
+        } catch (err) {
+            UI.toast(err.message || 'Downloaden lukte niet.', { type: 'error' });
+        } finally {
+            knop.disabled = false;
+        }
+    });
+
+    document.getElementById('account-delete')?.addEventListener('click', async () => {
+        if (!currentUser) return;
+        const zeker = await UI.ask({
+            title: 'Account verwijderen?',
+            message: `Je account ${currentUser.username} wordt meteen verwijderd, met al je tijden op de server, `
+                + 'records, XP, achievements, toernooien, duels en volgers. Dat kan niet ongedaan worden gemaakt. '
+                + 'Wil je een kopie? Download dan eerst je gegevens. De tijden in deze browser blijven staan.',
+            confirmLabel: 'Verder',
+            danger: true
+        });
+        if (!zeker) return;
+
+        const password = await UI.ask({
+            title: 'Bevestig met je wachtwoord',
+            message: 'Vul je wachtwoord in om je account definitief te verwijderen.',
+            input: { label: 'Wachtwoord', type: 'password' },
+            confirmLabel: 'Account verwijderen',
+            danger: true
+        });
+        if (!password) return;
+
+        // Geen synchronisatie meer op de achtergrond: het account is zo weg.
+        window.clearTimeout(syncTimer);
+        try {
+            const antwoord = await UI.api('account/delete.php', { body: { password } });
+            // Die tijden hoeven nergens meer vanaf: het account bestaat niet meer.
+            if (api.clearRemovedSolveIds && api.getRemovedSolveIds) api.clearRemovedSolveIds(api.getRemovedSolveIds());
+            currentUser = null;
+            profile = null;
+            looseSolves = 0;
+            setSyncState('idle', '');
+            renderAccount();
+            renderLooseSolves();
+            UI.closeModal(modal);
+            await announceAuthChange();
+            UI.toast(antwoord.message, { type: 'success', duration: 7000 });
+        } catch (err) {
+            UI.toast(err.message, { type: 'error' });
+        }
     });
 
     /* =====================================================================

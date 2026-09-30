@@ -51,4 +51,6 @@ Http::ok([
     'timezone'      => SiteTime::zoneName(),
     'authenticated' => $user !== null,
     'admin'         => $user !== null && ($user['role'] ?? 'user') === 'admin',
+    // Voor de formulieren: bewijst later hoe lang geleden de pagina laadde (BotGuard).
+    'formToken'     => BotGuard::issueToken(),
 ]);

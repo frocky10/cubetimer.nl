@@ -7,6 +7,7 @@
  *   CubeTimerUI.ask(...)       vervangt prompt() en confirm(), geeft een Promise
  *   CubeTimerUI.openModal()    modal openen/sluiten met Escape en klik-buiten
  *   CubeTimerUI.api(...)       fetch naar /api met nette foutafhandeling
+ *   CubeTimerUI.protectedApi() idem, voor formulieren met botbescherming
  *   CubeTimerUI.formatTime()   milliseconden -> mm:ss:mmm
  */
 (function () {
@@ -196,9 +197,13 @@
             promptLabel.textContent = settings.input.label || 'Naam';
             promptInput.value = settings.input.value || '';
             promptInput.placeholder = settings.input.placeholder || '';
+            // type: 'password' voor een wachtwoord (bijvoorbeeld bij account verwijderen).
+            promptInput.type = settings.input.type || 'text';
+            promptInput.autocomplete = settings.input.type === 'password' ? 'current-password' : 'off';
         } else {
             promptField.hidden = true;
             promptInput.value = '';
+            promptInput.type = 'text';
         }
 
         openModal(promptModal);
@@ -452,6 +457,37 @@
         return statusPromise;
     }
 
+    /**
+     * Een formulier versturen dat tegen bots beschermd is (zie BotGuard.php):
+     * het honeypotveld `website` uit het formulier gaat mee, plus het token
+     * uit status.php dat bewijst hoe lang geleden de pagina laadde.
+     *
+     * Is het token verlopen (tabblad langer dan een dag open, of status.php
+     * mislukte bij het laden), dan halen we een nieuw en proberen het na een
+     * paar tellen nog één keer: de server wil een minimale tijd zien tussen
+     * token en versturen.
+     */
+    async function protectedApi(path, body, form) {
+        const honeypot = form ? form.querySelector('[name="website"]') : null;
+        const verstuur = async () => {
+            const info = await status();
+            return api(path, {
+                body: Object.assign({}, body, {
+                    website: honeypot ? honeypot.value : '',
+                    formToken: (info && info.formToken) || ''
+                })
+            });
+        };
+        try {
+            return await verstuur();
+        } catch (err) {
+            if (err.code !== 'form_expired') throw err;
+            await refreshStatus();
+            await new Promise(klaar => setTimeout(klaar, 3200));
+            return verstuur();
+        }
+    }
+
     window.CubeTimerUI = {
         openModal,
         closeModal,
@@ -460,6 +496,7 @@
         toast,
         ask,
         api,
+        protectedApi,
         formatTime,
         uniqueId,
         status,
