@@ -76,7 +76,7 @@ const ZELFDE = [
     'Inter', 'MPL-2.0', 'Level', 'Lv.', 'TPS', '--', 'R', 'U', 'F', 'L', 'B', 'x', 'y', 'z',
     'GAN', 'MoYu', 'QiYi', 'X-Man', 'Giiker', 'GoCube', 'Timer', 'Status', 'Account', 'Menu', 'Privacy',
     'Feedback', 'Event', 'Solve', 'Solves', 'Cube', 'Protocol', 'Beginner', 'Cuber', 'Achievements',
-    'Challenges', 'Daily challenges', 'WebPage', 'LearningResource', 'AB:12:34:CD:56:EF', 'SportsApplication',
+    'Challenges', 'Daily challenges', 'FAQ', 'English', 'Nederlands', 'WebPage', 'LearningResource', 'AB:12:34:CD:56:EF', 'SportsApplication',
 ];
 
 /* -------------------------------------------------------------------------
@@ -319,20 +319,16 @@ function bouwPagina(string $bron, string $doel, array $woorden, string $web): ar
         $meta->setAttribute('content', paginaUrl($meta->getAttribute('content')));
     }
 
-    // De taalknop wijst naar de Nederlandse versie.
+    // De taallink wijst naar de Nederlandse versie. (Op de timer staat de taal
+    // in Instellingen; dat keuzemenu heeft geen vertaling nodig.)
     foreach ($doc->querySelectorAll('[data-taalwissel]') as $knop) {
         $nl = array_search('/' . $doel, PAGINAS, true);
         $knop->setAttribute('href', (($doel === 'en/index.html') ? '/' : ($nl !== false ? $nl : '/')) . '#taal=nl');
         $knop->setAttribute('hreflang', 'nl');
         $knop->setAttribute('lang', 'nl');
         $knop->setAttribute('data-taalwissel', 'nl');
-        $knop->setAttribute('title', 'Nederlands');
-        $knop->setAttribute('aria-label', 'Nederlands');
         foreach ($knop->querySelectorAll('[data-taalwissel-code]') as $code) {
-            $code->textContent = 'NL';
-        }
-        foreach ($knop->querySelectorAll('.btn-icon__label') as $label) {
-            $label->textContent = 'Nederlands';
+            $code->textContent = 'Nederlands';
         }
     }
 

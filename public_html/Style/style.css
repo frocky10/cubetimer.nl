@@ -1280,61 +1280,6 @@ body.is-timing #timer {
     opacity: 1;
 }
 
-/* --- Themaschakelaar ----------------------------------------------------- */
-
-.toggle {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 3.6rem;
-    height: 2.4rem;
-    padding: 0 0.45rem;
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
-}
-
-.toggle:hover {
-    border-color: var(--border-strong);
-}
-
-.toggle-icon {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.1rem;
-    font-size: 0.72rem;
-    opacity: 0.35;
-    transition: opacity var(--dur) var(--ease);
-}
-
-.toggle-icon.active {
-    opacity: 1;
-}
-
-.toggle-knob {
-    position: absolute;
-    top: 50%;
-    left: 0.22rem;
-    width: 1.55rem;
-    height: 1.75rem;
-    transform: translateY(-50%);
-    background: var(--gradient-brand);
-    border-radius: var(--radius-sm);
-    opacity: 0.22;
-    transition: transform var(--dur) var(--ease-out);
-    z-index: 1;
-}
-
-[data-theme="light"] .toggle-knob {
-    transform: translateY(-50%) translateX(1.61rem);
-}
-
 /* --- Account-chip in de topbar ------------------------------------------- */
 
 .account-chip {
@@ -4578,18 +4523,8 @@ a.board-cuber__name:hover {
 }
 
 /* ==========================================================================
-   18. Taalknop
+   18. Kopbalk van de losse pagina's
    ========================================================================== */
-
-.lang-switch {
-    text-decoration: none;
-}
-
-.lang-switch__code {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-}
 
 .profile-topbar__actions {
     display: flex;

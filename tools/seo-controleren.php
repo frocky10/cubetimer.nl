@@ -92,6 +92,7 @@ foreach (['/profiel.php', '/u/'] as $pad) {
 }
 
 // --- elke pagina uit de sitemap -----------------------------------------------
+$css = (string) file_get_contents("$root/Style/style.css");
 foreach ($adressen as $adres) {
     $bestand = bestandVoor($root, $adres);
     $naam = substr($bestand, strlen($root));
@@ -121,6 +122,17 @@ foreach ($adressen as $adres) {
 
     $titel = trim((string) ($x->query('//title')->item(0)?->textContent ?? ''));
     klopt($titel !== '' && mb_strlen($titel) <= 60, "$naam: titel van hooguit 60 tekens (" . mb_strlen($titel) . ')');
+    // Kort, met de naam van de site erachter (keuze van de eigenaar).
+    klopt(str_ends_with($titel, ' | cubetimer.nl') && mb_strlen($titel) <= 50, "$naam: titel kort en eindigt op \"| cubetimer.nl\"");
+
+    // Een id op een losse pagina mag niet ook een id uit style.css zijn: de
+    // vraag "Hoe werkt de timer?" met id="timer" kreeg zo de grote timercijfers.
+    if (basename($naam) !== 'index.html') {
+        foreach ($x->query('//*[@id]') as $el) {
+            $id = $el->getAttribute('id');
+            klopt(!preg_match('/#' . preg_quote($id, '/') . '(?![\w-])/', $css), "$naam: id=\"$id\" botst niet met style.css");
+        }
+    }
 
     $omschrijving = (string) attr($x, '//meta[@name="description"]', 'content');
     $lengte = mb_strlen($omschrijving);

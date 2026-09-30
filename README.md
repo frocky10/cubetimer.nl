@@ -263,7 +263,7 @@ terug te zien.
 **Engels**
 
 - [x] De hele site ook in het Engels op `/en/`: interface, meldingen, mails, leerpagina, uitleg, privacy en voorwaarden
-- [x] Taalknop in de balk die je keuze onthoudt; nooit automatisch omleiden
+- [x] Taal en thema in Instellingen (op de losse pagina's een link onderaan); de keuze wordt onthouden, nooit automatisch omleiden
 - [x] Engelstalige bezoekers krijgen de Engelse versie één keer aangeboden
 - [x] Openbare profielen ook als `/en/u/naam`
 - [x] Controlescript: elke tekst heeft een vertaling (`php tools/vertalen.php --controleer`)
@@ -281,7 +281,8 @@ terug te zien.
 - [x] `ads.txt` met beide AdSense-accounts
 - [x] gzip en caching voor plaatjes en lettertypes
 - [x] Titels en omschrijvingen herschreven: voor mensen, met de zoekwoorden gewoon in de zin
-- [x] Uitleg en veelgestelde vragen (`/uitleg.html`, `/en/faq.html`) met FAQ-structured data
+- [x] Veelgestelde vragen (`/uitleg.html`, `/en/faq.html`, in de footer "FAQ") met FAQ-structured data
+- [x] Korte titels die eindigen op "| cubetimer.nl"
 - [x] `hreflang` op elke pagina en in de sitemap, voor beide talen
 - [x] Controlescript (`tools/seo-controleren.php`)
 
