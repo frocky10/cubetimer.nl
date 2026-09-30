@@ -5,10 +5,12 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * POST /api/auth/register.php
- * Body: { username, email, password }
+ * Body: { username, email, password, website, formToken }
+ * (website en formToken: zie BotGuard)
  */
 Http::requireMethod('POST');
 Http::requireAjaxHeader();
+BotGuard::check('register');
 
 $ipKey = Auth::fingerprint(Http::clientIp());
 $limit = RateLimiter::hit("register:{$ipKey}", 5, 3600);

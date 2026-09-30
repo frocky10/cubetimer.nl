@@ -61,9 +61,9 @@ Officiële WCA-scrambles · inspectietijd · sessies · statistieken · smart cu
 
 ## Wat is het
 
-CubeTimer is een timer voor speedcubers. Geen account nodig, geen installatie,
-geen cookiebanner die je eerst moet wegklikken: je opent de site en drukt op de
-spatiebalk.
+CubeTimer is een timer voor speedcubers. Geen account nodig, geen installatie:
+je opent de site en drukt op de spatiebalk. Google Analytics en gepersonaliseerde
+advertenties komen er pas bij als je daar toestemming voor geeft.
 
 Wil je je tijden bewaren en meenemen naar een ander apparaat, dan kan dat met
 een account. Je komt dan ook op de ranglijsten, verdient XP, verzamelt
@@ -101,6 +101,7 @@ terug te zien.
 **Scrambles**
 
 - [x] Officiële WCA-scrambles via [cubing.js](https://cubing.net)
+- [x] cubing.js staat op onze eigen server, niet op een CDN — [#36](https://github.com/frocky10/cubetimer.nl/issues/36)
 - [x] 19 events: 2x2 t/m 7x7, blind, one-handed, Megaminx, Pyraminx, Skewb, Square-1 en meer
 
 **Je tijden**
@@ -142,6 +143,8 @@ terug te zien.
 - [x] E-mailadres bevestigen, niet verplicht; opnieuw te sturen vanuit je account
 - [x] Mail via een eigen SMTP-mailbox, zonder externe bibliotheek
 - [x] Blijft werken zonder internet; localStorage is altijd de werkkopie
+- [x] Al je gegevens downloaden als JSON-bestand, met één klik
+- [x] Je account zelf verwijderen, met alles erop (bevestigen met je wachtwoord)
 
 **Ranglijsten en voortgang**
 
@@ -246,6 +249,17 @@ terug te zien.
 - [x] Bug- en ideeënknop die een GitHub-issue aanmaakt — [#16](https://github.com/frocky10/cubetimer.nl/issues/16)
 - [x] Vlot in Chrome, ook met duizenden solves: 60 fps tijdens het timen, tabel toont de laatste 100 — [#81](https://github.com/frocky10/cubetimer.nl/issues/81)
 
+**Privacy en veiligheid**
+
+- [x] Privacyverklaring en gebruiksvoorwaarden (`/privacy.html`, `/voorwaarden.html`)
+- [x] Toestemming via het gecertificeerde CMP-venster van Google (AdSense), met Consent Mode v2
+- [x] Google Analytics laadt pas na toestemming; intrekken haalt de cookies weg
+- [x] Link "Cookie-instellingen" onderaan elke pagina
+- [x] Lettertype (Inter) en cubing.js op de eigen server: geen verzoeken naar derden zonder toestemming
+- [x] Botbescherming zonder captcha of derde partij: honeypot, ondertekend formuliertoken met minimumtijd, en limieten per IP en account
+- [x] Beveiligingsheaders: HSTS, clickjacking, referrer, permissions
+- [x] Controlescript (`tools/veiligheid-controleren.php`): geheimen in git en de geschiedenis, CSRF, SQL, cookies, headers
+
 **Vindbaarheid (SEO)** — [#77](https://github.com/frocky10/cubetimer.nl/issues/77)
 
 - [x] Eén adres: `https://cubetimer.nl`; `www.`, `http://` en `/index.html` sturen door
@@ -269,7 +283,7 @@ terug te zien.
 
 **Techniek**
 
-- [ ] Eigen scramble-script in plaats van de CDN — [#36](https://github.com/frocky10/cubetimer.nl/issues/36)
+- [x] ~~Eigen scramble-script in plaats van de CDN~~ — cubing.js zelf hosten; een eigen WCA-scrambler zou hetzelfde opnieuw uitvinden — [#36](https://github.com/frocky10/cubetimer.nl/issues/36)
 - [x] Wachtwoord vergeten
 - [x] E-mailadres bevestigen bij registratie
 - [x] Paginering op de ranglijsten
@@ -285,6 +299,8 @@ terug te zien.
 **Beheer**
 
 - [x] Site aanmelden in Google Search Console en de sitemap insturen
+- [ ] Toestemmingsvenster (Privacy en berichten) aanzetten in AdSense
+- [ ] Mailbox `privacy@cubetimer.nl` aanmaken
 - [ ] Google Ads goed instellen — [#15](https://github.com/frocky10/cubetimer.nl/issues/15)
 
 ---
@@ -322,7 +338,8 @@ PHP 8.1 en MySQL.
    [`database/README.md`](database/README.md).
 3. **Configuratie** — kopieer `public_html/api/config.example.php` naar
    `~/cubetimer_config.php`, dus één map **boven** je webroot, en vul je
-   database-gegevens in. Voor wachtwoord vergeten en e-mail bevestigen: maak in
+   database-gegevens in, plus bij `security.app_key` een lange willekeurige
+   string (`php -r "echo bin2hex(random_bytes(32));"`). Voor wachtwoord vergeten en e-mail bevestigen: maak in
    DirectAdmin een mailbox aan (bijv. `noreply@cubetimer.nl`) en vul die in
    onder `mail`. Daar komt de deploy nooit aan, dus je config blijft
    staan bij elke nieuwe release.
@@ -330,7 +347,10 @@ PHP 8.1 en MySQL.
    [fine-grained token](https://github.com/settings/personal-access-tokens) met
    alleen *Issues: read and write* op je eigen repo, en zet die in je config.
    Laat je hem leeg, dan verdwijnt de knop vanzelf.
-5. **Controleren** — ga naar `/api/status.php`. Daar zie je welke onderdelen
+5. **Toestemming** — zet in AdSense onder *Privacy en berichten* het bericht
+   voor de Europese regelgeving aan (met Google Consent Mode). Zonder dat
+   venster laadt de site Google Analytics nooit.
+6. **Controleren** — ga naar `/api/status.php`. Daar zie je welke onderdelen
    aanstaan. Controleer ook dat `/api/lib/Auth.php` een 403 of 404 geeft en niet
    je broncode laat zien.
 

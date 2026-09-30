@@ -24,8 +24,32 @@ final class Auth
     /** Hasht een waarde (IP-adres) met de app_key erbij, zodat hij niet te raden is. */
     public static function fingerprint(string $value): string
     {
-        $key = (string) Config::get('security.app_key', 'cubetimer');
-        return hash_hmac('sha256', $value, $key);
+        return hash_hmac('sha256', $value, self::appKey());
+    }
+
+    /**
+     * De geheime sleutel van deze installatie, voor IP-vingerafdrukken en de
+     * formuliertokens van BotGuard.
+     *
+     * Staat er geen (of nog het voorbeeld uit config.example.php), dan is de
+     * sleutel openbaar bekend: wie hem kent kan een IP-vingerafdruk terugrekenen
+     * (er zijn maar vier miljard IPv4-adressen) en formuliertokens maken. Dan
+     * leiden we er een af uit iets wat alleen deze server weet, en klagen we in
+     * het errorlog. Sessies hangen hier niet van af; wijzigen logt niemand uit.
+     */
+    public static function appKey(): string
+    {
+        static $key = null;
+        if ($key !== null) {
+            return $key;
+        }
+        $configured = (string) Config::get('security.app_key', '');
+        if (strlen($configured) >= 32 && !str_starts_with($configured, 'VERVANG_MIJ')) {
+            return $key = $configured;
+        }
+        error_log('[cubetimer] security.app_key ontbreekt of is te kort; zet een lange willekeurige string in cubetimer_config.php');
+        return $key = hash('sha256', 'cubetimer-noodsleutel|' . (string) Config::get('db.password', '')
+            . '|' . (string) Config::get('github.token', '') . '|' . __DIR__ . '|' . php_uname('n'));
     }
 
     /** De ingelogde gebruiker, of null. */

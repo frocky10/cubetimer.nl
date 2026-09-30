@@ -5,7 +5,9 @@
  * dus de eerste scramble van een event kan even duren; zolang staat het vakje
  * op "laden".
  */
-import { randomScrambleForEvent } from "https://cdn.cubing.net/v0/js/cubing/scramble";
+// cubing.js staat op onze eigen server (zie tools/cubing-bouwen.sh), niet op
+// een CDN: geen verzoek naar een derde partij, en geen afhankelijkheid ervan.
+import { randomScrambleForEvent } from "./vendor/cubing/scramble.js";
 
 const scrambleBox = document.getElementById("Scrambles");
 
