@@ -82,8 +82,8 @@ function tijd(?int $ms): string
 }
 
 $titel = $profiel === null
-    ? t('Profiel niet gevonden') . ' · CubeTimer'
-    : t('{naam} op CubeTimer', ['naam' => $profiel['displayName']]);
+    ? t('Profiel niet gevonden') . ' | cubetimer.nl'
+    : $profiel['displayName'] . ' | cubetimer.nl';
 
 if ($profiel === null) {
     $omschrijving = t('Deze cuber bestaat niet, of deelt dit profiel niet.');
@@ -147,6 +147,12 @@ $CATEGORIE_LABELS = [
                     stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
                 }
                 document.documentElement.setAttribute('data-theme', stored);
+                // De taallink onderaan wijst naar #taal=en of #taal=nl: onthouden.
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
             } catch (err) { /* privemodus: dan blijft het donkere thema staan */ }
         })();
     </script>
@@ -157,12 +163,6 @@ $CATEGORIE_LABELS = [
             <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
         </a>
         <div class="profile-topbar__actions">
-            <?php if ($profiel !== null): ?>
-            <a class="btn-icon lang-switch" href="<?= e(Taal::isEngels() ? '/u/' . rawurlencode($profiel['username']) . '#taal=nl' : '/en/u/' . rawurlencode($profiel['username']) . '#taal=en') ?>"
-               hreflang="<?= Taal::isEngels() ? 'nl' : 'en' ?>" title="<?= Taal::isEngels() ? 'Nederlands' : 'English' ?>" aria-label="<?= Taal::isEngels() ? 'Nederlands' : 'English' ?>">
-                <span class="lang-switch__code"><?= Taal::isEngels() ? 'NL' : 'EN' ?></span>
-            </a>
-            <?php endif; ?>
             <a class="btn btn--primary" href="<?= $voor ?>/"><?= e(t('Zelf timen')) ?></a>
         </div>
     </header>
@@ -441,8 +441,12 @@ $CATEGORIE_LABELS = [
         <a href="<?= $voor ?>/">CubeTimer</a>
         <a href="<?= Taal::isEngels() ? '/en/privacy.html' : '/privacy.html' ?>">Privacy</a>
         <a href="<?= Taal::isEngels() ? '/en/terms.html' : '/voorwaarden.html' ?>"><?= e(t('Voorwaarden')) ?></a>
-        <a href="<?= Taal::isEngels() ? '/en/faq.html' : '/uitleg.html' ?>"><?= e(t('Uitleg')) ?></a>
+        <a href="<?= Taal::isEngels() ? '/en/faq.html' : '/uitleg.html' ?>">FAQ</a>
         <a href="<?= $voor ?>/#cookie-instellingen"><?= e(t('Cookie-instellingen')) ?></a>
+        <?php if ($profiel !== null): ?>
+        <a href="<?= e(Taal::isEngels() ? '/u/' . rawurlencode($profiel['username']) . '#taal=nl' : '/en/u/' . rawurlencode($profiel['username']) . '#taal=en') ?>"
+           hreflang="<?= Taal::isEngels() ? 'nl' : 'en' ?>" lang="<?= Taal::isEngels() ? 'nl' : 'en' ?>"><?= Taal::isEngels() ? 'Nederlands' : 'English' ?></a>
+        <?php endif; ?>
     </footer>
 
     <div class="toast-host" id="toast-host" role="status" aria-live="polite"></div>

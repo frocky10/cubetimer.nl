@@ -96,9 +96,6 @@ function applyTheme() {
         /* privemodus: dan flitst het thema bij het laden, meer niet */
     }
 
-    const isLight = resolved === 'light';
-    document.querySelector('.moon')?.classList.toggle('active', !isLight);
-    document.querySelector('.sun')?.classList.toggle('active', isLight);
     renderGraph();
 }
 
@@ -1133,27 +1130,6 @@ document.addEventListener('touchend', e => {
     if (!isTimerTouchTarget(e.target) && !holdActive && !ready) return;
     handlePressEnd();
 });
-
-const themeToggle = document.getElementById('theme-toggle');
-
-/** De schakelaar in de topbar zet het thema altijd expliciet (niet op 'system'). */
-function toggleTheme() {
-    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
-    updateSetting('theme', isDark ? 'light' : 'dark');
-    window.dispatchEvent(new CustomEvent('cubetimer:settings-change', {
-        detail: { key: 'theme', value: settings.theme }
-    }));
-}
-
-if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-    themeToggle.addEventListener('keydown', e => {
-        if (e.key !== 'Enter' && e.key !== ' ') return;
-        e.preventDefault();
-        e.stopPropagation();
-        toggleTheme();
-    });
-}
 
 // Volgt het systeemthema zolang de instelling op 'system' staat.
 window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {

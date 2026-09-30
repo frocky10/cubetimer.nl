@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
-    <title>Guide: Ao5, WCA inspection, +2 and DNF | CubeTimer</title>
+    <title>Frequently asked questions | cubetimer.nl</title>
     <meta name="description" content="How the timer works, what Ao5 and Ao12 mean, how WCA inspection works and when you get a +2 or DNF. Answers to the questions we get asked most." />
     <link rel="canonical" href="https://cubetimer.nl/en/faq.html" />
     <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/uitleg.html" />
@@ -23,7 +23,7 @@
     <meta property="og:site_name" content="CubeTimer" />
     <meta property="og:locale" content="en_GB" />
     <meta property="og:url" content="https://cubetimer.nl/en/faq.html" />
-    <meta property="og:title" content="Guide and frequently asked questions" />
+    <meta property="og:title" content="Frequently asked questions | cubetimer.nl" />
     <meta property="og:description" content="How the timer works, what Ao5 and Ao12 mean, how WCA inspection works and when you get a +2 or DNF. Answers to the questions we get asked most." />
     <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -38,7 +38,7 @@
             "@type": "FAQPage",
             "@id": "https://cubetimer.nl/en/faq.html#vragen",
             "url": "https://cubetimer.nl/en/faq.html",
-            "name": "Guide and frequently asked questions",
+            "name": "Frequently asked questions",
             "inLanguage": "en",
             "isPartOf": {
                 "@type": "WebSite",
@@ -161,7 +161,7 @@
                 {
                     "@type": "ListItem",
                     "position": 2,
-                    "name": "Guide",
+                    "name": "FAQ",
                     "item": "https://cubetimer.nl/en/faq.html"
                 }
             ]
@@ -180,7 +180,10 @@
                 }
                 document.documentElement.setAttribute('data-theme', stored);
                 var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
-                if (gekozen) localStorage.setItem('cubetimer_taal', gekozen[1]);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
             } catch (err) { /* privemodus */ }
         })();
     </script>
@@ -191,9 +194,6 @@
             <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
         </a>
         <div class="profile-topbar__actions">
-            <a class="btn-icon lang-switch" href="/uitleg.html#taal=nl" hreflang="nl" lang="nl" title="Nederlands" aria-label="Nederlands">
-                <span class="lang-switch__code">NL</span>
-            </a>
             <a class="btn btn--primary" href="/en/">Go to the timer</a>
         </div>
     </header>
@@ -201,12 +201,12 @@
     <main class="profile-main">
         <article class="panel">
             <div class="panel__body legal">
-                <h1>Guide and frequently asked questions</h1>
+                <h1>Frequently asked questions</h1>
                 <p>Everything you want to know about timing with CubeTimer, and about the rules at an official competition. Can't find your question? Use the feedback button on the timer or email <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>.</p>
 
                 <nav class="legal__summary" aria-label="Questions on this page">
                     <ul class="legal__toc">
-                <li><a href="#timer">How does the timer work?</a></li>
+                <li><a href="#timen">How does the timer work?</a></li>
                 <li><a href="#inspectie">What is WCA inspection?</a></li>
                 <li><a href="#ao5">What do Ao5 and Ao12 mean?</a></li>
                 <li><a href="#mo3">What is a Mo3?</a></li>
@@ -221,7 +221,7 @@
                     </ul>
                 </nav>
 
-                <h2 id="timer">How does the timer work?</h2>
+                <h2 id="timen">How does the timer work?</h2>
                 <p>Press the space bar to start inspection (if it's switched on). Then hold the space bar until the lights turn green and let go: the clock is running. Press again to stop it. On a phone or tablet, tap the timer area. Press <kbd>2</kbd> to add a +2 to your last solve, <kbd>D</kbd> for a DNF, and <kbd>Backspace</kbd> to delete it.</p>
 
                 <h2 id="inspectie">What is WCA inspection?</h2>
@@ -267,6 +267,7 @@
         <a href="/en/privacy.html">Privacy</a>
         <a href="/en/terms.html">Terms</a>
         <a href="/en/#cookie-instellingen">Cookie settings</a>
+        <a href="/uitleg.html#taal=nl" hreflang="nl" lang="nl" data-taalwissel="nl">Nederlands</a>
     </footer>
 </body>
 </html>

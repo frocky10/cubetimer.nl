@@ -45,9 +45,27 @@
         });
     });
 
-    // De themaschakelaar in de topbar wijzigt dezelfde instelling; het
-    // keuzemenu hier moet dan meebewegen.
     window.addEventListener('cubetimer:settings-change', syncFromSettings);
 
     syncFromSettings();
+
+    /*
+     * Taal. Geen instelling in cubetimer_settings_v1 maar een eigen adres: de
+     * keuze gaat naar cubetimer_taal (dat leest het inline script in de <head>
+     * bij het volgende bezoek) en daarna naar de andere versie van deze pagina,
+     * met de querystring erbij (?oefen=...). Het adres staat al in de
+     * hreflang-link, dus hier hoeft geen lijst met pagina's.
+     */
+    const taalKeuze = document.getElementById('setting-taal');
+    if (taalKeuze) {
+        taalKeuze.value = document.documentElement.lang === 'en' ? 'en' : 'nl';
+        taalKeuze.addEventListener('change', () => {
+            const taal = taalKeuze.value;
+            try { localStorage.setItem('cubetimer_taal', taal); } catch (err) { /* privémodus: dan alleen deze keer */ }
+            const ander = document.querySelector(`link[rel="alternate"][hreflang="${taal}"]`);
+            if (!ander || taal === document.documentElement.lang) return;
+            const doel = new URL(ander.getAttribute('href'), location.href);
+            location.href = doel.pathname + location.search;
+        });
+    }
 })();
