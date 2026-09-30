@@ -14,6 +14,77 @@
     'use strict';
 
     /* ---------------------------------------------------------------------
+     * Taal
+     *
+     * De Nederlandse tekst is de sleutel: UI.t('Opslaan') geeft op een
+     * Engelse pagina "Save" en op een Nederlandse gewoon "Opslaan". De
+     * vertalingen staan in taal/en/js.json; tools/vertalen.php maakt er
+     * Script/taal-en.js van, dat alleen de Engelse pagina's laden (vóór dit
+     * bestand). Plaatshouders: UI.t('Nog {n} solves', { n: 3 }).
+     * ------------------------------------------------------------------ */
+
+    const TAAL = document.documentElement.lang === 'en' ? 'en' : 'nl';
+    const LOCALE = TAAL === 'en' ? 'en-GB' : 'nl-NL';
+    const vertaling = window.CubeTimerVertaling || {};
+    const ontbrekend = new Set();
+
+    function t(tekst, waarden) {
+        let uit = String(tekst);
+        if (TAAL === 'en') {
+            if (Object.prototype.hasOwnProperty.call(vertaling, uit)) {
+                uit = vertaling[uit];
+            } else if (!ontbrekend.has(uit)) {
+                // Voor het testen: wat nog geen vertaling heeft, staat hier.
+                ontbrekend.add(uit);
+                console.warn('[cubetimer] geen vertaling:', uit);
+            }
+        }
+        if (waarden) {
+            uit = uit.replace(/\{(\w+)\}/g, (heel, naam) =>
+                Object.prototype.hasOwnProperty.call(waarden, naam) ? String(waarden[naam]) : heel);
+        }
+        return uit;
+    }
+
+    /** Nederlandse pagina => Engelse pagina. Gelijk aan PAGINAS in tools/vertalen.php. */
+    const PAGINAS = {
+        '/': '/en/',
+        '/index.html': '/en/',
+        '/leren.html': '/en/learn.html',
+        '/privacy.html': '/en/privacy.html',
+        '/voorwaarden.html': '/en/terms.html',
+        '/uitleg.html': '/en/faq.html'
+    };
+
+    /**
+     * Het adres van een pagina in de huidige taal: UI.pad('leren.html') is
+     * op een Engelse pagina /en/learn.html. Querystring en hekje gaan mee.
+     */
+    function pad(adres) {
+        const m = /^\/?([^?#]*)(.*)$/.exec(String(adres));
+        const basis = '/' + m[1];
+        if (TAAL !== 'en') return basis + m[2];
+        return (PAGINAS[basis] || basis) + m[2];
+    }
+
+    /** De link naar een openbaar profiel, in de huidige taal. */
+    function profielUrl(naam) {
+        return (TAAL === 'en' ? '/en/u/' : '/profiel.php?u=') + encodeURIComponent(naam);
+    }
+
+    function getal(n, opties) {
+        return Number(n).toLocaleString(LOCALE, opties);
+    }
+
+    /** Een plek als rangtelwoord: 3e in het Nederlands, 3rd in het Engels. */
+    function plek(n) {
+        if (TAAL !== 'en') return n + 'e';
+        const achter = ['th', 'st', 'nd', 'rd'];
+        const rest = n % 100;
+        return n + (achter[(rest - 20) % 10] || achter[rest] || achter[0]);
+    }
+
+    /* ---------------------------------------------------------------------
      * Modals
      * ------------------------------------------------------------------ */
 
@@ -99,8 +170,10 @@
             const anchor = document.createElement('a');
             anchor.className = 'toast__link';
             anchor.href = settings.link.href;
-            anchor.target = '_blank';
-            anchor.rel = 'noopener noreferrer';
+            if (!settings.link.sameTab) {
+                anchor.target = '_blank';
+                anchor.rel = 'noopener noreferrer';
+            }
             anchor.textContent = settings.link.label || 'Bekijken';
             body.appendChild(document.createElement('br'));
             body.appendChild(anchor);
@@ -175,11 +248,11 @@
         // Een openstaande vraag eerst netjes afronden.
         if (resolveAsk) settleAsk(settings.input ? null : false);
 
-        promptTitle.textContent = settings.title || 'Weet je het zeker?';
+        promptTitle.textContent = settings.title || t('Weet je het zeker?');
         promptMessage.textContent = settings.message || '';
         promptMessage.hidden = !settings.message;
-        promptConfirm.textContent = settings.confirmLabel || 'Oké';
-        promptCancel.textContent = settings.cancelLabel || 'Annuleren';
+        promptConfirm.textContent = settings.confirmLabel || t('Oké');
+        promptCancel.textContent = settings.cancelLabel || t('Annuleren');
         promptConfirm.classList.toggle('btn--danger', settings.danger === true);
         promptConfirm.classList.toggle('btn--primary', settings.danger !== true);
 
@@ -194,7 +267,7 @@
 
         if (settings.input) {
             promptField.hidden = false;
-            promptLabel.textContent = settings.input.label || 'Naam';
+            promptLabel.textContent = settings.input.label || t('Naam');
             promptInput.value = settings.input.value || '';
             promptInput.placeholder = settings.input.placeholder || '';
             // type: 'password' voor een wachtwoord (bijvoorbeeld bij account verwijderen).
@@ -301,12 +374,15 @@
         const settings = options || {};
         const method = settings.method || (settings.body ? 'POST' : 'GET');
 
-        const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+        // X-Taal: de server antwoordt (meldingen, achievements, mails) in de
+        // taal van de pagina.
+        const headers = { 'X-Requested-With': 'XMLHttpRequest', 'X-Taal': TAAL };
         if (settings.body) headers['Content-Type'] = 'application/json';
 
         let response;
         try {
-            response = await fetch('api/' + path, {
+            // Absoluut: de Engelse pagina's staan in /en/.
+            response = await fetch('/api/' + path, {
                 method,
                 headers,
                 credentials: 'same-origin',
@@ -315,7 +391,7 @@
             });
         } catch (err) {
             if (err && err.name === 'AbortError') throw err;
-            const networkError = new Error('Geen verbinding met de server.');
+            const networkError = new Error(t('Geen verbinding met de server.'));
             networkError.code = 'network_error';
             networkError.status = 0;
             throw networkError;
@@ -329,7 +405,7 @@
         }
 
         if (!response.ok || !payload || payload.ok !== true) {
-            const error = new Error((payload && payload.message) || 'Er ging iets mis op de server.');
+            const error = new Error((payload && payload.message) || t('Er ging iets mis op de server.'));
             error.code = (payload && payload.error) || 'server_error';
             error.status = response.status;
             error.payload = payload;
@@ -368,7 +444,7 @@
      * browser zelf (Intl.DisplayNames), zodat we geen vertaallijst hoeven bij
      * te houden. Kent een browser dat niet, dan valt hij terug op de code.
      */
-    const COUNTRY_CODES = 'AD AE AF AG AL AM AO AR AT AU AZ BA BB BD BE BF BG BH BI BJ BN BO BR BS BT BW BY BZ CA CD CF CG CH CI CL CM CN CO CR CU CV CY CZ DE DJ DK DM DO DZ EC EE EG ER ES ET FI FJ FM FR GA GB GD GE GH GM GN GQ GR GT GW GY HN HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KI KM KN KP KR KW KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MH MK ML MM MN MR MT MU MV MW MX MY MZ NA NE NG NI NL NO NP NR NZ OM PA PE PG PH PK PL PT PW PY QA RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR SS ST SV SY SZ TD TG TH TJ TL TM TN TO TR TT TV TW TZ UA UG US UY UZ VA VC VE VN VU WS YE ZA ZM ZW'.split(' ');
+    const COUNTRY_CODES = 'AD AE AF AG AL AM AO AR AT AU AZ BA BB BD BE BF BG BH BI BJ BN BO BR BS BT BW BY BZ CA CD CF CG CH CI CL CM CN CO CR CU CV CY CZ DE DJ DK DM DO DZ EC EE EG ER ES ET FI FJ FM FR GA GB GD GE GH GM GN GQ GR GT GW GY HN HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KI KM KN KP KR KW KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MH MK ML MM MN MR MT MU MV MW MX MY MZ NA NE NG NI NL NO NP NR NZ OM PA PE PG PH PK PL PT PW PY QA RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR SS ST SV SY SZ TD TG TH TJ TL TM TN TO TR TT TV TW TZ UA UG US UY UZ VA VC VE VN VU WS YE ZA ZM ZW'.split(' ') // niet vertalen
 
     let countryCache = null;
 
@@ -377,7 +453,7 @@
 
         let namen = null;
         try {
-            namen = new Intl.DisplayNames(['nl'], { type: 'region' });
+            namen = new Intl.DisplayNames([TAAL], { type: 'region' });
         } catch (err) {
             namen = null;
         }
@@ -392,7 +468,7 @@
                 }
                 return { code, name: naam };
             })
-            .sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+            .sort((a, b) => a.name.localeCompare(b.name, TAAL));
 
         return countryCache;
     }
@@ -497,6 +573,14 @@
         ask,
         api,
         protectedApi,
+        t,
+        lang: TAAL,
+        locale: LOCALE,
+        pad,
+        profielUrl,
+        getal,
+        plek,
+        ontbrekendeVertalingen: () => Array.from(ontbrekend),
         formatTime,
         uniqueId,
         status,
@@ -505,4 +589,44 @@
         countryName,
         storage
     };
+
+    /* ---------------------------------------------------------------------
+     * Taalknop en taalsuggestie
+     * ------------------------------------------------------------------ */
+
+    // De taalknop onthoudt de keuze (het inline script in de <head> doet dat
+    // ook via #taal=..., voor als dit script nog niet geladen is) en neemt een
+    // querystring mee, zoals ?oefen=OLL-27.
+    document.addEventListener('click', event => {
+        const knop = event.target.closest && event.target.closest('[data-taalwissel]');
+        if (!knop) return;
+        try { localStorage.setItem('cubetimer_taal', knop.getAttribute('data-taalwissel')); } catch (err) { /* privémodus */ }
+        if (location.search) {
+            event.preventDefault();
+            const doel = new URL(knop.href, location.href);
+            location.href = doel.pathname + location.search + doel.hash;
+        }
+    });
+
+    // Een bezoeker wiens browser geen Nederlands spreekt, krijgt één keer de
+    // Engelse versie aangeboden. Nooit automatisch omleiden: dan ziet Google
+    // (die vanuit de VS kijkt) de Nederlandse pagina nooit.
+    if (TAAL === 'nl') {
+        window.addEventListener('load', () => {
+            let gevraagd = true;
+            try {
+                gevraagd = localStorage.getItem('cubetimer_taal') !== null || localStorage.getItem('cubetimer_taal_gevraagd') !== null;
+            } catch (err) { /* geen opslag: niet elke keer vragen */ }
+            const talen = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'nl'];
+            if (gevraagd || talen.some(taal => /^nl\b/i.test(taal))) return;
+            const naarEngels = document.querySelector('[data-taalwissel="en"]');
+            if (!naarEngels) return;
+            try { localStorage.setItem('cubetimer_taal_gevraagd', '1'); } catch (err) { /* idem */ }
+            toast('This site is also available in English.', { // niet vertalen: altijd Engels
+                type: 'info',
+                duration: 10000,
+                link: { href: naarEngels.href, label: 'Switch to English', sameTab: true } // niet vertalen
+            });
+        });
+    }
 })();

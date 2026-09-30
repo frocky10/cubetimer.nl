@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<!-- Written by hand; the Dutch version is /privacy.html. Change both together. -->
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Privacy policy – CubeTimer</title>
+    <meta name="description" content="What data CubeTimer keeps, why, for how long and who it's shared with. About your account, your times, cookies, ads and your rights under the GDPR." />
+    <link rel="canonical" href="https://cubetimer.nl/en/privacy.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/privacy.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/privacy.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/privacy.html" />
+    <meta name="robots" content="index, follow" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:url" content="https://cubetimer.nl/en/privacy.html" />
+    <meta property="og:title" content="Privacy policy — CubeTimer" />
+    <meta property="og:description" content="What data CubeTimer keeps, why, for how long and who it's shared with." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "@id": "https://cubetimer.nl/en/privacy.html#pagina",
+                "url": "https://cubetimer.nl/en/privacy.html",
+                "name": "Privacy policy",
+                "inLanguage": "en",
+                "isPartOf": { "@type": "WebSite", "@id": "https://cubetimer.nl/#website", "name": "CubeTimer", "url": "https://cubetimer.nl/" },
+                "breadcrumb": { "@id": "https://cubetimer.nl/en/privacy.html#kruimelpad" }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "@id": "https://cubetimer.nl/en/privacy.html#kruimelpad",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "CubeTimer", "item": "https://cubetimer.nl/en/" },
+                    { "@type": "ListItem", "position": 2, "name": "Privacy policy", "item": "https://cubetimer.nl/en/privacy.html" }
+                ]
+            }
+        ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) localStorage.setItem('cubetimer_taal', gekozen[1]);
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+            } catch (err) { /* private mode */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/en/" aria-label="Go to the timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn-icon lang-switch" href="/privacy.html#taal=nl" hreflang="nl" lang="nl" title="Nederlands" aria-label="Nederlands">
+                <span class="lang-switch__code">NL</span>
+            </a>
+            <a class="btn btn--primary" href="/en/">Go to the timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <h1>Privacy policy</h1>
+                <p class="legal__meta">Last updated: 30 September 2026. This is a translation; if the two differ, the <a href="/privacy.html" hreflang="nl">Dutch version</a> applies.</p>
+
+                <div class="legal__summary">
+                    <p><strong>In short</strong></p>
+                    <ul>
+                        <li>You can use the timer without an account. Your times then stay in your own browser.</li>
+                        <li>With an account we store your username, email address, password (encrypted, we can't read it) and your times.</li>
+                        <li>We don't sell anything and don't share your data with anyone, except the services listed below.</li>
+                        <li>We only use Google Analytics and personalised ads if you give permission. You can change that at any time in <a href="/en/#cookie-instellingen">Cookie settings</a>.</li>
+                        <li>You can download all your data and delete your account with everything in it yourself, from the account window.</li>
+                    </ul>
+                </div>
+
+                <h2 id="who">1. Who we are</h2>
+                <p>
+                    CubeTimer (<a href="https://cubetimer.nl/en/">cubetimer.nl</a>) is a free speedcubing timer.
+                    CubeTimer is the controller responsible for processing your personal data as described in this
+                    policy. Send questions, requests or complaints about privacy to
+                    <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>.
+                </p>
+
+                <h2 id="without-account">2. Without an account</h2>
+                <p>
+                    The timer works without an account. Your times, sessions and settings are then stored in your
+                    own browser (<code>localStorage</code>) and never reach us. If you clear your browser data,
+                    they're gone.
+                </p>
+                <p>What the browser remembers for the site:</p>
+                <div class="legal__table-wrap">
+                    <table>
+                        <thead><tr><th>Key</th><th>Contents</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cubetimer_sessions_v1</code></td><td>Your sessions and times, with the scrambles</td></tr>
+                            <tr><td><code>cubetimer_settings_v1</code>, <code>cubetimer_theme</code></td><td>Your settings and theme</td></tr>
+                            <tr><td><code>cubetimer_stats_scope</code></td><td>Which period you last viewed in the statistics</td></tr>
+                            <tr><td><code>cubetimer_removed_v1</code></td><td>Times that also need to come off your account at the next sync</td></tr>
+                            <tr><td><code>cubetimer_cube_macs</code></td><td>Your smart cube's Bluetooth address, so you only have to enter it once</td></tr>
+                            <tr><td><code>cubetimer_game_v1</code></td><td>A game mode in progress and your last choices in it</td></tr>
+                            <tr><td><code>cubetimer_taal</code>, <code>cubetimer_taal_gevraagd</code></td><td>Whether you want the site in Dutch or English, and whether we've already asked</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    This is needed for the timer to work and is therefore not covered by the cookie consent
+                    request.
+                </p>
+
+                <h2 id="account">3. With an account</h2>
+                <p>If you create an account, we store on our server:</p>
+                <ul>
+                    <li><strong>Account details</strong>: username, email address, your password as a hash (bcrypt; we don't know the password itself), when you created the account and last logged in, and whether your email address is confirmed.</li>
+                    <li><strong>Profile</strong>: display name, country (if you fill it in), your main event and whether you want to appear on the leaderboards.</li>
+                    <li><strong>Your times</strong>: sessions and solves with time, penalty (+2, DNF), scramble, date and time, and for a smart cube the analysis of the solve (moves, phases).</li>
+                    <li><strong>What follows from them</strong>: records, XP and level, streaks, achievements, daily challenges, tournaments, game modes, duels, who you follow, which algorithms you've ticked off as learned, and scrambles your browser contributes for the scramble of the day.</li>
+                    <li><strong>Login sessions</strong>: for each logged-in device a random key (stored only as a hash), the browser (user agent) and an irreversibly encrypted form of your IP address.</li>
+                    <li><strong>Fair play checks</strong>: times that look impossibly fast are flagged and reviewed by us before they can appear on a leaderboard.</li>
+                </ul>
+                <p>
+                    <strong>Why:</strong> to make your account work, to have your times on all your devices, and to
+                    provide the leaderboards, challenges, tournaments and other features. The legal basis is the
+                    agreement with you (Article 6(1)(b) GDPR): without this data we can't provide the service. We
+                    check for impossible times and keep the site secure on the basis of our legitimate interest in
+                    fair leaderboards and a safe site (Article 6(1)(f)).
+                </p>
+
+                <h3>What others can see</h3>
+                <p>
+                    If you're on the leaderboards (on by default), your username, country, records and leaderboard
+                    position are public, and you have a public profile at <code>cubetimer.nl/u/yourname</code> with
+                    your records, level, rank and a selection of your achievements. Your profile isn't in search
+                    engines. Real users can also appear as a simulated opponent in someone's tournament (with their
+                    name and level, never their real times). Turn the leaderboards off in your account settings and
+                    all of this disappears. Your email address is never visible to others.
+                </p>
+
+                <h3>Email</h3>
+                <p>
+                    We only email you to confirm your email address and when you ask for a new password yourself. No
+                    newsletters, no advertising. Emails are sent from our own mailbox at our hosting provider, in the
+                    language of the page you were using.
+                </p>
+
+                <h2 id="reports">4. Reporting a bug or idea</h2>
+                <p>
+                    The feedback button sends us a report. It becomes an issue in our task list on
+                    <a href="https://github.com/" rel="noopener">GitHub</a>, together with technical details that help
+                    us find the problem: the page, your browser, your screen size, language, time zone, theme and
+                    event, and your username if you're logged in. That task list isn't public at the moment.
+                    <strong>Still, please leave out personal details</strong>, in case that ever changes.
+                </p>
+                <p>
+                    An email address for a reply is optional. If you leave one, it's only stored in our database, not
+                    on GitHub. We also store an encrypted form of your IP address and your browser to prevent abuse
+                    of the button. Legal basis: legitimate interest (Article 6(1)(f)) in improving the site and
+                    keeping spam out.
+                </p>
+
+                <h2 id="cookies">5. Cookies, ads and statistics</h2>
+                <div class="legal__table-wrap">
+                    <table>
+                        <thead><tr><th>Cookie</th><th>From</th><th>Purpose</th><th>How long</th><th>Consent needed?</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cubetimer_session</code></td><td>CubeTimer</td><td>Staying logged in. Only when you log in.</td><td>90 days, or until you log out</td><td>No, strictly necessary</td></tr>
+                            <tr><td><code>FCCDCF</code>, <code>FCNEC</code> etc.</td><td>Google (consent window)</td><td>Remembering the choice you made in the consent window</td><td>Up to 13 months</td><td>No, needed to respect your choice</td></tr>
+                            <tr><td><code>_ga</code>, <code>_ga_*</code></td><td>Google Analytics</td><td>Visitor statistics: how many people use the site and which parts</td><td>Up to 2 years</td><td>Yes</td></tr>
+                            <tr><td><code>__gads</code>, <code>__gpi</code>, <code>IDE</code> etc.</td><td>Google AdSense</td><td>Showing ads, measuring them and (with consent) personalising them</td><td>Up to 13 months</td><td>Yes</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    The site is paid for with ads from Google AdSense. If you visit from the European Economic Area,
+                    the United Kingdom or Switzerland, a window from Google (a certified consent management platform)
+                    asks for your permission first. <strong>Until you give permission, we don't load Google
+                    Analytics</strong>, and AdSense only shows non-personalised ads, for which Google uses limited data
+                    to fight fraud, for example. Legal basis: your consent (Article 6(1)(a)), which you can withdraw at
+                    any time via <a href="/en/#cookie-instellingen">Cookie settings</a>, at the bottom of every page.
+                </p>
+                <p>
+                    How Google handles data is explained in
+                    <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">Google's explanation for partner sites</a>
+                    and the <a href="https://policies.google.com/privacy" rel="noopener">Google privacy policy</a>.
+                </p>
+                <p>
+                    Fonts and the scramble code are hosted on our own server, so your browser doesn't connect to
+                    anyone else for them.
+                </p>
+
+                <h2 id="sharing">6. Who we share data with</h2>
+                <ul>
+                    <li><strong>Our hosting provider</strong>, where the site, database and mailbox run. They only process data on our behalf. Like every web server, the server keeps temporary log files with things like IP addresses, for security and troubleshooting.</li>
+                    <li><strong>Google</strong> (Analytics and AdSense), only as described above. Google may process data in the United States; Google participates in the EU-US Data Privacy Framework for this.</li>
+                    <li><strong>GitHub</strong>, for reports from the feedback button (see above). GitHub is a US company.</li>
+                </ul>
+                <p>
+                    For past competitions our server fetches public results from the
+                    <a href="https://www.worldcubeassociation.org/" rel="noopener">World Cube Association</a>. No data
+                    about you goes to the WCA. We never sell data and only hand it over if the law requires us to.
+                </p>
+
+                <h2 id="retention">7. How long we keep data</h2>
+                <ul>
+                    <li><strong>Your account and everything in it</strong>: as long as your account exists. If you delete your account, everything is gone immediately (see below).</li>
+                    <li><strong>Loose times</strong> (removed from a session but not from your account): until you delete them or delete your account.</li>
+                    <li><strong>Login sessions</strong>: until you log out, at most 90 days.</li>
+                    <li><strong>Email confirmation link</strong>: 48 hours. <strong>New password link</strong>: 1 hour, and single use.</li>
+                    <li><strong>Counting attempts to prevent abuse</strong> (for example logging in too often): with an encrypted IP address, only while the limit runs, usually fifteen minutes to an hour.</li>
+                    <li><strong>Reports</strong>: until they're dealt with and we no longer need them. If you delete your account, we remove your email address and details from your reports.</li>
+                </ul>
+
+                <h2 id="rights">8. Your rights</h2>
+                <p>Under the GDPR you have the right to:</p>
+                <ul>
+                    <li><strong>access your data and take it with you</strong>: in the account window you download all your data as a JSON file with one click;</li>
+                    <li><strong>have your data erased</strong>: in the account window you delete your account with everything in it; this happens immediately and can't be undone;</li>
+                    <li><strong>correct your data</strong>: you edit your profile yourself; for anything else, email us;</li>
+                    <li><strong>object</strong> to processing based on legitimate interest, and <strong>withdraw your consent</strong> via Cookie settings;</li>
+                    <li><strong>lodge a complaint</strong> with the Dutch Data Protection Authority, the <a href="https://autoriteitpersoonsgegevens.nl/en" rel="noopener">Autoriteit Persoonsgegevens</a>, or the authority in your own country. We'd rather hear from you first, of course.</li>
+                </ul>
+                <p>
+                    For anything you can't arrange yourself, email <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>.
+                    We reply within a month. To make sure it's your account, we may ask you to email us from the
+                    address linked to your account.
+                </p>
+
+                <h2 id="security">9. Security</h2>
+                <ul>
+                    <li>The whole site only works over an encrypted connection (https).</li>
+                    <li>Passwords are stored with bcrypt, a method designed to make guessing passwords a hopeless task. We can't see your password either.</li>
+                    <li>Login keys and links in emails are only stored as hashes; anyone who could read the database still couldn't log in with them.</li>
+                    <li>We don't store IP addresses in readable form, only as an encrypted fingerprint to prevent abuse.</li>
+                    <li>Logging in, signing up and forms are protected against guessing and bots, without relying on another company's service.</li>
+                </ul>
+                <p>
+                    Found a weakness anyway? Please email <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>
+                    instead of making it public; we'll fix it as quickly as we can.
+                </p>
+
+                <h2 id="children">10. Children</h2>
+                <p>
+                    Lots of cubers are young, and that's fine: you can use the timer without an account and nothing
+                    is sent to us. If you're under 16 and want to create an account, talk to your parents or
+                    guardians first. They can always email us to see or delete data. Consent for Google cookies for
+                    someone under 16 should be given by a parent.
+                </p>
+
+                <h2 id="changes">11. Changes</h2>
+                <p>
+                    If anything changes in how we handle data, we update this policy and the date at the top. For big
+                    changes we'll let you know on the site.
+                </p>
+
+                <p>See also the <a href="/en/terms.html">terms of use</a>.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/en/">Timer</a>
+        <a href="/en/learn.html">Learn</a>
+        <a href="/en/faq.html">FAQ</a>
+        <a href="/en/privacy.html" aria-current="page">Privacy</a>
+        <a href="/en/terms.html">Terms</a>
+        <a href="/en/#cookie-instellingen">Cookie settings</a>
+    </footer>
+</body>
+</html>

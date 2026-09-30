@@ -130,7 +130,7 @@
             // De naam is een link naar het openbare profiel.
             const naam = document.createElement('a');
             naam.className = 'board-cuber__link';
-            naam.href = 'profiel.php?u=' + encodeURIComponent(entry.user);
+            naam.href = UI.profielUrl(entry.user);
             naam.textContent = entry.user;
 
             wrap.appendChild(badge);
@@ -158,13 +158,13 @@
 
         empty.hidden = data.entries.length > 0;
         if (!data.entries.length && data.scope === 'friends') {
-            empty.textContent = 'Je volgt nog niemand. Klik op een naam in de ranglijst om iemand te volgen.';
+            empty.textContent = UI.t('Je volgt nog niemand. Klik op een naam in de ranglijst om iemand te volgen.');
         } else if (!data.entries.length) {
-            empty.textContent = 'Hier staat nog niemand. Wees de eerste.';
+            empty.textContent = UI.t('Hier staat nog niemand. Wees de eerste.');
         }
         countLabel.textContent = data.total === 1
-            ? '1 cuber op deze ranglijst'
-            : `${data.total} cubers op deze ranglijst`;
+            ? UI.t('1 cuber op deze ranglijst')
+            : UI.t('{n} cubers op deze ranglijst', { n: UI.getal(data.total) });
     }
 
     function renderMe(data) {
@@ -179,11 +179,15 @@
 
         const sterk = document.createElement('strong');
         sterk.textContent = data.me.label;
-        meText.appendChild(document.createTextNode('Jij staat op '));
+        // "Jij staat op {plek} van {totaal} met {tijd}." met de plek vetgedrukt.
+        const zin = UI.t('Jij staat op {plek} van {totaal} met {tijd}.', {
+            totaal: UI.getal(data.me.total),
+            tijd: formatValue(data.me.valueMs)
+        });
+        const [voor, na] = zin.split('{plek}'); // niet vertalen
+        meText.appendChild(document.createTextNode(voor));
         meText.appendChild(sterk);
-        meText.appendChild(document.createTextNode(
-            ` van ${data.me.total} met ${formatValue(data.me.valueMs)}.`
-        ));
+        meText.appendChild(document.createTextNode(na || ''));
     }
 
     function renderPager(data) {
@@ -196,12 +200,12 @@
         nextButton.disabled = offset + PAGE_SIZE > laatste;
         prevButton.hidden = nextButton.hidden = data.total <= PAGE_SIZE;
         pageLabel.hidden = data.total <= PAGE_SIZE;
-        pageLabel.textContent = `Pagina ${pagina} van ${paginas}`;
+        pageLabel.textContent = UI.t('Pagina {pagina} van {paginas}', { pagina, paginas });
 
         // "Naar mijn plek" alleen als je ergens anders staat dan hier.
         const mijnPagina = myIndex === null ? null : Math.floor(myIndex / PAGE_SIZE);
         mineButton.hidden = mijnPagina === null || mijnPagina === pagina - 1 || myIndex > MAX_OFFSET;
-        if (!mineButton.hidden) mineButton.textContent = `Naar mijn plek (#${myIndex + 1})`;
+        if (!mineButton.hidden) mineButton.textContent = UI.t('Naar mijn plek (#{plek})', { plek: myIndex + 1 });
     }
 
     function goToOffset(nieuw) {
@@ -213,7 +217,7 @@
         const aanvraag = ++laatsteAanvraag;
         body.innerHTML = '';
         empty.hidden = true;
-        countLabel.textContent = 'Laden…';
+        countLabel.textContent = UI.t('Laden…');
 
         const query = new URLSearchParams({
             event: state.event,
@@ -242,8 +246,10 @@
             body.closest('.board-wrap')?.scrollTo?.(0, 0);
 
             subtitle.textContent = data.period === 'all'
-                ? 'Alle tijden ooit neergezet.'
-                : `De ${data.period === 'day' ? 'dag' : 'week'} loopt in de tijdzone ${data.timezone}.`;
+                ? UI.t('Alle tijden ooit neergezet.')
+                : (data.period === 'day'
+                    ? UI.t('De dag loopt in de tijdzone {zone}.', { zone: data.timezone })
+                    : UI.t('De week loopt in de tijdzone {zone}.', { zone: data.timezone }));
 
             UI.storage.set(STATE_KEY, state);
         } catch (err) {
@@ -251,8 +257,8 @@
             countLabel.textContent = '';
             empty.hidden = false;
             empty.textContent = state.scope === 'friends' && err.status === 401
-                ? 'Log in om de ranglijst van de mensen die je volgt te zien.'
-                : (err.message || 'De ranglijst kon niet geladen worden.');
+                ? UI.t('Log in om de ranglijst van de mensen die je volgt te zien.')
+                : (err.message || UI.t('De ranglijst kon niet geladen worden.'));
         }
     }
 

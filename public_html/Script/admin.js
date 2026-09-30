@@ -24,10 +24,10 @@
     let isAdmin = false;
 
     const REASONS = {
-        below_world_record: 'Sneller dan het wereldrecord',
-        impossible: 'Onmogelijk kort',
-        too_fast_for_user: 'Sprong te groot',
-        burst: 'Te veel solves achter elkaar'
+        below_world_record: UI.t('Sneller dan het wereldrecord'),
+        impossible: UI.t('Onmogelijk kort'),
+        too_fast_for_user: UI.t('Sprong te groot'),
+        burst: UI.t('Te veel solves achter elkaar')
     };
 
     function setStatus(next) {
@@ -46,7 +46,7 @@
         listElement.innerHTML = '';
         const laden = document.createElement('p');
         laden.className = 'table-empty';
-        laden.textContent = 'Laden…';
+        laden.textContent = UI.t('Laden…');
         listElement.appendChild(laden);
 
         try {
@@ -56,7 +56,7 @@
             listElement.innerHTML = '';
             const fout = document.createElement('p');
             fout.className = 'table-empty';
-            fout.textContent = err.message || 'De wachtrij kon niet geladen worden.';
+            fout.textContent = err.message || UI.t('De wachtrij kon niet geladen worden.');
             listElement.appendChild(fout);
         }
     }
@@ -64,14 +64,14 @@
     function render(data) {
         listElement.innerHTML = '';
 
-        tabButton.textContent = data.pending > 0 ? `Beheer (${data.pending})` : 'Beheer';
+        tabButton.textContent = data.pending > 0 ? UI.t('Beheer ({n})', { n: data.pending }) : UI.t('Beheer');
 
         if (!data.flags.length) {
             const leeg = document.createElement('p');
             leeg.className = 'table-empty';
             leeg.textContent = status === 'pending'
-                ? 'Niets te beoordelen. Alles ziet er goed uit.'
-                : 'Hier staat nog niets.';
+                ? UI.t('Niets te beoordelen. Alles ziet er goed uit.')
+                : UI.t('Hier staat nog niets.');
             listElement.appendChild(leeg);
             return;
         }
@@ -106,13 +106,13 @@
             const goedkeuren = document.createElement('button');
             goedkeuren.className = 'btn btn--sm';
             goedkeuren.type = 'button';
-            goedkeuren.textContent = 'Toch goed';
+            goedkeuren.textContent = UI.t('Toch goed');
             goedkeuren.addEventListener('click', () => decide(flag.id, 'approve', goedkeuren));
 
             const afkeuren = document.createElement('button');
             afkeuren.className = 'btn btn--sm btn--danger';
             afkeuren.type = 'button';
-            afkeuren.textContent = 'Afkeuren';
+            afkeuren.textContent = UI.t('Afkeuren');
             afkeuren.addEventListener('click', () => decide(flag.id, 'reject', afkeuren));
 
             acties.appendChild(goedkeuren);
@@ -121,7 +121,7 @@
         } else {
             const label = document.createElement('span');
             label.className = 'field__hint';
-            label.textContent = flag.status === 'approved' ? 'Goedgekeurd' : 'Afgekeurd';
+            label.textContent = flag.status === 'approved' ? UI.t('Goedgekeurd') : UI.t('Afgekeurd');
             card.appendChild(label);
         }
 
@@ -136,7 +136,7 @@
             load();
             window.CubeTimerLeaderboard?.reload?.();
         } catch (err) {
-            UI.toast(err.message || 'Dat is niet gelukt.', { type: 'error' });
+            UI.toast(err.message || UI.t('Dat is niet gelukt.'), { type: 'error' });
             button.disabled = false;
         }
     }

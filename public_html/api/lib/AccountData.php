@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 
 /**
  * Je gegevens meenemen en je account verwijderen (AVG, artikel 15, 17 en 20).
@@ -63,9 +64,9 @@ final class AccountData
         }
 
         $data = [
-            'uitleg' => 'Alle gegevens die CubeTimer (cubetimer.nl) over je account bewaart, op het moment van downloaden. '
+            'uitleg' => Taal::t('Alle gegevens die CubeTimer (cubetimer.nl) over je account bewaart, op het moment van downloaden. '
                 . 'Wachtwoorden, inlogsleutels en IP-adressen staan alleen als onomkeerbare hash in de database en daarom niet in dit bestand. '
-                . 'Tijden staan in milliseconden; datums in UTC. Vragen: privacy@cubetimer.nl',
+                . 'Tijden staan in milliseconden; datums in UTC. Vragen: privacy@cubetimer.nl'),
             'gedownload_op' => gmdate('Y-m-d\TH:i:s\Z'),
             'account' => self::clean($user),
         ];

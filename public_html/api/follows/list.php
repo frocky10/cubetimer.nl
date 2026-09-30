@@ -29,7 +29,7 @@ if ($gevraagd === '') {
         [mb_strtolower($gevraagd)]
     );
     if ($row === null) {
-        Http::fail('not_found', 'Deze cuber bestaat niet, of deelt zijn profiel niet.', 404);
+        Http::fail('not_found', 'Deze cuber bestaat niet, of deelt dit profiel niet.', 404);
     }
     $userId = (int) $row['id'];
 }

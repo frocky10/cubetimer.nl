@@ -46,9 +46,9 @@
 
     const SCOPE_KEY = 'cubetimer_stats_scope';
     const SCOPES = {
-        session: { label: 'Huidige sessie', note: 'Alleen de sessie die je nu open hebt.' },
-        today: { label: 'Vandaag', note: 'Alle sessies van dit event, vanaf 00:00 vannacht.' },
-        week: { label: 'Deze week', note: 'Alle sessies van dit event, vanaf maandag 00:00.' }
+        session: { label: UI.t('Huidige sessie'), note: UI.t('Alleen de sessie die je nu open hebt.') },
+        today: { label: UI.t('Vandaag'), note: UI.t('Alle sessies van dit event, vanaf 00:00 vannacht.') },
+        week: { label: UI.t('Deze week'), note: UI.t('Alle sessies van dit event, vanaf maandag 00:00.') }
     };
 
     let scope = UI.storage.get(SCOPE_KEY, 'session');

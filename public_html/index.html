@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
-    <title>CubeTimer – online speedcubing-timer met WCA-scrambles</title>
-    <meta name="description" content="Gratis online timer voor de Rubik's kubus: officiële WCA-scrambles, inspectietijd, Ao5 en Ao12, statistieken en smart cubes. Direct in je browser." />
-    <meta name="keywords" content="cubetimer, rubiks kubus timer, speedcubing timer, online cube timer, wca scrambles, speedcube, ao5, ao12, smart cube" />
+    <title>Online Rubik's cube timer met WCA-scrambles | CubeTimer</title>
+    <meta name="description" content="Time je solves met officiële WCA-scrambles en inspectietijd. Houd je Ao5 en Ao12 bij, koppel je smart cube en kijk hoe je het doet tegen andere cubers." />
+    <meta name="keywords" content="cube timer, rubiks cube timer, rubik's kubus timer, speedcube timer, speedcubing, online timer, wca scrambles, scramble generator, ao5, ao12, inspectietijd, smart cube timer, gan cube, cstimer alternatief" />
     <meta name="google-adsense-account" content="ca-pub-9889350952616788" />
 
     <!-- SEO: het ene echte adres van deze pagina (zie CLAUDE.md, SEO). -->
     <link rel="canonical" href="https://cubetimer.nl/" />
+    <!-- Dezelfde pagina in het Engels (gegenereerd door tools/vertalen.php). -->
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
 
     <!-- Het voorbeeldje bij een gedeelde link. Adressen moeten volledig zijn. -->
@@ -19,8 +23,8 @@
     <meta property="og:site_name" content="CubeTimer" />
     <meta property="og:locale" content="nl_NL" />
     <meta property="og:url" content="https://cubetimer.nl/" />
-    <meta property="og:title" content="CubeTimer – online speedcubing-timer" />
-    <meta property="og:description" content="Officiële WCA-scrambles, inspectietijd, statistieken en smart cubes. Gratis, in je browser, ook zonder account." />
+    <meta property="og:title" content="CubeTimer, de cube timer in je browser" />
+    <meta property="og:description" content="Gratis timer voor speedcubers. WCA-scrambles, inspectie, statistieken en smart cubes, zonder account of installatie." />
     <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -58,7 +62,7 @@
                 "@id": "https://cubetimer.nl/#timer",
                 "name": "CubeTimer",
                 "url": "https://cubetimer.nl/",
-                "description": "Gratis online timer voor speedcubers, met officiële WCA-scrambles, inspectietijd, statistieken, smart cubes, ranglijsten en toernooien.",
+                "description": "Gratis timer voor speedcubers met WCA-scrambles, inspectietijd, statistieken en smart cubes. Werkt in de browser, ook zonder account.",
                 "image": "https://cubetimer.nl/Pictures/og-image.png",
                 "applicationCategory": "SportsApplication",
                 "operatingSystem": "Elke moderne browser",
@@ -94,6 +98,26 @@
             } catch (err) {
                 /* localStorage geblokkeerd: dan blijft het donkere standaardthema staan. */
             }
+        })();
+        // Eerder voor de andere taal gekozen (de taalknop)? Dan meteen daarheen,
+        // vóór er iets getekend wordt. Zonder keuze gebeurt er niets: zoekmachines
+        // en nieuwe bezoekers zien gewoon de pagina van het adres.
+        (function () {
+            try {
+                var hier = document.documentElement.lang;
+                // De taalknop wijst naar #taal=en of #taal=nl: dat is de keuze.
+                // Zo werkt hij ook als de scripts nog niet geladen zijn.
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+                var keuze = localStorage.getItem('cubetimer_taal');
+                if ((keuze === 'nl' || keuze === 'en') && keuze !== hier) {
+                    var ander = document.querySelector('link[rel="alternate"][hreflang="' + keuze + '"]');
+                    if (ander) location.replace(ander.getAttribute('href').replace(/^https:\/\/cubetimer\.nl/, '') + location.search + location.hash);
+                }
+            } catch (err) { /* geen localStorage: dan blijft iedereen waar hij is */ }
         })();
     </script>
 
@@ -231,7 +255,7 @@
                     var ui = window.CubeTimerUI;
                     var tekst = 'De cookie-instellingen konden niet geladen worden, bijvoorbeeld door een adblocker. '
                         + 'Zonder toestemming plaatsen we geen cookies van Google.';
-                    if (ui && ui.toast) ui.toast(tekst, { type: 'info' });
+                    if (ui && ui.toast) ui.toast(ui.t ? ui.t(tekst) : tekst, { type: 'info' });
                 }, 4000);
             }
             window.CubeTimerToestemming = { open: openInstellingen };
@@ -387,6 +411,7 @@
                 </section>
             </div>
             <footer class="site-footer" aria-label="Over deze site">
+                <a href="/uitleg.html">Uitleg</a>
                 <a href="/privacy.html">Privacy</a>
                 <a href="/voorwaarden.html">Voorwaarden</a>
                 <a href="/#cookie-instellingen" data-cookie-instellingen>Cookie-instellingen</a>
@@ -399,7 +424,7 @@
         <main class="main">
             <!-- De kop van de pagina voor zoekmachines en schermlezers. Zichtbaar
                  staat het logo er al; een tweede kop zou de timer in de weg zitten. -->
-            <h1 class="visually-hidden">CubeTimer: online speedcubing-timer met WCA-scrambles</h1>
+            <h1 class="visually-hidden">Online Rubik's cube timer</h1>
             <header class="topbar">
                 <div class="topbar__brand">
                     <img id="logo-header" src="Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
@@ -457,6 +482,13 @@
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></svg>
                         <span class="btn-icon__label">Instellingen</span>
                     </button>
+
+                    <!-- Andere taal. tools/vertalen.php zet hem op de Engelse pagina om naar NL. -->
+                    <a class="btn-icon lang-switch" href="/en/#taal=en" hreflang="en" lang="en" data-taalwissel="en"
+                       data-niet-vertalen title="English" aria-label="English">
+                        <span class="lang-switch__code" data-taalwissel-code>EN</span>
+                        <span class="btn-icon__label">English</span>
+                    </a>
                     </div>
 
                     <button id="account-open" class="account-chip" type="button" aria-label="Account" hidden>
@@ -545,7 +577,9 @@
             </div>
 
             <footer class="scramble-bar">
-                <div id="Scrambles" class="ScrambleBox" aria-live="polite"></div>
+                <div class="scramble-bar__inner">
+                <div class="scramble-bar__main">
+                <div id="Scrambles" class="ScrambleBox" aria-live="polite" data-leeg="Scramble laden…"></div>
                 <!-- Smart cube: hoe ver je bent met de scramble. Alleen als er een cube verbonden is. -->
                 <div class="smartcube-stage" id="smartcube-stage" hidden>
                     <div class="smartcube-stage__cube" id="smartcube-stage-cube" aria-hidden="true"></div>
@@ -555,14 +589,18 @@
                     </div>
                     <div class="smartcube-stage__bar" aria-hidden="true"><span id="smartcube-stage-progress"></span></div>
                 </div>
+               </div>
+
+                <!-- Sessiegrafiek: rechts naast de scramble, op een smal scherm eronder. -->
+                <section id="session-graph" class="session-graph" aria-label="Verloop van deze sessie">
+                    <span class="panel__title">Verloop</span>
+                    <div class="session-graph__plot" id="session-graph-plot">
+                        <canvas id="session-graph-canvas" width="260" height="140"></canvas>
+                    </div>
+                </section>
+              </div>
             </footer>
         </main>
-    </div>
-
-    <!-- Sessiegrafiek, zweeft rechtsonder op grote schermen -->
-    <div id="session-graph">
-        <span class="panel__title">Verloop</span>
-        <canvas id="session-graph-canvas" width="260" height="140"></canvas>
     </div>
 
     <canvas id="confetti-canvas"></canvas>
@@ -799,7 +837,7 @@
                     <label class="field__label" for="feedback-email">Je e-mailadres <span class="field__hint">(optioneel)</span></label>
                     <input class="input" type="email" id="feedback-email" name="email" maxlength="191"
                            placeholder="voor als we een vraag hebben" autocomplete="email" />
-                    <span class="field__hint">Blijft privé — het komt niet in het publieke GitHub-issue.</span>
+                    <span class="field__hint">Blijft privé: het komt niet in het GitHub-issue.</span>
                 </div>
 
                 <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots. -->
@@ -810,8 +848,8 @@
 
                 <p class="notice">
                     We sturen automatisch je browser, schermformaat en het actieve event mee, zodat we het probleem kunnen
-                    nabootsen. Er gaan geen tijden mee. Je melding komt als issue op GitHub; zet er dus geen persoonlijke
-                    gegevens in. Zie de <a href="/privacy.html#meldingen" target="_blank" rel="noopener">privacyverklaring</a>.
+                    nabootsen. Er gaan geen tijden mee. Je melding komt als issue in onze takenlijst op GitHub; zet er
+                    geen persoonlijke gegevens in. Zie de <a href="/privacy.html#meldingen" target="_blank" rel="noopener">privacyverklaring</a>.
                 </p>
 
                 <p class="form-error" id="feedback-error" role="alert"></p>

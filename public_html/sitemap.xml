@@ -1,24 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    De pagina's die in Google horen. Profielen staan er bewust niet in: die
-    hebben noindex. Een nieuwe openbare pagina hoort hier bij, met hetzelfde
-    adres als in zijn canonical-tag.
+    De pagina's die in Google horen, in beide talen. Elke pagina noemt zijn
+    tegenhanger (hreflang), net als in de <head>. Profielen staan er bewust
+    niet in: die hebben noindex. Een nieuwe openbare pagina hoort hier bij, met
+    hetzelfde adres als in zijn canonical-tag.
 -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://cubetimer.nl/</loc>
         <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/</loc>
+        <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/" />
     </url>
     <url>
         <loc>https://cubetimer.nl/leren.html</loc>
-        <lastmod>2026-09-24</lastmod>
+        <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/leren.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/learn.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/leren.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/learn.html</loc>
+        <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/leren.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/learn.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/leren.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/uitleg.html</loc>
+        <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/uitleg.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/faq.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/uitleg.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/faq.html</loc>
+        <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/uitleg.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/faq.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/uitleg.html" />
     </url>
     <url>
         <loc>https://cubetimer.nl/privacy.html</loc>
         <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/privacy.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/privacy.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/privacy.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/privacy.html</loc>
+        <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/privacy.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/privacy.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/privacy.html" />
     </url>
     <url>
         <loc>https://cubetimer.nl/voorwaarden.html</loc>
         <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/voorwaarden.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/terms.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/voorwaarden.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/terms.html</loc>
+        <lastmod>2026-09-30</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/voorwaarden.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/terms.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/voorwaarden.html" />
     </url>
 </urlset>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<!-- Written by hand; the Dutch version is /voorwaarden.html. Change both together. -->
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Terms of use – CubeTimer</title>
+    <meta name="description" content="The house rules of CubeTimer: free to use, your account, fair timing on the leaderboards, what's not allowed, and what we can and can't promise." />
+    <link rel="canonical" href="https://cubetimer.nl/en/terms.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/voorwaarden.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/terms.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/voorwaarden.html" />
+    <meta name="robots" content="index, follow" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:url" content="https://cubetimer.nl/en/terms.html" />
+    <meta property="og:title" content="Terms of use — CubeTimer" />
+    <meta property="og:description" content="The house rules of CubeTimer: your account, fair timing and what's not allowed." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "@id": "https://cubetimer.nl/en/terms.html#pagina",
+                "url": "https://cubetimer.nl/en/terms.html",
+                "name": "Terms of use",
+                "inLanguage": "en",
+                "isPartOf": { "@type": "WebSite", "@id": "https://cubetimer.nl/#website", "name": "CubeTimer", "url": "https://cubetimer.nl/" },
+                "breadcrumb": { "@id": "https://cubetimer.nl/en/terms.html#kruimelpad" }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "@id": "https://cubetimer.nl/en/terms.html#kruimelpad",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "CubeTimer", "item": "https://cubetimer.nl/en/" },
+                    { "@type": "ListItem", "position": 2, "name": "Terms of use", "item": "https://cubetimer.nl/en/terms.html" }
+                ]
+            }
+        ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) localStorage.setItem('cubetimer_taal', gekozen[1]);
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+            } catch (err) { /* private mode */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/en/" aria-label="Go to the timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn-icon lang-switch" href="/voorwaarden.html#taal=nl" hreflang="nl" lang="nl" title="Nederlands" aria-label="Nederlands">
+                <span class="lang-switch__code">NL</span>
+            </a>
+            <a class="btn btn--primary" href="/en/">Go to the timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <h1>Terms of use</h1>
+                <p class="legal__meta">Last updated: 30 September 2026. This is a translation; if the two differ, the <a href="/voorwaarden.html" hreflang="nl">Dutch version</a> applies.</p>
+
+                <div class="legal__summary">
+                    <p><strong>In short</strong></p>
+                    <ul>
+                        <li>CubeTimer is free. You can use it to practise, measure your progress and take part in the leaderboards.</li>
+                        <li>Times on the leaderboard have to be real solves. Cheating can cost you your place or your account.</li>
+                        <li>We do our best, but we can't promise the site always works. Back up your times now and then (you can download them from the account window).</li>
+                    </ul>
+                </div>
+
+                <h2 id="service">1. The service</h2>
+                <p>
+                    CubeTimer (<a href="https://cubetimer.nl/en/">cubetimer.nl</a>) is a free online timer for
+                    speedcubers, with scrambles, statistics, leaderboards, challenges, tournaments and a learn page,
+                    among other things. By using the site you agree to these terms. How we handle your data is
+                    explained in the <a href="/en/privacy.html">privacy policy</a>.
+                </p>
+                <p>
+                    The site is paid for with ads. We may add, change or stop features; if it's something big, we'll
+                    let you know in good time.
+                </p>
+
+                <h2 id="account">2. Your account</h2>
+                <ul>
+                    <li>One account per person. Choose a password you don't use anywhere else and keep it to yourself; you're responsible for what happens with your account.</li>
+                    <li>Choose a username that isn't offensive, discriminatory or misleading and doesn't impersonate someone else (such as a well-known cuber). We may change an inappropriate name.</li>
+                    <li>If you're under 16, talk to your parents or guardians before creating an account.</li>
+                    <li>You can delete your account yourself at any time from the account window. All your data is then gone immediately.</li>
+                </ul>
+
+                <h2 id="fair">3. Fair timing</h2>
+                <p>
+                    The leaderboards, records, challenges and achievements are only fun if everyone plays fair.
+                    So:
+                </p>
+                <ul>
+                    <li>Only real solves, done by you, with the scramble the site gave you (or an official WCA scramble).</li>
+                    <li>Don't make up or edit times, or submit them through the console, a script or any other way than using the timer.</li>
+                    <li>No solves by someone else under your name, and no second account to help yourself in duels or leaderboards.</li>
+                </ul>
+                <p>
+                    Times that look impossible are flagged automatically and only count once we've reviewed them. If
+                    we find cheating, we can remove times from the leaderboards, and block your account if it keeps
+                    happening. The times in your own sessions always remain yours.
+                </p>
+
+                <h2 id="not-allowed">4. What's not allowed</h2>
+                <ul>
+                    <li>Attacking or overloading the site, or trying to get into places you shouldn't (found a weakness? Report it to <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a> and we'll fix it).</li>
+                    <li>Using bots or scripts to create accounts, fill in forms or scrape data from the site.</li>
+                    <li>Using the feedback button for spam, advertising or messages unrelated to the site.</li>
+                    <li>Harassing other users, for example through duels.</li>
+                </ul>
+
+                <h2 id="content">5. Who owns what</h2>
+                <p>
+                    Your times and your data are yours; you can always download them. You only give us permission to
+                    use them for the site itself, such as your name and records on the leaderboards if you take part.
+                </p>
+                <p>
+                    The design, texts and code of CubeTimer are ours. The scrambles come from
+                    <a href="https://github.com/cubing/cubing.js" rel="noopener">cubing.js</a> (MPL-2.0), the font is
+                    Inter (SIL Open Font License), and the results of past competitions come from the
+                    <a href="https://www.worldcubeassociation.org/" rel="noopener">World Cube Association</a>.
+                    CubeTimer isn't affiliated with the WCA or with any brand of cubes or smart cubes.
+                </p>
+
+                <h2 id="liability">6. No guarantees</h2>
+                <p>
+                    CubeTimer is free and provided as is. We do our best to keep the site working, secure and
+                    correct, but we can't promise it's always available, never has a bug or never loses data. So
+                    download your data as a backup now and then. As far as the law allows, we're not liable for
+                    damage caused by using the site, such as lost times. Your rights as a consumer still apply.
+                </p>
+                <p>
+                    You use smart cubes at your own risk; we haven't been able to test the connection with every
+                    model ourselves.
+                </p>
+
+                <h2 id="stopping">7. Stopping</h2>
+                <p>
+                    You can stop at any time by deleting your account. We can block or delete an account if someone
+                    breaks these terms seriously or repeatedly. If we ever stop running CubeTimer, we'll let you know
+                    in good time so you can download your data.
+                </p>
+
+                <h2 id="changes">8. Changes and law</h2>
+                <p>
+                    We may update these terms; the date at the top shows when that last happened. For important
+                    changes we'll let you know on the site. These terms are governed by Dutch law.
+                </p>
+
+                <h2 id="contact">9. Contact</h2>
+                <p>
+                    Questions about these terms? Email <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>.
+                    For a bug or idea you can also use the feedback button on the site.
+                </p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/en/">Timer</a>
+        <a href="/en/learn.html">Learn</a>
+        <a href="/en/faq.html">FAQ</a>
+        <a href="/en/privacy.html">Privacy</a>
+        <a href="/en/terms.html" aria-current="page">Terms</a>
+        <a href="/en/#cookie-instellingen">Cookie settings</a>
+    </footer>
+</body>
+</html>

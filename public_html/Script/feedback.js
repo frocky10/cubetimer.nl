@@ -48,11 +48,11 @@
         });
 
         const isBug = currentType === 'bug';
-        descriptionLabel.textContent = isBug ? 'Wat gaat er mis?' : 'Wat zou je graag willen?';
+        descriptionLabel.textContent = isBug ? UI.t('Wat gaat er mis?') : UI.t('Wat zou je graag willen?');
         descriptionField.placeholder = isBug
-            ? 'Beschrijf zo precies mogelijk wat je ziet.'
-            : 'Beschrijf je idee. Wat zou het je opleveren?';
-        titleField.placeholder = isBug ? 'Korte samenvatting van de bug' : 'Korte samenvatting van je idee';
+            ? UI.t('Beschrijf zo precies mogelijk wat je ziet.')
+            : UI.t('Beschrijf je idee. Wat zou het je opleveren?');
+        titleField.placeholder = isBug ? UI.t('Korte samenvatting van de bug') : UI.t('Korte samenvatting van je idee');
 
         // Reproductiestappen zijn alleen zinnig bij een bug.
         stepsField.hidden = !isBug;
@@ -86,7 +86,7 @@
             event: state.activeEvent || '',
             solveCount: String(window.cubeTimerApi?.getSessions?.()
                 .find(session => session.id === window.cubeTimerApi.getActiveSessionId())?.times.length ?? 0),
-            bluetooth: state.bluetoothSupported ? 'ondersteund voor dit event' : 'niet van toepassing'
+            bluetooth: state.bluetoothSupported ? 'ondersteund voor dit event' : 'niet van toepassing' // niet vertalen: gaat naar GitHub
         };
     }
 
@@ -137,12 +137,12 @@
         const description = descriptionField.value.trim();
 
         if (title.length < 5) {
-            errorField.textContent = 'Geef je melding een titel van minstens 5 tekens.';
+            errorField.textContent = UI.t('Geef je melding een titel van minstens 5 tekens.');
             titleField.focus();
             return;
         }
         if (description.length < 10) {
-            errorField.textContent = 'Vertel iets meer, zodat we het kunnen nabootsen.';
+            errorField.textContent = UI.t('Vertel iets meer, zodat we het kunnen nabootsen.');
             descriptionField.focus();
             return;
         }
@@ -150,7 +150,7 @@
         sending = true;
         errorField.textContent = '';
         submitButton.disabled = true;
-        submitButton.textContent = 'Versturen…';
+        submitButton.textContent = UI.t('Versturen…');
 
         try {
             // protectedApi stuurt het honeypotveld (website) en het formuliertoken mee.
@@ -166,7 +166,7 @@
 
             form.hidden = true;
             successPanel.hidden = false;
-            successText.textContent = response.message || 'Je melding is doorgestuurd.';
+            successText.textContent = response.message || UI.t('Je melding is doorgestuurd.');
 
             if (response.issue && response.issue.url) {
                 issueLink.hidden = false;
@@ -175,11 +175,11 @@
                 issueLink.hidden = true;
             }
         } catch (err) {
-            errorField.textContent = err.message || 'Versturen is niet gelukt. Probeer het later nog eens.';
+            errorField.textContent = err.message || UI.t('Versturen is niet gelukt. Probeer het later nog eens.');
         } finally {
             sending = false;
             submitButton.disabled = false;
-            submitButton.textContent = 'Versturen';
+            submitButton.textContent = UI.t('Versturen');
         }
     });
 

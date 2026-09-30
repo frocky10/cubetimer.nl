@@ -155,7 +155,7 @@
             const normal = turn(sticker.normal, axis);
             const target = SLOT_INDEX.get(key(pos, normal));
             if (target === undefined) {
-                throw new Error('Draai ' + name + ' loopt buiten de kubus');
+                throw new Error('Draai ' + name + ' loopt buiten de kubus'); // niet vertalen: alleen voor ontwikkelaars
             }
             to[index] = target;
         });
@@ -177,7 +177,7 @@
         return tokens.map(token => {
             const match = MOVE_PATTERN.exec(token);
             if (!match) {
-                throw new Error('Onbekende zet: ' + token);
+                throw new Error('Onbekende zet: ' + token); // niet vertalen: alleen voor ontwikkelaars
             }
             const suffix = match[2] || '';
             let quarters = 1;

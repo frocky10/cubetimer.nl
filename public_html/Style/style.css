@@ -19,6 +19,7 @@
     15. Leerpagina (leren.html)
     16. Spelmodi en duels
     17. Privacy, voorwaarden en de voettekst
+    18. Taalknop
    ========================================================================== */
 
 /* ==========================================================================
@@ -1199,38 +1200,69 @@ body.is-timing #timer {
 
 .ScrambleBox:empty::after,
 .ScrambleBox.is-loading::after {
-    content: 'Scramble laden…';
+    content: attr(data-leeg);
     color: var(--text-subtle);
     font-family: var(--font-ui);
     letter-spacing: normal;
 }
 
 /* --- Sessiegrafiek ------------------------------------------------------- */
+/* Rechts naast de scramble, even hoog. De canvas vult het vak .session-graph__plot;
+   script.js meet dat vak met een ResizeObserver en tekent op die maat. */
 
-#session-graph {
-    position: fixed;
-    right: var(--space-5);
-    bottom: calc(9rem + var(--space-5));
-    width: 17rem;
+.scramble-bar__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 19rem;
+    gap: var(--space-3);
+    align-items: stretch;
+    max-width: 82rem;
+    margin: 0 auto;
+}
+
+.scramble-bar__main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.scramble-bar__main .ScrambleBox {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: none;
+    min-height: 7.5rem;
+}
+
+.session-graph {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
     padding: var(--space-3);
     background: var(--surface-1);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    z-index: 40;
+    box-shadow: var(--shadow-sm);
 }
 
-#session-graph .panel__title {
+.session-graph .panel__title {
     display: block;
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
 }
 
-#session-graph canvas {
+.session-graph__plot {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 5.5rem;
+}
+
+.session-graph__plot canvas {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
 }
 
 /* --- Confetti ------------------------------------------------------------ */
@@ -2355,12 +2387,25 @@ body.is-timing #timer {
         --sidebar-width: 21rem;
     }
 
-    #session-graph {
-        display: none;
+    .scramble-bar__inner {
+        grid-template-columns: minmax(0, 1fr) 16rem;
     }
 }
 
 @media (max-width: 1100px) {
+    /* De grafiek onder de scramble in plaats van ernaast. */
+    .scramble-bar__inner {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .scramble-bar__main .ScrambleBox {
+        min-height: 0;
+    }
+
+    .session-graph__plot {
+        min-height: 7rem;
+    }
+
     body {
         overflow-y: auto;
         overflow-x: hidden;
@@ -4529,5 +4574,25 @@ a.board-cuber__name:hover {
 .account-danger__actions {
     display: flex;
     flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+/* ==========================================================================
+   18. Taalknop
+   ========================================================================== */
+
+.lang-switch {
+    text-decoration: none;
+}
+
+.lang-switch__code {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+.profile-topbar__actions {
+    display: flex;
+    align-items: center;
     gap: var(--space-2);
 }

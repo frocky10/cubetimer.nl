@@ -71,7 +71,7 @@
             list.innerHTML = '';
             const melding = document.createElement('p');
             melding.className = 'table-empty';
-            melding.textContent = err.message || 'De achievements konden niet geladen worden.';
+            melding.textContent = err.message || UI.t('De achievements konden niet geladen worden.');
             list.appendChild(melding);
         } finally {
             laden = false;
@@ -84,7 +84,7 @@
 
         nieuw.slice(0, 3).forEach((achievement, index) => {
             window.setTimeout(() => {
-                UI.toast(`Achievement behaald: ${achievement.title} (+${achievement.xp} XP)`, {
+                UI.toast(UI.t('Achievement behaald: {titel} (+{xp} XP)', { titel: achievement.title, xp: achievement.xp }), {
                     type: 'success',
                     duration: 6000
                 });
@@ -93,7 +93,7 @@
 
         if (nieuw.length > 3) {
             window.setTimeout(() => {
-                UI.toast(`En nog ${nieuw.length - 3} andere achievements. Kijk maar bij het medaille-icoon.`, {
+                UI.toast(UI.t('En nog {n} andere achievements. Kijk maar bij het medaille-icoon.', { n: nieuw.length - 3 }), {
                     type: 'success',
                     duration: 6000
                 });
@@ -108,7 +108,7 @@
     function renderFilter() {
         filter.innerHTML = '';
 
-        const knoppen = [{ slug: 'alles', name: 'Alles' }].concat(
+        const knoppen = [{ slug: 'alles', name: UI.t('Alles') }].concat(
             data.categories
                 .filter(cat => cat.items.length > 0 || cat.slug === 'geheim')
                 .map(cat => ({ slug: cat.slug, name: cat.name }))
@@ -135,11 +135,11 @@
 
         const deel = data.total > 0 ? Math.round(data.unlocked / data.total * 100) : 0;
         progressFill.style.width = deel + '%';
-        countLabel.textContent = `${data.unlocked} van ${data.total} behaald`;
-        xpLabel.textContent = `${data.xpFromAchievements.toLocaleString('nl-NL')} XP uit achievements`;
+        countLabel.textContent = UI.t('{behaald} van {totaal} behaald', { behaald: data.unlocked, totaal: data.total });
+        xpLabel.textContent = UI.t('{xp} XP uit achievements', { xp: UI.getal(data.xpFromAchievements) });
         subtitle.textContent = data.authenticated
-            ? `${deel}% compleet. Alles wat je ooit hebt getimed telt mee.`
-            : 'Log in om ze te verzamelen. Dit is wat er te halen valt.';
+            ? UI.t('{deel}% compleet. Alles wat je ooit hebt getimed telt mee.', { deel })
+            : UI.t('Log in om ze te verzamelen. Dit is wat er te halen valt.');
         guestNotice.hidden = data.authenticated;
 
         list.innerHTML = '';
@@ -183,8 +183,10 @@
             pip.className = 'tier-pip' + (tier.unlocked ? '' : ' tier-pip--locked');
             pip.dataset.tier = tier.tier;
             pip.title = tier.unlocked
-                ? `${tier.tier}: ${tier.label} — behaald${tier.rarity ? `, ${tier.rarity}% van de cubers heeft deze` : ''}`
-                : `${tier.tier}: ${tier.label}`;
+                ? (tier.rarity
+                    ? UI.t('{niveau}: {label}, behaald. {deel}% van de cubers heeft deze.', { niveau: UI.t(tier.tier), label: tier.label, deel: tier.rarity })
+                    : UI.t('{niveau}: {label}, behaald.', { niveau: UI.t(tier.tier), label: tier.label }))
+                : `${UI.t(tier.tier)}: ${tier.label}`;
 
             const mark = document.createElement('span');
             mark.className = 'tier-pip__mark';
@@ -192,7 +194,7 @@
 
             const label = document.createElement('span');
             label.className = 'tier-pip__label';
-            label.textContent = tier.tier.slice(0, 3);
+            label.textContent = UI.t(tier.tier).slice(0, 3);
 
             pip.appendChild(mark);
             pip.appendChild(label);
@@ -232,7 +234,7 @@
             const head = document.createElement('div');
             head.className = 'achievement-next__head';
             const links = document.createElement('span');
-            links.textContent = `Volgende: ${item.next.tier} — ${item.next.label}`;
+            links.textContent = UI.t('Volgende: {niveau}, {label}', { niveau: UI.t(item.next.tier), label: item.next.label });
             const rechts = document.createElement('span');
             rechts.textContent = Math.round(item.next.progress * 100) + '%';
             head.appendChild(links);
@@ -251,7 +253,7 @@
         } else {
             const klaar = document.createElement('p');
             klaar.className = 'achievement-done';
-            klaar.textContent = 'Alle vier de niveaus binnen.';
+            klaar.textContent = UI.t('Alle vier de niveaus binnen.');
             body.appendChild(klaar);
         }
 
@@ -295,8 +297,8 @@
             const slot = document.createElement('p');
             slot.className = 'secret-locked';
             slot.textContent = cat.hidden === 1
-                ? 'Er is nog een geheime achievement te ontdekken.'
-                : `Er zijn nog ${cat.hidden} geheime achievements te ontdekken.`;
+                ? UI.t('Er is nog een geheime achievement te ontdekken.')
+                : UI.t('Er zijn nog {n} geheime achievements te ontdekken.', { n: cat.hidden });
             groep.appendChild(slot);
         }
 

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/Events.php';
 require_once __DIR__ . '/SiteTime.php';
 require_once __DIR__ . '/Xp.php';
@@ -545,6 +546,7 @@ final class Achievements
                 $nieuw[] = [
                     'key'   => $sleutel,
                     'title' => $definitie['title'] . ' · ' . ucfirst($tier),
+                    'shown' => Taal::t($definitie['title']) . ' · ' . ucfirst(Taal::t($tier)),
                     'tier'  => $tier,
                     'xp'    => self::TIER_XP[$tier],
                 ];
@@ -567,6 +569,7 @@ final class Achievements
                 $nieuw[] = [
                     'key'   => $sleutel,
                     'title' => $definitie['title'],
+                    'shown' => Taal::t($definitie['title']),
                     'tier'  => 'geheim',
                     'xp'    => self::TIER_XP['geheim'],
                 ];
@@ -589,7 +592,14 @@ final class Achievements
             }
         }
 
-        return $nieuw;
+        // In het logboek (xp_events) staat de Nederlandse titel; Xp::detailTekst()
+        // vertaalt hem bij het tonen. Terug naar de browser gaat de titel in de
+        // taal van de pagina.
+        return array_map(static function (array $a): array {
+            $a['title'] = $a['shown'];
+            unset($a['shown']);
+            return $a;
+        }, $nieuw);
     }
 
     /**
@@ -610,7 +620,7 @@ final class Achievements
         if ($familie === 'geheim') {
             $geheim = self::secrets()[$tier] ?? null;
             return $geheim === null ? null : [
-                'title' => $geheim['title'], 'tier' => 'geheim', 'category' => 'geheim',
+                'title' => Taal::t($geheim['title']), 'tier' => 'geheim', 'category' => 'geheim',
             ];
         }
 
@@ -619,7 +629,7 @@ final class Achievements
             return null;
         }
         return [
-            'title'    => $definitie['title'] . ' · ' . ucfirst($tier),
+            'title'    => Taal::t($definitie['title']) . ' · ' . ucfirst(Taal::t($tier)),
             'tier'     => $tier,
             'category' => $definitie['category'],
         ];
@@ -656,7 +666,7 @@ final class Achievements
 
         $categorieen = [];
         foreach (self::CATEGORIES as $slug => $naam) {
-            $categorieen[$slug] = ['slug' => $slug, 'name' => $naam, 'items' => []];
+            $categorieen[$slug] = ['slug' => $slug, 'name' => Taal::t($naam), 'items' => []];
         }
 
         foreach (self::families() as $familie => $definitie) {
@@ -693,8 +703,8 @@ final class Achievements
 
             $categorieen[$definitie['category']]['items'][] = [
                 'key'         => $familie,
-                'title'       => $definitie['title'],
-                'description' => $definitie['description'],
+                'title'       => Taal::t($definitie['title']),
+                'description' => Taal::t($definitie['description']),
                 'format'      => $definitie['format'],
                 'value'       => $waarde,
                 'valueLabel'  => $waarde === null ? null : self::formatValue($definitie, $waarde),
@@ -713,8 +723,8 @@ final class Achievements
             }
             $geheimBehaald[] = [
                 'key'         => $sleutel,
-                'title'       => $definitie['title'],
-                'description' => $definitie['description'],
+                'title'       => Taal::t($definitie['title']),
+                'description' => Taal::t($definitie['description']),
                 'xp'          => self::TIER_XP['geheim'],
                 'unlockedAt'  => str_replace(' ', 'T', $behaald[$sleutel]) . 'Z',
                 'rarity'      => $zeldzaamheid[$sleutel] ?? 0,
@@ -782,9 +792,9 @@ final class Achievements
     private static function formatThreshold(array $definitie, int $drempel): string
     {
         return match ($definitie['format']) {
-            'time' => 'onder ' . self::formatMs($drempel),
-            'rank' => $drempel === 1 ? 'nummer 1' : 'top ' . $drempel,
-            default => number_format($drempel, 0, ',', '.') . ' ' . self::unit($definitie, (float) $drempel),
+            'time' => Taal::t('onder {tijd}', ['tijd' => self::formatMs($drempel)]),
+            'rank' => $drempel === 1 ? Taal::t('nummer 1') : Taal::t('top {n}', ['n' => $drempel]),
+            default => Taal::getal($drempel) . ' ' . self::unit($definitie, (float) $drempel),
         };
     }
 
@@ -794,7 +804,7 @@ final class Achievements
         return match ($definitie['format']) {
             'time' => self::formatMs((int) $waarde),
             'rank' => '#' . (int) $waarde,
-            default => number_format((float) $waarde, 0, ',', '.') . ' ' . self::unit($definitie, (float) $waarde),
+            default => Taal::getal((float) $waarde) . ' ' . self::unit($definitie, (float) $waarde),
         };
     }
 
@@ -802,9 +812,9 @@ final class Achievements
     private static function unit(array $definitie, float $waarde): string
     {
         if ((int) $waarde === 1 && isset($definitie['unitOne'])) {
-            return (string) $definitie['unitOne'];
+            return Taal::t((string) $definitie['unitOne']);
         }
-        return (string) ($definitie['unit'] ?? '');
+        return Taal::t((string) ($definitie['unit'] ?? ''));
     }
 
     private static function formatMs(int $ms): string
@@ -813,6 +823,6 @@ final class Achievements
         $seconden = ($ms % 60000) / 1000;
         return $minuten > 0
             ? sprintf('%d:%05.2f', $minuten, $seconden)
-            : rtrim(rtrim(number_format($seconden, 2, ',', ''), '0'), ',') . ' s';
+            : rtrim(rtrim(number_format($seconden, 2, Taal::isEngels() ? '.' : ',', ''), '0'), Taal::isEngels() ? '.' : ',') . ' s';
     }
 }

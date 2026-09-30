@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Taal.php';
 require_once __DIR__ . '/SiteTime.php';
 require_once __DIR__ . '/Events.php';
 
@@ -68,10 +69,42 @@ final class Xp
         ];
         foreach ($tiers as $tier) {
             if ($level >= $tier['min']) {
-                return $tier;
+                return ['name' => Taal::t($tier['name'])] + $tier;
             }
         }
-        return $tiers[count($tiers) - 1];
+        $laagste = $tiers[count($tiers) - 1];
+        return ['name' => Taal::t($laagste['name'])] + $laagste;
+    }
+
+    /**
+     * De regel in het XP-logboek, in de taal van het verzoek.
+     *
+     * In xp_events staat de regel in het Nederlands, zoals hij bij het
+     * toekennen gemaakt werd ("12 solves op 2026-09-30"). Voor een Engelse
+     * pagina herkennen we de vaste vormen en bouwen we hem opnieuw op.
+     */
+    public static function detailTekst(?string $detail): string
+    {
+        $detail = (string) $detail;
+        if (!Taal::isEngels() || $detail === '') {
+            return $detail;
+        }
+        $vormen = [
+            '/^(\d+) solves op (\d{4}-\d{2}-\d{2})$/u' => static fn ($m) => Taal::t('{n} solves op {dag}', ['n' => $m[1], 'dag' => $m[2]]),
+            '/^Nieuw record (\S+) op (.+): (.+)$/u' => static fn ($m) => Taal::t('Nieuw record {soort} op {event}: {tijd}', ['soort' => $m[1], 'event' => $m[2], 'tijd' => $m[3]]),
+            '/^Dag (\d+) op rij getimed$/u' => static fn ($m) => Taal::t('Dag {n} op rij getimed', ['n' => $m[1]]),
+            '/^Achievement: (.+) · (\w+)$/u' => static fn ($m) => 'Achievement: ' . Taal::t($m[1]) . ' · ' . ucfirst(Taal::t(strtolower($m[2]))),
+            '/^Achievement: (.+)$/u' => static fn ($m) => 'Achievement: ' . Taal::t($m[1]),
+            '/^Challenge gehaald: Scramble van de dag · (.+)$/u' => static fn ($m) => Taal::t('Challenge gehaald: {titel}', ['titel' => Taal::t('Scramble van de dag · {event}', ['event' => $m[1]])]),
+            '/^Challenge gehaald: (.+)$/u' => static fn ($m) => Taal::t('Challenge gehaald: {titel}', ['titel' => Taal::t($m[1])]),
+            '/^Toernooi afgerond: plek (\d+)$/u' => static fn ($m) => Taal::t('Toernooi afgerond: plek {n}', ['n' => $m[1]]),
+        ];
+        foreach ($vormen as $patroon => $maak) {
+            if (preg_match($patroon, $detail, $m) === 1) {
+                return $maak($m);
+            }
+        }
+        return Taal::t($detail);
     }
 
     /**

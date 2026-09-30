@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<!-- Written by hand; the Dutch version is /uitleg.html. If you change a question here, change it there too. -->
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Guide: Ao5, WCA inspection, +2 and DNF | CubeTimer</title>
+    <meta name="description" content="How the timer works, what Ao5 and Ao12 mean, how WCA inspection works and when you get a +2 or DNF. Answers to the questions we get asked most." />
+    <link rel="canonical" href="https://cubetimer.nl/en/faq.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/uitleg.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/faq.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/uitleg.html" />
+    <meta name="robots" content="index, follow" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:url" content="https://cubetimer.nl/en/faq.html" />
+    <meta property="og:title" content="Guide and frequently asked questions" />
+    <meta property="og:description" content="How the timer works, what Ao5 and Ao12 mean, how WCA inspection works and when you get a +2 or DNF. Answers to the questions we get asked most." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "FAQPage",
+            "@id": "https://cubetimer.nl/en/faq.html#vragen",
+            "url": "https://cubetimer.nl/en/faq.html",
+            "name": "Guide and frequently asked questions",
+            "inLanguage": "en",
+            "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/#website",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/"
+            },
+            "breadcrumb": {
+                "@id": "https://cubetimer.nl/en/faq.html#kruimelpad"
+            },
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "How does the timer work?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Press the space bar to start inspection (if it's switched on). Then hold the space bar until the lights turn green and let go: the clock is running. Press again to stop it. On a phone or tablet, tap the timer area. Press 2 to add a +2 to your last solve, D for a DNF, and Backspace to delete it."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What is WCA inspection?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "At an official World Cube Association competition you get 15 seconds to look at the cube before you start. Start between 15 and 17 seconds and you get a 2-second penalty (+2); after that the attempt is a DNF. In CubeTimer you can turn inspection on or off in the settings. If you start after 15 seconds, the +2 is added automatically."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What do Ao5 and Ao12 mean?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Ao5 is the average of your last five solves, leaving out the fastest and the slowest. That way one outlier doesn't count. Ao12 works the same way with twelve solves. At competitions most events are decided by an Ao5. A DNF counts as your worst time, so it gets dropped; if there are two in your average, the whole average is a DNF. In CubeTimer, Ao50 and Ao100 also drop only the best and the worst time."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "What is a Mo3?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "The plain mean of three solves, without dropping anything. The WCA uses it for long events such as 6x6 and 7x7. Here too, a single DNF makes the mean a DNF."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "When do you get a +2 or a DNF?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "You get a +2 if you start too late after inspection, or if the cube is one move away from solved when you stop. A DNF (did not finish) is an attempt that doesn't count, for example because the cube isn't solved. In CubeTimer you can add or remove either one by clicking the row in the times table."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Where do the scrambles come from?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "CubeTimer generates the same kind of scrambles as an official competition: random-state scrambles made with cubing.js, which uses the same method as TNoodle, the WCA's own program. So every event gets a fair, random starting position. The code runs from our own server, so it keeps working if another site is down."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Which events can I time?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "All 17 official WCA events: 2x2 up to 7x7, 3x3 blindfolded, 3x3 one-handed, Fewest Moves, Multi-Blind, 4x4 and 5x5 blindfolded, Clock, Megaminx, Pyraminx, Skewb and Square-1. Plus FTO and Master Tetraminx. Each session has its own event."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Do I need an account?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "No. Without an account your times are stored in your own browser, and the timer also works offline. With a free account you can take your times to other devices, appear on the leaderboards and join the daily challenges, tournaments and achievements."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Which smart cubes are supported?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "GAN (including the 356i), QiYi and X-Man, MoYu WeiLong AI, Giiker and GoCube. You connect over Bluetooth in Chrome or Edge on Windows, macOS, Android and ChromeOS; Safari and Firefox don't support Web Bluetooth. The scramble lights up move by move, the timer starts on your first turn and stops when the cube is solved. Afterwards you see how long the cross, F2L, OLL and PLL took for each solve."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "How do the leaderboards work?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "There's a leaderboard for each event and each kind of time (single, Mo3 and Ao5 up to Ao100), for all time, this week or today. Times that look impossibly fast only count once we've reviewed them. If you'd rather not be listed, you can turn that off in your account."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "How do I learn to solve the cube?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "The learn page covers the beginner's method step by step, followed by F2L and every OLL and PLL algorithm. Each algorithm has a practice button that opens the timer with exactly that case set up."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Is CubeTimer free?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. The site is paid for by ads, which are only personalised if you give permission. How we handle your data is explained in the privacy policy."
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://cubetimer.nl/en/faq.html#kruimelpad",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "CubeTimer",
+                    "item": "https://cubetimer.nl/en/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Guide",
+                    "item": "https://cubetimer.nl/en/faq.html"
+                }
+            ]
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) localStorage.setItem('cubetimer_taal', gekozen[1]);
+            } catch (err) { /* privemodus */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/en/" aria-label="Go to the timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn-icon lang-switch" href="/uitleg.html#taal=nl" hreflang="nl" lang="nl" title="Nederlands" aria-label="Nederlands">
+                <span class="lang-switch__code">NL</span>
+            </a>
+            <a class="btn btn--primary" href="/en/">Go to the timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <h1>Guide and frequently asked questions</h1>
+                <p>Everything you want to know about timing with CubeTimer, and about the rules at an official competition. Can't find your question? Use the feedback button on the timer or email <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>.</p>
+
+                <nav class="legal__summary" aria-label="Questions on this page">
+                    <ul class="legal__toc">
+                <li><a href="#timer">How does the timer work?</a></li>
+                <li><a href="#inspectie">What is WCA inspection?</a></li>
+                <li><a href="#ao5">What do Ao5 and Ao12 mean?</a></li>
+                <li><a href="#mo3">What is a Mo3?</a></li>
+                <li><a href="#straf">When do you get a +2 or a DNF?</a></li>
+                <li><a href="#scrambles">Where do the scrambles come from?</a></li>
+                <li><a href="#events">Which events can I time?</a></li>
+                <li><a href="#account">Do I need an account?</a></li>
+                <li><a href="#smartcube">Which smart cubes are supported?</a></li>
+                <li><a href="#ranglijsten">How do the leaderboards work?</a></li>
+                <li><a href="#leren">How do I learn to solve the cube?</a></li>
+                <li><a href="#gratis">Is CubeTimer free?</a></li>
+                    </ul>
+                </nav>
+
+                <h2 id="timer">How does the timer work?</h2>
+                <p>Press the space bar to start inspection (if it's switched on). Then hold the space bar until the lights turn green and let go: the clock is running. Press again to stop it. On a phone or tablet, tap the timer area. Press <kbd>2</kbd> to add a +2 to your last solve, <kbd>D</kbd> for a DNF, and <kbd>Backspace</kbd> to delete it.</p>
+
+                <h2 id="inspectie">What is WCA inspection?</h2>
+                <p>At an official World Cube Association competition you get 15 seconds to look at the cube before you start. Start between 15 and 17 seconds and you get a 2-second penalty (+2); after that the attempt is a DNF. In CubeTimer you can turn inspection on or off in the settings. If you start after 15 seconds, the +2 is added automatically.</p>
+
+                <h2 id="ao5">What do Ao5 and Ao12 mean?</h2>
+                <p>Ao5 is the average of your last five solves, leaving out the fastest and the slowest. That way one outlier doesn't count. Ao12 works the same way with twelve solves. At competitions most events are decided by an Ao5. A DNF counts as your worst time, so it gets dropped; if there are two in your average, the whole average is a DNF. In CubeTimer, Ao50 and Ao100 also drop only the best and the worst time.</p>
+
+                <h2 id="mo3">What is a Mo3?</h2>
+                <p>The plain mean of three solves, without dropping anything. The WCA uses it for long events such as 6x6 and 7x7. Here too, a single DNF makes the mean a DNF.</p>
+
+                <h2 id="straf">When do you get a +2 or a DNF?</h2>
+                <p>You get a +2 if you start too late after inspection, or if the cube is one move away from solved when you stop. A DNF (did not finish) is an attempt that doesn't count, for example because the cube isn't solved. In CubeTimer you can add or remove either one by clicking the row in the times table.</p>
+
+                <h2 id="scrambles">Where do the scrambles come from?</h2>
+                <p>CubeTimer generates the same kind of scrambles as an official competition: random-state scrambles made with cubing.js, which uses the same method as TNoodle, the WCA's own program. So every event gets a fair, random starting position. The code runs from our own server, so it keeps working if another site is down.</p>
+
+                <h2 id="events">Which events can I time?</h2>
+                <p>All 17 official WCA events: 2x2 up to 7x7, 3x3 blindfolded, 3x3 one-handed, Fewest Moves, Multi-Blind, 4x4 and 5x5 blindfolded, Clock, Megaminx, Pyraminx, Skewb and Square-1. Plus FTO and Master Tetraminx. Each session has its own event.</p>
+
+                <h2 id="account">Do I need an account?</h2>
+                <p>No. Without an account your times are stored in your own browser, and the timer also works offline. With a free account you can take your times to other devices, appear on the leaderboards and join the daily challenges, tournaments and achievements.</p>
+
+                <h2 id="smartcube">Which smart cubes are supported?</h2>
+                <p>GAN (including the 356i), QiYi and X-Man, MoYu WeiLong AI, Giiker and GoCube. You connect over Bluetooth in Chrome or Edge on Windows, macOS, Android and ChromeOS; Safari and Firefox don't support Web Bluetooth. The scramble lights up move by move, the timer starts on your first turn and stops when the cube is solved. Afterwards you see how long the cross, F2L, OLL and PLL took for each solve.</p>
+
+                <h2 id="ranglijsten">How do the leaderboards work?</h2>
+                <p>There's a leaderboard for each event and each kind of time (single, Mo3 and Ao5 up to Ao100), for all time, this week or today. Times that look impossibly fast only count once we've reviewed them. If you'd rather not be listed, you can turn that off in your account.</p>
+
+                <h2 id="leren">How do I learn to solve the cube?</h2>
+                <p>The <a href="/en/learn.html">learn page</a> covers the beginner's method step by step, followed by F2L and every OLL and PLL algorithm. Each algorithm has a practice button that opens the timer with exactly that case set up.</p>
+
+                <h2 id="gratis">Is CubeTimer free?</h2>
+                <p>Yes. The site is paid for by ads, which are only personalised if you give permission. How we handle your data is explained in the <a href="/en/privacy.html">privacy policy</a>.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/en/">Timer</a>
+        <a href="/en/learn.html">Learn</a>
+        <a href="/en/faq.html" aria-current="page">FAQ</a>
+        <a href="/en/privacy.html">Privacy</a>
+        <a href="/en/terms.html">Terms</a>
+        <a href="/en/#cookie-instellingen">Cookie settings</a>
+    </footer>
+</body>
+</html>

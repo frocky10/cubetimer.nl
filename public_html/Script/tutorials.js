@@ -197,7 +197,7 @@
             + delen.join('') + '</svg>';
 
         return '<div class="cube-pair">' + boven
-            + '<div class="cube-pair__slot"><span>sleuf</span>' + sleuf + '</div></div>';
+            + '<div class="cube-pair__slot"><span>' + UI.t('sleuf') + '</span>' + sleuf + '</div></div>';
     }
 
     function tekenGeval(geval) {
@@ -215,9 +215,9 @@
         if (geval.soort === 'oll') {
             const hoeken = geval.hoekenGoed;
             return Algorithms.groupLabel('oll', geval.groep) + ' · '
-                + (hoeken === 0 ? 'geen hoek goed'
-                    : hoeken === 1 ? 'één hoek goed'
-                        : hoeken + ' hoeken goed');
+                + (hoeken === 0 ? UI.t('geen hoek goed')
+                    : hoeken === 1 ? UI.t('één hoek goed')
+                        : UI.t('{n} hoeken goed', { n: hoeken }));
         }
         return Algorithms.groupLabel(geval.soort, geval.groep);
     }
@@ -236,10 +236,10 @@
                     <p class="alg-card__moves">${geval.alg}</p>
                 </div>
                 <div class="alg-card__actions">
-                    <button class="btn btn--sm" type="button" data-practice="${geval.id}">Oefenen</button>
+                    <button class="btn btn--sm" type="button" data-practice="${geval.id}">${UI.t('Oefenen')}</button>
                     <label class="alg-card__check"${kanOnthouden ? '' : ' hidden'}>
                         <input type="checkbox" data-learned="${geval.id}"${isGeleerd ? ' checked' : ''} />
-                        <span>Geleerd</span>
+                        <span>${UI.t('Geleerd')}</span>
                     </label>
                 </div>
             </article>`;
@@ -258,7 +258,7 @@
         const stukken = Object.keys(labels).map(groep => {
             const inGroep = gevallen.filter(geval => geval.groep === groep);
             if (!inGroep.length) return '';
-            return `<h3 class="alg-group">${labels[groep]}`
+            return `<h3 class="alg-group">${Algorithms.groupLabel(soort, groep)}`
                 + `<span class="alg-group__count">${inGroep.length}</span></h3>`
                 + '<div class="alg-grid">' + inGroep.map(kaart).join('') + '</div>';
         });
@@ -275,7 +275,7 @@
             const soort = element.dataset.progress;
             const gevallen = Algorithms.all()[soort] || [];
             const gedaan = gevallen.filter(geval => geleerd.has(geval.id)).length;
-            element.textContent = `${gedaan} van de ${gevallen.length} geleerd`;
+            element.textContent = UI.t('{gedaan} van de {totaal} geleerd', { gedaan, totaal: gevallen.length });
         });
     }
 
@@ -310,7 +310,7 @@
             if (vinkje) vinkje.checked = eerder.has(id);
             document.querySelector(`[data-alg="${id}"]`)?.classList.toggle('is-learned', eerder.has(id));
             werkVoortgangBij();
-            UI.toast('Opslaan is niet gelukt: ' + err.message, { type: 'error' });
+            UI.toast(UI.t('Opslaan is niet gelukt: {fout}', { fout: err.message }), { type: 'error' });
         }
     }
 
@@ -325,7 +325,7 @@
     function oefen(id) {
         const geval = Algorithms.byId(id);
         if (!geval) return;
-        window.location.href = 'index.html?oefen=' + encodeURIComponent(geval.id);
+        window.location.href = UI.pad('/?oefen=' + encodeURIComponent(geval.id));
     }
 
     /* =====================================================================
