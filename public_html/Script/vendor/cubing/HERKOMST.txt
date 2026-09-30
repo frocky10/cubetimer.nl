@@ -1,0 +1,7 @@
+cubing.js 0.63.8 (https://github.com/cubing/cubing.js)
+Licentie: MPL-2.0 OR GPL-3.0-or-later; hier gebruikt onder MPL-2.0.
+De broncode staat op https://github.com/cubing/cubing.js en in het npm-pakket
+"cubing" versie 0.63.8.
+
+Gebundeld met esbuild door tools/cubing-bouwen.sh (alleen het scramble-deel).
+Niet met de hand aanpassen: bouw opnieuw met dat script.

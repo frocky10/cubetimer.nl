@@ -58,10 +58,13 @@ return [
      * Beveiliging
      * ------------------------------------------------------------------ */
     'security' => [
-        // Willekeurige lange string. Wordt gebruikt om IP-adressen te hashen
-        // en tokens af te leiden. Genereer er een met bijvoorbeeld:
+        // Willekeurige lange string (minstens 32 tekens). Wordt gebruikt om
+        // IP-adressen te hashen en de formuliertokens tegen bots te
+        // ondertekenen. Genereer er een met bijvoorbeeld:
         //   php -r "echo bin2hex(random_bytes(32));"
-        // LET OP: als je deze wijzigt, worden alle bestaande logins ongeldig.
+        // Wijzigen mag: logins blijven geldig, alleen de tellers van de
+        // rate limits beginnen opnieuw. Laat je het voorbeeld staan, dan
+        // gebruikt de site een noodsleutel en klaagt hij in het errorlog.
         'app_key'             => 'VERVANG_MIJ_DOOR_EEN_LANGE_WILLEKEURIGE_STRING',
         // Hoe lang een login geldig blijft (in dagen).
         'session_lifetime_days' => 90,

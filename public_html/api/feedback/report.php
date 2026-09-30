@@ -5,7 +5,7 @@ require_once __DIR__ . '/../bootstrap.php';
 
 /**
  * POST /api/feedback/report.php
- * Body: { type, title, description, steps, expected, email, website, context }
+ * Body: { type, title, description, steps, expected, email, website, formToken, context }
  *
  * Maakt een issue aan in de GitHub-repo. Het GitHub-token staat uitsluitend in
  * het configbestand buiten de webroot; de browser ziet het nooit.
@@ -22,10 +22,12 @@ if (!GitHubIssues::isEnabled()) {
  * ---------------------------------------------------------------------- */
 
 // Honeypot: een verborgen veld dat een mens nooit invult, een bot meestal wel.
-if (Http::stringInput('website') !== '') {
+if (BotGuard::honeypotFilled()) {
     // Doe alsof het gelukt is, zodat de bot niet gaat variëren.
     Http::ok(['issue' => null, 'message' => 'Bedankt voor je melding!']);
 }
+// Formuliertoken met minimumtijd (zie BotGuard).
+BotGuard::check('feedback');
 
 $ipKey = Auth::fingerprint(Http::clientIp());
 $limit = RateLimiter::hit("feedback:{$ipKey}", 5, 3600);

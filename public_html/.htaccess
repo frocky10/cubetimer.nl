@@ -41,6 +41,29 @@ ErrorDocument 404 /404.html
     RewriteRule ^u/([A-Za-z0-9_.-]{3,32})/?$ profiel.php?u=$1 [L,QSA]
 </IfModule>
 
+# --- Beveiligingsheaders ------------------------------------------------------
+# "always", zodat ze ook op een 404 of een omleiding staan.
+<IfModule mod_headers.c>
+    # Geen bestand anders laten uitvoeren dan zijn type zegt.
+    Header always set X-Content-Type-Options "nosniff"
+    # Andere sites zien alleen het domein, nooit het pad of een ?oefen=.
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Clickjacking: de site mag niet in een iframe op een andere site. Beide
+    # headers, want oudere browsers kennen frame-ancestors niet.
+    # Bewust GEEN volledige Content-Security-Policy voor scripts: AdSense laadt
+    # scripts van wisselende Google-domeinen en in-page CMP-code, en een CSP die
+    # dat toelaat beschermt nauwelijks nog. Deze drie regels breken niets.
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Content-Security-Policy "frame-ancestors 'self'; base-uri 'self'; object-src 'none'"
+    # Wat de site niet gebruikt, mag ook geen advertentie of script vragen.
+    # Bluetooth staat er bewust niet in (smart cubes).
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), usb=(), payment=()"
+    # HSTS: de browser komt een jaar lang alleen nog via https. Alleen op een
+    # https-verbinding (zo wil de standaard het), en zonder includeSubDomains:
+    # een subdomein zonder certificaat (mail.cubetimer.nl) mag niet stukgaan.
+    Header always set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on' || %{HTTP:X-Forwarded-Proto} == 'https'"
+</IfModule>
+
 <IfModule mod_headers.c>
     # Profielen en foutpagina's horen niet in zoekmachines (ook als een
     # crawler de HTML niet leest). profiel.php zet de header zelf ook.
@@ -57,6 +80,7 @@ ErrorDocument 404 /404.html
 
 <IfModule mod_mime.c>
     AddType application/manifest+json .webmanifest
+    AddType font/woff2 .woff2
 </IfModule>
 
 # Plaatjes en lettertypes veranderen vrijwel nooit: een maand in de cache.
@@ -69,6 +93,7 @@ ErrorDocument 404 /404.html
     ExpiresByType image/x-icon "access plus 1 month"
     ExpiresByType image/vnd.microsoft.icon "access plus 1 month"
     ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
     ExpiresByType application/x-font-ttf "access plus 1 year"
     ExpiresByType text/css "access plus 0 seconds"
     ExpiresByType application/javascript "access plus 0 seconds"

@@ -39,6 +39,8 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
   duels tegen vrienden op dezelfde scrambles
 - Bug-/ideeënknop die een GitHub-issue aanmaakt
 - Donker en licht thema, sessiegrafiek, confetti bij een PR
+- Privacyverklaring en voorwaarden, toestemming via Googles CMP, je gegevens
+  downloaden en je account verwijderen, botbescherming zonder derden
 
 ---
 
@@ -51,6 +53,8 @@ tools/                         Hulpscripts voor het ontwikkelen (niet gedeployd)
 public_html/                   Precies wat er op de server komt te staan
   index.html                   De timer
   leren.html                   Leerpagina: beginner, F2L, OLL, PLL
+  privacy.html                 Privacyverklaring (AVG, cookies, je rechten)
+  voorwaarden.html             Gebruiksvoorwaarden
   profiel.php                  Openbaar profiel, serverside gerenderd
   404.html                     Eigen foutpagina (noindex, paden vanaf de root)
   .htaccess                    Eén adres (https, zonder www), /u/naam, 404, caching
@@ -78,17 +82,18 @@ public_html/                   Precies wat er op de server komt te staan
     algorithms.js              OLL, PLL en F2L; plaatjes eruit afgeleid
     tutorials.js               De leerpagina
     vendor/aes.js              aes-js (MIT), voor de versleuteling van cubes
+    vendor/cubing/             cubing.js (MPL-2.0), gebundeld door tools/cubing-bouwen.sh
     scrambleScript.js          Scrambles via cubing.js (ES-module)
   api/                         PHP-backend
     bootstrap.php              Laadt de libs, zet de foutafhandeling
     status.php                 Welke onderdelen zijn beschikbaar?
     config.example.php         Sjabloon — kopieer naar ~/cubetimer_config.php
-    lib/                       Config, Http, Database, Auth, RateLimiter, GitHubIssues,
+    lib/                       Config, Http, Database, Auth, RateLimiter, BotGuard, GitHubIssues,
                                SiteTime, Events, Averages, Records, Xp,
                                Leaderboard, Challenges, SolveFacts, Achievements,
                                PublicProfile, Follows, Tournaments, TournamentField,
                                SolveAnalysis, Ranking, GameModes, Duels, Wca,
-                               Mailer, AccountMail
+                               Mailer, AccountMail, AccountData
     auth/                      register, login, logout, me, verify-email,
                                resend-verification, forgot-password, reset-password
     sync/                      pull, push
@@ -104,7 +109,9 @@ public_html/                   Precies wat er op de server komt te staan
     games/                     overview, finish (spelmodi)
     duels/                     create, solve, decline
     admin/                     flags
-  Pictures/  Fonts/
+    account/                   export, delete (AVG)
+  Pictures/
+  Fonts/                       Digital-7 (timer) en Inter (zelf gehost, OFL)
 ```
 
 ---
@@ -157,6 +164,14 @@ php tools/spelmodi-en-wca-testen.php
 # SEO: titels, omschrijvingen, canonicals, sitemap, robots.txt, noindex op
 # profielen, og:image, JSON-LD, ads.txt. Draai na elke wijziging aan een <head>.
 php tools/seo-controleren.php
+
+# Veiligheid: geheimen in git (ook de geschiedenis), CSRF-header op elk
+# schrijvend endpoint, variabelen in SQL, cookies, headers, botbescherming,
+# geen CDN's. Draai na elke wijziging aan een endpoint of een query.
+php tools/veiligheid-controleren.php
+
+# cubing.js opnieuw bouwen (nieuwe versie). Nooit met de hand in vendor/cubing.
+bash tools/cubing-bouwen.sh [versie]
 
 # De site lokaal draaien, inclusief werkende API
 php -S 127.0.0.1:8123 -t public_html
@@ -230,7 +245,8 @@ gebruikt, niet alleen die van een solve.
 `window.CubeTimerUI`), daarna `script.js` (dat `window.cubeTimerApi` zet),
 daarna de rest. Ze staan met `defer` in de `<head>`, wat de volgorde
 garandeert. `scrambleScript.js` is een ES-module (cubing.js), laadt apart en
-mag nergens vroeg op rekenen.
+mag nergens vroeg op rekenen. Hij importeert `./vendor/cubing/scramble.js` van
+onze eigen server; zie het hoofdstuk Privacy.
 
 Een paar bestanden worden pas geladen als ze nodig zijn: `cube.js` en
 `algorithms.js` (door de oefenknop), en `vendor/aes.js`, `cube.js`,
@@ -241,7 +257,8 @@ smart-cubevenster opent). Wie ze niet nodig heeft, downloadt ze ook niet.
 
 | Object | Van wie | Waarvoor |
 |---|---|---|
-| `window.CubeTimerUI` | `ui.js` | `toast`, `ask`, `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
+| `window.CubeTimerUI` | `ui.js` | `toast`, `ask` (ook `input: { type: 'password' }`), `openModal`, `closeModal`, `registerModal`, `isAnyModalOpen`, `api`, `protectedApi(path, body, form)` (formulieren met botbescherming), `status`, `refreshStatus`, `formatTime`, `uniqueId`, `storage` |
+| `window.CubeTimerToestemming` | inline in `index.html` | `open()`: het CMP-venster van Google opnieuw tonen (Cookie-instellingen) |
 | `window.cubeTimerApi` | `script.js` | `getSessions`, `replaceSessions`, `getSetting`, `updateSetting`, `averageOf`, `bestAverageOf`, `getEffectiveTime`, `getEventOptions`, `setScrambleOverride`, `setActiveSessionEvent`, `setSolveCapture(handler, owner)`, `getSolveCaptureOwner`, `triggerConfetti`, `getRemovedSolveIds`, `clearRemovedSolveIds`, `getState`, `startInspectionFromBluetooth`, `startTimerFromBluetooth`, `stopTimerFromBluetooth({ ms, analysis })` |
 | `window.CubeTimerAccount` | `account.js` | `currentUsername`, `getProfile`, `reloadProfile` |
 | `window.CubeTimerLeaderboard` | `leaderboard.js` | `open`, `reload` |
@@ -352,7 +369,7 @@ uit `lib/`.
 
 | Endpoint | Methode | Doet |
 |---|---|---|
-| `status.php` | GET | Welke onderdelen zijn beschikbaar, ben ik ingelogd |
+| `status.php` | GET | Welke onderdelen zijn beschikbaar, ben ik ingelogd, en een `formToken` voor BotGuard |
 | `auth/register.php` | POST | Account aanmaken en meteen inloggen |
 | `auth/login.php` | POST | Inloggen met gebruikersnaam of e-mail |
 | `auth/logout.php` | POST | Sessie beëindigen |
@@ -391,6 +408,8 @@ uit `lib/`.
 | `duels/solve.php` | POST | Een poging in een duel |
 | `duels/decline.php` | POST | Afwijzen, of intrekken zolang de ander niet begonnen is |
 | `admin/flags.php` | GET/POST | Beoordeelwachtrij (alleen rol `admin`) |
+| `account/export.php` | GET | Al je gegevens als JSON-download (AVG) |
+| `account/delete.php` | POST | Account met alles erop verwijderen; vraagt je wachtwoord |
 
 ### Rate limiting
 
@@ -401,7 +420,8 @@ per account, meldingen 5/uur, wachtwoord vergeten 5/uur per IP en 3/uur per
 account, een nieuw wachtwoord zetten 10/uur, bevestigen 20/uur. Per account:
 bevestigingsmail opnieuw 3/uur, toernooien starten 20/uur,
 spelmodusrondes 120/uur, duels aanmaken 30/uur, WCA-comps zoeken 40 en ophalen
-30 per tien minuten. Zonder schrijfbare map wordt er niet gelimiteerd.
+30 per tien minuten, gegevens downloaden 10/uur, account verwijderen 5
+pogingen per uur. Zonder schrijfbare map wordt er niet gelimiteerd.
 
 ---
 
@@ -718,7 +738,7 @@ op één adres, **`https://cubetimer.nl`**, zonder www.
 |---|---|---|
 | Eén adres | `.htaccess` | `www.` en `http://` gaan met een 301 naar `https://cubetimer.nl`, `/index.html` naar `/`. Anders ziet Google drie sites met dezelfde inhoud. Controleert `X-Forwarded-Proto`, zodat een proxy geen lus geeft |
 | Canonical | `<link rel="canonical">` op elke indexeerbare pagina | Precies het adres uit de sitemap, ook als iemand `?oefen=...` of `/index.html` deelt |
-| Sitemap | `sitemap.xml` | Alleen `/` en `/leren.html`. Een nieuwe openbare pagina hoort erin, met hetzelfde adres als in zijn canonical |
+| Sitemap | `sitemap.xml` | `/`, `/leren.html`, `/privacy.html` en `/voorwaarden.html`. Een nieuwe openbare pagina hoort erin, met hetzelfde adres als in zijn canonical |
 | robots.txt | `robots.txt` | Blokkeert alleen `/api/`. Profielen bewust **niet**: een geblokkeerde pagina leest Google niet, dus dan ziet hij de noindex niet en kan de kale URL alsnog in de resultaten komen |
 | Niet in Google | `profiel.php`, `404.html` | `noindex, follow` als meta-tag en als `X-Robots-Tag`-header. De 404-pagina geeft ook echt een 404 |
 | Titel en omschrijving | `<head>` | Nederlands, titel ≤ 60 tekens, omschrijving 70-160 tekens |
@@ -726,7 +746,7 @@ op één adres, **`https://cubetimer.nl`**, zonder www.
 | Delen | `og:*` en `twitter:card` | `Pictures/og-image.png` (1200x630), altijd als volledig adres; een relatief pad toont in WhatsApp niets |
 | Structured data | JSON-LD in de `<head>` | Timer: `WebSite`, `Organization` (met logo) en `WebApplication` (gratis). Leren: `WebPage`/`LearningResource` met een kruimelpad |
 | Iconen | `favicon.ico`, `Pictures/favicon-*.png`, `apple-touch-icon.png`, `site.webmanifest` | Google toont een favicon vanaf 48px. Gemaakt met `php tools/seo-afbeeldingen.php`; opnieuw draaien als het logo verandert |
-| Snelheid | `.htaccess` | gzip, plaatjes en lettertypes een maand in de cache. CSS, JS en HTML niet: er zit geen versienummer in de bestandsnamen, dus na een release moet de browser het nieuwe bestand ophalen |
+| Snelheid | `.htaccess` | gzip, plaatjes een maand en lettertypes een jaar in de cache, de stukken van cubing.js (met een hash in de naam) ook een jaar. CSS, JS en HTML niet: er zit geen versienummer in de bestandsnamen, dus na een release moet de browser het nieuwe bestand ophalen |
 | Advertenties | `ads.txt` | Beide AdSense-accounts (`pub-7865…` en `pub-9889…`) staan erin. `tools/seo-controleren.php` controleert dat elk id uit `index.html` er ook in staat |
 
 `php tools/seo-controleren.php` loopt dit allemaal na. De `.htaccess` is
@@ -736,6 +756,87 @@ getest op een echte Apache (redirects, 404, headers, gzip); `php -S` leest geen
 **Na de deploy**: meld de site aan in Google Search Console (eigendom bewijzen
 via DNS of een HTML-bestand), stuur daar `https://cubetimer.nl/sitemap.xml` in,
 en controleer met de Rich Results Test dat de structured data gelezen wordt.
+
+## Privacy en toestemming
+
+De regels (AVG en de cookiewet) in het kort: wat nodig is om de site te laten
+werken mag zonder vragen; alles van Google wat volgt of personaliseert pas na
+toestemming. De teksten staan in `privacy.html` en `voorwaarden.html`;
+verantwoordelijke is "CubeTimer (cubetimer.nl)", contact `privacy@cubetimer.nl`.
+**Verander je iets aan wat er bewaard of gedeeld wordt, pas dan de
+privacyverklaring aan** (en de datum bovenaan).
+
+**Toestemming.** Er is geen eigen cookiebanner: het gecertificeerde CMP-venster
+van Google (AdSense > Privacy en berichten) komt met het AdSense-script mee.
+Het inline script in de `<head>` van `index.html`:
+
+1. zet Consent Mode v2 standaard op `denied` (alle vier de signalen), vóór
+   `gtag('config')`;
+2. laadt na `load` + idle alleen het AdSense-script (met de CMP);
+3. vraagt via `__tcfapi` wat de bezoeker koos. Pas bij doel 1 plus doel 8 of 9
+   (of als de AVG niet geldt, `gdprApplies: false`) gaat `analytics_storage`
+   op `granted` en wordt `gtag.js` geladen. Trekt iemand het in, dan weer
+   `denied` en gaan de `_ga`-cookies weg;
+4. komt er binnen 15 seconden geen CMP (niet ingesteld in AdSense, adblocker),
+   dan laden we Analytics **niet**. Liever geen statistieken dan zonder
+   toestemming.
+
+AdSense zelf leest de toestemming uit de CMP en toont zonder toestemming alleen
+niet-gepersonaliseerde advertenties. Alleen `index.html` heeft advertenties en
+Analytics; de andere pagina's laden niets van Google.
+
+**Cookie-instellingen** staat onderaan elke pagina. Op de timer opent een klik
+(`[data-cookie-instellingen]`) meteen `googlefc.showRevocationMessage()`; vanaf
+een andere pagina gaat de link naar `/#cookie-instellingen`, en de timer opent
+het venster dan zelf. Laadt de CMP niet, dan een toast in plaats van niets.
+
+**Geen verzoeken naar derden zonder toestemming.** Het lettertype Inter staat in
+`Fonts/` (Google Fonts stuurde het IP-adres van elke bezoeker naar Google), en
+cubing.js in `Script/vendor/cubing/` (was cdn.cubing.net). `tools/veiligheid-controleren.php`
+bewaakt dat er geen CDN terugkomt.
+
+**cubing.js zelf hosten.** `bash tools/cubing-bouwen.sh [versie]` haalt het
+npm-pakket en bundelt met esbuild alleen `randomScrambleForEvent`, met code
+splitting (de zoekcode per puzzel laadt pas als hij nodig is) en de worker
+`search-worker-entry.js` als eigen ingang in dezelfde map, want cubing.js zoekt
+hem met `new URL("./search-worker-entry.js", import.meta.url)`. Ongeveer 1,3 MB
+in 30 bestanden. Licentie MPL-2.0 (tekst in `tools/licenties/`, mee
+gekopieerd); daarom **nooit met de hand aanpassen**, alleen opnieuw bouwen. Een
+eigen scramble-script schrijven heeft geen zin: WCA-waardige random-state
+scrambles voor 19 events is precies wat cubing.js (de TNoodle-opvolger) al doet.
+
+**Je gegevens.** In het accountvenster, onder "Je gegevens":
+
+| Knop | Endpoint | Wat |
+|---|---|---|
+| Mijn gegevens downloaden | `account/export.php` | Alles als JSON: account, profiel, sessies, solves (ook losse), records, XP, achievements, challenges, toernooien, spelmodi, duels, volgen, algoritmes, meldingen, inlogsessies. `AccountData::export()` doet `SELECT *` per tabel, zodat een nieuwe kolom vanzelf meegaat; `HIDDEN_COLUMNS` haalt hashes eruit. 18.000 solves: 0,1 s, 9 MB |
+| Account verwijderen | `account/delete.php` | Twee vragen (zeker weten, dan het wachtwoord) en dan één `DELETE FROM users`; de foreign keys ruimen de rest op. Wat met `SET NULL` blijft staan, wordt eerst anoniem: e-mail, IP-hash en browser uit `feedback_reports`, en je naam in andermans toernooi wordt "Oud-lid". De tijden in de browser blijven staan |
+
+**Nieuwe tabel met een `user_id`?** Zet hem in `AccountData::USER_TABLES` (dan
+komt hij in de export) en geef de foreign key `ON DELETE CASCADE` (dan gaat hij
+mee bij verwijderen). Bij `SET NULL`: anoniem maken in `AccountData::delete()`.
+
+## Veiligheid
+
+Wat er is, en waar het staat. `php tools/veiligheid-controleren.php` loopt het
+na; draai hem na elke wijziging aan een endpoint of query.
+
+| Onderdeel | Hoe |
+|---|---|
+| Wachtwoorden | `password_hash(PASSWORD_DEFAULT)` = bcrypt, kosten 12 (±250 ms per poging). Oude hashes worden bij het inloggen bijgewerkt (`password_needs_rehash`). Login rekent ook een hash uit als het account niet bestaat, zodat de responstijd niets verraadt |
+| Sessies | 32 willekeurige bytes in een cookie (`HttpOnly`, `SameSite=Lax`, `Secure`), in de database alleen de SHA-256. Wachtwoord herstellen logt overal uit |
+| CSRF | Alles wat schrijft eist POST en `X-Requested-With`; een formulier van een andere site kan die header niet zetten |
+| SQL | Altijd placeholders. De paar queries met een variabele in de tekst (getypte getallen, vraagtekens, vaste stukjes) staan met reden in `SQL_VEILIG` in het controlescript; een nieuwe geeft een fout tot iemand ernaar kijkt |
+| Geheimen | Alleen in `~/cubetimer_config.php`. Het controlescript zoekt tokens en sleutels in de bestanden én in de hele git-geschiedenis |
+| `app_key` | Voor IP-vingerafdrukken en formuliertokens. Ontbreekt hij of staat er nog het voorbeeld, dan leidt `Auth::appKey()` er een af uit geheimen van de server en klaagt hij in het errorlog |
+| Bots | `BotGuard`: honeypotveld `website` plus een formuliertoken uit `status.php` (tijdstempel + HMAC met de app_key). Te snel na het laden (inloggen 1 s, wachtwoord vergeten 2 s, registreren en melden 3 s) of zonder geldig token = geweigerd. Op registreren, inloggen, wachtwoord vergeten en de meldknop. `UI.protectedApi()` stuurt het mee en probeert bij een verlopen token één keer opnieuw. De limieten per IP en account blijven het vangnet |
+| Headers | In `.htaccess`: HSTS (een jaar, alleen via https, zonder subdomeinen), `X-Frame-Options` + `frame-ancestors` tegen clickjacking, `Referrer-Policy`, `Permissions-Policy` (camera, microfoon, locatie, usb, betalen uit; Bluetooth niet, voor smart cubes), `nosniff`. Getest op Apache |
+| Geen script-CSP | Bewust: AdSense laadt scripts van wisselende Google-domeinen; een CSP die dat toelaat beschermt nauwelijks nog en breekt makkelijk de advertenties |
+| XSS | Gebruikersinvoer gaat via `textContent`; waar `innerHTML` staat, zijn het getallen of eigen teksten, of gaat het door `escapeHtml`. `profiel.php` zet alles door `e()` |
+| Foutmeldingen | Nooit technische details naar de browser (behalve met `debug => true`) |
+
+Wat niet kan: de timer draait in de browser, dus een tijd kan altijd verzonnen
+worden. Daarvoor is de controle op onmogelijke tijden (zie Records).
 
 ## Mail: bevestigen en wachtwoord vergeten
 
@@ -1083,6 +1184,14 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
 - Solves uit een spelmodus komen niet in je sessie (net als bij toernooien).
   Wil je ze wel in je statistieken, dan kan de capture-handler ze ook doorgeven.
 
+- **Na de deploy, voor de eigenaar**: in AdSense onder Privacy en berichten het
+  bericht voor de Europese regelgeving aanzetten (met Consent Mode), de mailbox
+  `privacy@cubetimer.nl` aanmaken, en controleren dat `security.app_key` in de
+  config staat. Zonder CMP laadt Analytics nooit (bewust).
+- De privacyverklaring noemt de hostingpartij niet bij naam. Wil je dat wel
+  (netter), zet dan naam en land erbij in hoofdstuk 6.
+- De meldknop maakt een GitHub-issue; is de repository openbaar, dan is de
+  melding dat ook. Dat staat in de privacyverklaring en bij het formulier.
 - E-mailadres wijzigen kan nog niet vanuit de site. Komt dat, stuur dan een
   nieuwe bevestigingsmail en zet `email_verified_at` terug op NULL; een oude
   link werkt dan vanzelf niet meer (`email_verifications.email_lower`).

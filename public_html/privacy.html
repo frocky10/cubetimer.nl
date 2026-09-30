@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Privacyverklaring – CubeTimer</title>
+    <meta name="description" content="Welke gegevens CubeTimer bewaart, waarom, hoe lang en bij wie. Over je account, je tijden, cookies, advertenties en je rechten onder de AVG." />
+    <link rel="canonical" href="https://cubetimer.nl/privacy.html" />
+    <meta name="robots" content="index, follow" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="nl_NL" />
+    <meta property="og:url" content="https://cubetimer.nl/privacy.html" />
+    <meta property="og:title" content="Privacyverklaring — CubeTimer" />
+    <meta property="og:description" content="Welke gegevens CubeTimer bewaart, waarom, hoe lang en bij wie." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebPage",
+                "@id": "https://cubetimer.nl/privacy.html#pagina",
+                "url": "https://cubetimer.nl/privacy.html",
+                "name": "Privacyverklaring",
+                "inLanguage": "nl-NL",
+                "isPartOf": { "@type": "WebSite", "@id": "https://cubetimer.nl/#website", "name": "CubeTimer", "url": "https://cubetimer.nl/" },
+                "breadcrumb": { "@id": "https://cubetimer.nl/privacy.html#kruimelpad" }
+            },
+            {
+                "@type": "BreadcrumbList",
+                "@id": "https://cubetimer.nl/privacy.html#kruimelpad",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "CubeTimer", "item": "https://cubetimer.nl/" },
+                    { "@type": "ListItem", "position": 2, "name": "Privacyverklaring", "item": "https://cubetimer.nl/privacy.html" }
+                ]
+            }
+        ]
+    }
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+
+    <!-- Thema meteen zetten, vóór de eerste paint. Zelfde script als in
+         index.html; bewust inline, anders flitst de pagina. -->
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+            } catch (err) { /* privemodus: dan blijft het donkere thema staan */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/" aria-label="Naar de timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <a class="btn btn--primary" href="/">Naar de timer</a>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <h1>Privacyverklaring</h1>
+                <p class="legal__meta">Laatst bijgewerkt: 30 september 2026</p>
+
+                <div class="legal__summary">
+                    <p><strong>In het kort</strong></p>
+                    <ul>
+                        <li>Je kunt de timer gebruiken zonder account. Je tijden staan dan alleen in je eigen browser.</li>
+                        <li>Met een account bewaren we je gebruikersnaam, je e-mailadres, je wachtwoord (versleuteld, wij kunnen het niet lezen) en je tijden.</li>
+                        <li>We verkopen niets en delen je gegevens niet met anderen, behalve met de diensten die hieronder staan.</li>
+                        <li>Google Analytics en gepersonaliseerde advertenties gebruiken we alleen als je daar toestemming voor geeft. Je kunt dat altijd weer veranderen via <a href="/#cookie-instellingen">Cookie-instellingen</a>.</li>
+                        <li>Je kunt al je gegevens downloaden en je account met alles erop zelf verwijderen, in het accountvenster.</li>
+                    </ul>
+                </div>
+
+                <h2 id="wie">1. Wie zijn wij</h2>
+                <p>
+                    CubeTimer (<a href="https://cubetimer.nl/">cubetimer.nl</a>) is een gratis speedcubing-timer.
+                    CubeTimer is verantwoordelijk voor de verwerking van je persoonsgegevens zoals in deze
+                    verklaring beschreven. Vragen, verzoeken of klachten over privacy stuur je naar
+                    <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>.
+                </p>
+
+                <h2 id="zonder-account">2. Zonder account</h2>
+                <p>
+                    De timer werkt zonder account. Je tijden, sessies en instellingen staan dan in de
+                    opslag van je eigen browser (<code>localStorage</code>) en komen niet bij ons terecht.
+                    Wis je de gegevens van je browser, dan zijn ze weg.
+                </p>
+                <p>Wat de browser voor de site onthoudt:</p>
+                <div class="legal__table-wrap">
+                    <table>
+                        <thead><tr><th>Sleutel</th><th>Inhoud</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cubetimer_sessions_v1</code></td><td>Je sessies en tijden, met de scrambles</td></tr>
+                            <tr><td><code>cubetimer_settings_v1</code>, <code>cubetimer_theme</code></td><td>Je instellingen en thema</td></tr>
+                            <tr><td><code>cubetimer_stats_scope</code></td><td>Welke periode je in de statistieken bekeek</td></tr>
+                            <tr><td><code>cubetimer_removed_v1</code></td><td>Tijden die ook van je account af moeten bij de volgende synchronisatie</td></tr>
+                            <tr><td><code>cubetimer_cube_macs</code></td><td>Het Bluetooth-adres van je smart cube, zodat je het maar één keer hoeft in te vullen</td></tr>
+                            <tr><td><code>cubetimer_game_v1</code></td><td>Een lopende spelmodus en je laatste keuzes daarin</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    Dit is nodig om de timer te laten werken en valt daarom niet onder de toestemmingsvraag
+                    voor cookies.
+                </p>
+
+                <h2 id="account">3. Met een account</h2>
+                <p>Maak je een account, dan bewaren we op onze server:</p>
+                <ul>
+                    <li><strong>Accountgegevens</strong>: gebruikersnaam, e-mailadres, je wachtwoord als hash (bcrypt; het wachtwoord zelf kennen we niet), wanneer je het account maakte en voor het laatst inlogde, en of je e-mailadres bevestigd is.</li>
+                    <li><strong>Profiel</strong>: weergavenaam, land (als je dat invult), je hoofd-event en of je op de ranglijsten wilt staan.</li>
+                    <li><strong>Je tijden</strong>: sessies en solves met tijd, straf (+2, DNF), scramble, datum en tijd, en bij een smart cube de analyse van de solve (zetten, fases).</li>
+                    <li><strong>Wat daaruit volgt</strong>: records, XP en level, streaks, achievements, daily challenges, toernooien, spelmodi, duels, wie je volgt, welke algoritmes je als geleerd hebt afgevinkt, en scrambles die je browser voor de scramble van de dag aanlevert.</li>
+                    <li><strong>Inlogsessies</strong>: per ingelogd apparaat een willekeurige sleutel (alleen als hash opgeslagen), de browser (user agent) en een onomkeerbaar versleutelde vorm van je IP-adres.</li>
+                    <li><strong>Controle op eerlijk spel</strong>: tijden die onmogelijk snel lijken, worden gemarkeerd en door ons bekeken voordat ze op een ranglijst kunnen komen.</li>
+                </ul>
+                <p>
+                    <strong>Waarom:</strong> om je account te laten werken, je tijden op al je apparaten te hebben,
+                    en de ranglijsten, challenges, toernooien en andere onderdelen te kunnen aanbieden. De grondslag
+                    is de overeenkomst met jou (artikel 6 lid 1 sub b AVG): zonder deze gegevens kunnen we de dienst
+                    niet leveren. De controle op onmogelijke tijden en de beveiliging doen we op grond van ons
+                    gerechtvaardigd belang bij eerlijke ranglijsten en een veilige site (sub f).
+                </p>
+
+                <h3>Wat anderen van je zien</h3>
+                <p>
+                    Sta je op de ranglijsten (dat staat standaard aan), dan zijn je gebruikersnaam, land, records
+                    en plek op de ranglijst openbaar, en heb je een openbaar profiel op
+                    <code>cubetimer.nl/u/jouwnaam</code> met je records, level, rang en een selectie van je
+                    achievements. Je profiel staat niet in zoekmachines. Echte gebruikers kunnen ook als
+                    gesimuleerde tegenstander in iemands toernooi verschijnen (met hun naam en niveau, nooit met
+                    hun echte tijden). Zet je de ranglijsten uit in je accountinstellingen, dan verdwijnt dit
+                    allemaal. Je e-mailadres is nooit zichtbaar voor anderen.
+                </p>
+
+                <h3>E-mail</h3>
+                <p>
+                    We mailen alleen om je e-mailadres te bevestigen en als je zelf om een nieuw wachtwoord
+                    vraagt. Geen nieuwsbrieven, geen reclame. De mail gaat via onze eigen mailbox bij onze
+                    hostingpartij.
+                </p>
+
+                <h2 id="meldingen">4. Een bug of idee melden</h2>
+                <p>
+                    Met de meldknop stuur je ons een melding. Die komt als issue op
+                    <a href="https://github.com/" rel="noopener">GitHub</a>, waar we onze takenlijst bijhouden, samen
+                    met technische gegevens die helpen om het probleem te vinden: de pagina, je browser, je
+                    schermformaat, taal, tijdzone, thema en event, en je gebruikersnaam als je bent ingelogd.
+                    <strong>Zet er geen persoonlijke gegevens in</strong>: een issue kan voor anderen leesbaar zijn.
+                </p>
+                <p>
+                    Een e-mailadres voor een reactie is niet verplicht. Laat je het achter, dan staat het alleen in
+                    onze database, niet op GitHub. We bewaren daarnaast een versleutelde vorm van je IP-adres en je
+                    browser, om misbruik van de knop tegen te gaan. Grondslag: gerechtvaardigd belang (sub f) om de
+                    site te verbeteren en spam te weren.
+                </p>
+
+                <h2 id="cookies">5. Cookies, advertenties en statistieken</h2>
+                <div class="legal__table-wrap">
+                    <table>
+                        <thead><tr><th>Cookie</th><th>Van</th><th>Waarvoor</th><th>Hoe lang</th><th>Toestemming nodig?</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>cubetimer_session</code></td><td>CubeTimer</td><td>Ingelogd blijven. Alleen als je inlogt.</td><td>90 dagen, of tot je uitlogt</td><td>Nee, strikt noodzakelijk</td></tr>
+                            <tr><td><code>FCCDCF</code>, <code>FCNEC</code> e.d.</td><td>Google (toestemmingsvenster)</td><td>Onthouden welke keuze je in het toestemmingsvenster maakte</td><td>Tot 13 maanden</td><td>Nee, nodig om je keuze te respecteren</td></tr>
+                            <tr><td><code>_ga</code>, <code>_ga_*</code></td><td>Google Analytics</td><td>Bezoekersstatistieken: hoeveel mensen de site gebruiken en welke onderdelen</td><td>Tot 2 jaar</td><td>Ja</td></tr>
+                            <tr><td><code>__gads</code>, <code>__gpi</code>, <code>IDE</code> e.d.</td><td>Google AdSense</td><td>Advertenties tonen, meten en (met toestemming) personaliseren</td><td>Tot 13 maanden</td><td>Ja</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    De site wordt betaald met advertenties van Google AdSense. Bezoek je de site vanuit de Europese
+                    Economische Ruimte, het Verenigd Koninkrijk of Zwitserland, dan vraagt een venster van Google
+                    (een gecertificeerd toestemmingsplatform) eerst om je toestemming. <strong>Zolang je geen
+                    toestemming geeft, laden we Google Analytics niet</strong>, en toont AdSense alleen
+                    niet-gepersonaliseerde advertenties, waarvoor Google beperkte gegevens gebruikt om bijvoorbeeld
+                    fraude te bestrijden. Grondslag: je toestemming (sub a), die je op elk moment kunt intrekken via
+                    <a href="/#cookie-instellingen">Cookie-instellingen</a>, onderaan elke pagina.
+                </p>
+                <p>
+                    Hoe Google met gegevens omgaat, lees je in de
+                    <a href="https://policies.google.com/technologies/partner-sites?hl=nl" rel="noopener">uitleg van Google over partnersites</a>
+                    en het <a href="https://policies.google.com/privacy?hl=nl" rel="noopener">privacybeleid van Google</a>.
+                </p>
+                <p>
+                    Lettertypes en de code voor de scrambles staan op onze eigen server; daarvoor maakt je browser
+                    geen verbinding met anderen.
+                </p>
+
+                <h2 id="derden">6. Met wie we gegevens delen</h2>
+                <ul>
+                    <li><strong>Onze hostingpartij</strong>, waar de site, de database en de mailbox draaien. Die verwerkt de gegevens alleen voor ons. Zoals elke webserver houdt de server tijdelijk logbestanden bij met onder meer IP-adressen, voor beveiliging en storingen.</li>
+                    <li><strong>Google</strong> (Analytics en AdSense), alleen zoals hierboven beschreven. Google kan gegevens in de Verenigde Staten verwerken; Google is daarvoor aangesloten bij het EU-VS Data Privacy Framework.</li>
+                    <li><strong>GitHub</strong>, voor meldingen via de meldknop (zie hierboven). GitHub is een Amerikaans bedrijf.</li>
+                </ul>
+                <p>
+                    Voor de historische toernooien haalt onze server openbare uitslagen op bij de
+                    <a href="https://www.worldcubeassociation.org/" rel="noopener">World Cube Association</a>. Daarbij
+                    gaan geen gegevens van jou naar de WCA. We verkopen nooit gegevens en geven ze alleen aan
+                    anderen als de wet ons daartoe verplicht.
+                </p>
+
+                <h2 id="bewaren">7. Hoe lang we gegevens bewaren</h2>
+                <ul>
+                    <li><strong>Je account en alles wat erbij hoort</strong>: zolang je account bestaat. Verwijder je je account, dan is alles direct weg (zie hieronder).</li>
+                    <li><strong>Losse tijden</strong> (uit een sessie gehaald maar niet van je account gewist): tot je ze wist of je account verwijdert.</li>
+                    <li><strong>Inlogsessies</strong>: tot je uitlogt of hooguit 90 dagen.</li>
+                    <li><strong>Link om je e-mailadres te bevestigen</strong>: 48 uur. <strong>Link voor een nieuw wachtwoord</strong>: 1 uur, en maar één keer te gebruiken.</li>
+                    <li><strong>Pogingen tellen tegen misbruik</strong> (bijvoorbeeld te vaak inloggen): met een versleuteld IP-adres, alleen zolang de limiet loopt, meestal een kwartier tot een uur.</li>
+                    <li><strong>Meldingen</strong>: tot ze zijn afgehandeld en we ze niet meer nodig hebben. Verwijder je je account, dan halen we je e-mailadres en je gegevens uit je meldingen weg.</li>
+                </ul>
+
+                <h2 id="rechten">8. Je rechten</h2>
+                <p>Onder de AVG heb je het recht om:</p>
+                <ul>
+                    <li><strong>je gegevens in te zien en mee te nemen</strong>: in het accountvenster download je met één klik al je gegevens als JSON-bestand;</li>
+                    <li><strong>je gegevens te laten verwijderen</strong>: in het accountvenster verwijder je je account met alles erop; dat gaat meteen en is niet terug te draaien;</li>
+                    <li><strong>je gegevens te verbeteren</strong>: je profiel pas je zelf aan; voor iets anders mail je ons;</li>
+                    <li><strong>bezwaar te maken</strong> tegen verwerking op grond van gerechtvaardigd belang, en <strong>je toestemming in te trekken</strong> via Cookie-instellingen;</li>
+                    <li><strong>een klacht in te dienen</strong> bij de <a href="https://autoriteitpersoonsgegevens.nl/" rel="noopener">Autoriteit Persoonsgegevens</a>. We horen het natuurlijk liever eerst van jou.</li>
+                </ul>
+                <p>
+                    Voor alles wat je niet zelf kunt regelen mail je <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>.
+                    We reageren binnen een maand. Om zeker te weten dat het jouw account is, kunnen we je vragen te
+                    mailen vanaf het adres dat bij je account hoort.
+                </p>
+
+                <h2 id="beveiliging">9. Beveiliging</h2>
+                <ul>
+                    <li>De hele site werkt alleen via een versleutelde verbinding (https).</li>
+                    <li>Wachtwoorden worden opgeslagen met bcrypt, een methode die speciaal gemaakt is om het raden van wachtwoorden onbegonnen werk te maken. Ook wij kunnen je wachtwoord niet zien.</li>
+                    <li>Inlogsleutels en links in e-mails staan alleen als hash in de database; wie de database zou kunnen lezen, kan er niet mee inloggen.</li>
+                    <li>IP-adressen bewaren we niet leesbaar, alleen als versleutelde vingerafdruk om misbruik tegen te gaan.</li>
+                    <li>Inloggen, registreren en formulieren zijn beschermd tegen raden en tegen bots, zonder dat daar een dienst van een ander voor nodig is.</li>
+                </ul>
+                <p>
+                    Vind je toch een zwakke plek? Mail dan naar <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>
+                    in plaats van hem openbaar te maken; we lossen het zo snel mogelijk op.
+                </p>
+
+                <h2 id="kinderen">10. Kinderen</h2>
+                <p>
+                    Veel cubers zijn jong, en dat is prima: je kunt de timer zonder account gebruiken zonder dat er
+                    iets naar ons gaat. Ben je jonger dan 16 en wil je een account maken, overleg dat dan met je
+                    ouders of verzorgers. Zij kunnen ons altijd mailen om gegevens in te zien of te laten
+                    verwijderen. Toestemming voor cookies van Google hoort bij iemand onder de 16 door een ouder
+                    gegeven te worden.
+                </p>
+
+                <h2 id="wijzigingen">11. Wijzigingen</h2>
+                <p>
+                    Verandert er iets aan hoe we met gegevens omgaan, dan passen we deze verklaring aan en zetten we
+                    de datum bovenaan bij. Bij grote veranderingen laten we het op de site weten.
+                </p>
+
+                <p>Zie ook de <a href="/voorwaarden.html">gebruiksvoorwaarden</a>.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/">Timer</a>
+        <a href="/leren.html">Leren</a>
+        <a href="/privacy.html" aria-current="page">Privacy</a>
+        <a href="/voorwaarden.html">Voorwaarden</a>
+        <a href="/#cookie-instellingen">Cookie-instellingen</a>
+    </footer>
+</body>
+</html>

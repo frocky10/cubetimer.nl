@@ -79,9 +79,6 @@
     }
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="Style/style.css" />
 
     <!-- Thema meteen zetten, vóór de eerste paint, anders flitst de site kort in
@@ -115,17 +112,43 @@
     <script src="Script/account.js" defer></script>
     <script type="module" src="Script/scrambleScript.js"></script>
 
-    <!-- Google AdSense en Analytics, pas als de pagina klaar is.
-         Ze laden allebei flink wat script; bij het openen van de site ging dat
-         af van de tijd die de timer nodig had om te starten. gtag() werkt
-         meteen: wat erin gaat, wacht in dataLayer tot het script er is. -->
+    <!-- Google AdSense en Analytics, pas als de pagina klaar is, en Analytics
+         pas na toestemming.
+
+         Snelheid: ze laden allebei flink wat script; bij het openen van de site
+         ging dat af van de tijd die de timer nodig had om te starten. gtag()
+         werkt meteen: wat erin gaat, wacht in dataLayer tot het script er is.
+
+         Toestemming (AVG en de cookiewet): Consent Mode v2 staat standaard op
+         "geweigerd". De toestemmingsvraag zelf is het gecertificeerde
+         CMP-venster van Google (AdSense > Privacy en berichten), dat met het
+         AdSense-script meekomt. Analytics wordt pas geladen als dat venster
+         via de TCF-standaard (__tcfapi) zegt dat het mag, of dat de AVG voor
+         deze bezoeker niet geldt. Komt er geen antwoord (CMP niet ingesteld,
+         adblocker), dan laden we Analytics niet: liever geen statistieken dan
+         zonder toestemming. AdSense leest de toestemming zelf uit de CMP; zonder
+         toestemming toont het alleen niet-gepersonaliseerde advertenties.
+         Zie het hoofdstuk Privacy in CLAUDE.md. -->
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
+        gtag('consent', 'default', {
+            ad_storage: 'denied',
+            ad_user_data: 'denied',
+            ad_personalization: 'denied',
+            analytics_storage: 'denied',
+            wait_for_update: 500
+        });
+        gtag('set', 'ads_data_redaction', true);
         gtag('js', new Date());
         gtag('config', 'G-DNL5446N18');
 
+        window.googlefc = window.googlefc || {};
+        window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+
         (function () {
+            var analyticsGeladen = false;
+
             function laad(src, crossOrigin) {
                 var script = document.createElement('script');
                 script.async = true;
@@ -133,9 +156,52 @@
                 if (crossOrigin) script.crossOrigin = 'anonymous';
                 document.head.appendChild(script);
             }
-            function start() {
+
+            function analyticsAan() {
+                gtag('consent', 'update', { analytics_storage: 'granted' });
+                if (analyticsGeladen) return;
+                analyticsGeladen = true;
                 laad('https://www.googletagmanager.com/gtag/js?id=G-DNL5446N18', false);
+            }
+
+            // Toestemming ingetrokken: niets meer meten en de cookies van
+            // Analytics (_ga, _ga_...) weghalen.
+            function analyticsUit() {
+                gtag('consent', 'update', { analytics_storage: 'denied' });
+                document.cookie.split(';').forEach(function (deel) {
+                    var naam = deel.split('=')[0].trim();
+                    if (naam.indexOf('_ga') !== 0) return;
+                    var weg = naam + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+                    document.cookie = weg;
+                    document.cookie = weg + '; domain=.' + location.hostname.replace(/^www\./, '');
+                });
+            }
+
+            // Doel 1 (informatie op je apparaat opslaan) plus doel 8 of 9
+            // (meten en statistiek) uit de TCF: dat is wat Analytics doet.
+            function beslis(tcData) {
+                if (!tcData) return;
+                if (tcData.gdprApplies === false) { analyticsAan(); return; }
+                if (tcData.eventStatus !== 'tcloaded' && tcData.eventStatus !== 'useractioncomplete') return;
+                var doelen = (tcData.purpose && tcData.purpose.consents) || {};
+                if (doelen[1] && (doelen[8] || doelen[9])) analyticsAan();
+                else analyticsUit();
+            }
+
+            function volgToestemming(pogingen) {
+                if (typeof window.__tcfapi === 'function') {
+                    window.__tcfapi('addEventListener', 2, function (tcData, gelukt) {
+                        if (gelukt) beslis(tcData);
+                    });
+                    return;
+                }
+                // De CMP komt met het AdSense-script mee; geef hem even de tijd.
+                if (pogingen > 0) window.setTimeout(function () { volgToestemming(pogingen - 1); }, 500);
+            }
+
+            function start() {
                 laad('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7865142075636059', true);
+                volgToestemming(30);
             }
             function zodraRustig() {
                 if ('requestIdleCallback' in window) {
@@ -149,6 +215,40 @@
             } else {
                 window.addEventListener('load', zodraRustig, { once: true });
             }
+
+            // "Cookie-instellingen": het venster van de CMP opnieuw openen.
+            // Werkt ook als link vanaf een andere pagina: /#cookie-instellingen.
+            function openInstellingen() {
+                var geopend = false;
+                window.googlefc.callbackQueue.push(function () {
+                    if (typeof window.googlefc.showRevocationMessage === 'function') {
+                        geopend = true;
+                        window.googlefc.showRevocationMessage();
+                    }
+                });
+                window.setTimeout(function () {
+                    if (geopend) return;
+                    var ui = window.CubeTimerUI;
+                    var tekst = 'De cookie-instellingen konden niet geladen worden, bijvoorbeeld door een adblocker. '
+                        + 'Zonder toestemming plaatsen we geen cookies van Google.';
+                    if (ui && ui.toast) ui.toast(tekst, { type: 'info' });
+                }, 4000);
+            }
+            window.CubeTimerToestemming = { open: openInstellingen };
+
+            document.addEventListener('click', function (e) {
+                var link = e.target.closest && e.target.closest('[data-cookie-instellingen]');
+                if (!link) return;
+                e.preventDefault();
+                openInstellingen();
+            });
+            function vanuitAdres() {
+                if (location.hash !== '#cookie-instellingen') return;
+                history.replaceState(null, '', location.pathname + location.search);
+                openInstellingen();
+            }
+            window.addEventListener('hashchange', vanuitAdres);
+            window.addEventListener('load', vanuitAdres, { once: true });
         })();
     </script>
 </head>
@@ -286,6 +386,11 @@
                     </div>
                 </section>
             </div>
+            <footer class="site-footer" aria-label="Over deze site">
+                <a href="/privacy.html">Privacy</a>
+                <a href="/voorwaarden.html">Voorwaarden</a>
+                <a href="/#cookie-instellingen" data-cookie-instellingen>Cookie-instellingen</a>
+            </footer>
         </aside>
 
         <!-- ================================================================
@@ -705,7 +810,8 @@
 
                 <p class="notice">
                     We sturen automatisch je browser, schermformaat en het actieve event mee, zodat we het probleem kunnen
-                    nabootsen. Er gaan geen tijden of persoonlijke gegevens mee.
+                    nabootsen. Er gaan geen tijden mee. Je melding komt als issue op GitHub; zet er dus geen persoonlijke
+                    gegevens in. Zie de <a href="/privacy.html#meldingen" target="_blank" rel="noopener">privacyverklaring</a>.
                 </p>
 
                 <p class="form-error" id="feedback-error" role="alert"></p>
@@ -754,6 +860,11 @@
                         <label class="field__label" for="login-password">Wachtwoord</label>
                         <input class="input" type="password" id="login-password" autocomplete="current-password" required />
                     </div>
+                    <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots (zie BotGuard). -->
+                    <div class="honeypot" aria-hidden="true">
+                        <label for="login-website">Laat dit veld leeg</label>
+                        <input type="text" id="login-website" name="website" tabindex="-1" autocomplete="off" />
+                    </div>
                     <p class="form-error" id="login-error" role="alert"></p>
                     <button class="btn btn--primary btn--block" type="submit" id="login-submit">Inloggen</button>
                     <button class="btn btn--ghost btn--sm auth-link" type="button" id="forgot-open" hidden>Wachtwoord vergeten?</button>
@@ -768,6 +879,11 @@
                     <div class="field">
                         <label class="field__label" for="forgot-identifier">E-mailadres of gebruikersnaam</label>
                         <input class="input" type="text" id="forgot-identifier" autocomplete="username" required />
+                    </div>
+                    <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots (zie BotGuard). -->
+                    <div class="honeypot" aria-hidden="true">
+                        <label for="forgot-website">Laat dit veld leeg</label>
+                        <input type="text" id="forgot-website" name="website" tabindex="-1" autocomplete="off" />
                     </div>
                     <p class="form-error" id="forgot-error" role="alert"></p>
                     <p class="notice" id="forgot-done" hidden></p>
@@ -807,8 +923,17 @@
                                minlength="8" />
                         <span class="field__hint">Minstens 8 tekens.</span>
                     </div>
+                    <!-- Honeypot: verborgen voor mensen, vaak ingevuld door bots (zie BotGuard). -->
+                    <div class="honeypot" aria-hidden="true">
+                        <label for="register-website">Laat dit veld leeg</label>
+                        <input type="text" id="register-website" name="website" tabindex="-1" autocomplete="off" />
+                    </div>
                     <p class="form-error" id="register-error" role="alert"></p>
                     <button class="btn btn--primary btn--block" type="submit" id="register-submit">Account aanmaken</button>
+                    <p class="form-note">
+                        Door een account te maken ga je akkoord met de <a href="/voorwaarden.html" target="_blank" rel="noopener">voorwaarden</a>.
+                        Hoe we met je gegevens omgaan staat in de <a href="/privacy.html" target="_blank" rel="noopener">privacyverklaring</a>.
+                    </p>
                 </form>
             </div>
 
@@ -933,6 +1058,19 @@
                     <button class="btn" type="button" id="account-copy-profile">Profiellink kopiëren</button>
                     <button class="btn" type="button" id="account-sync-now">Nu synchroniseren</button>
                     <button class="btn btn--danger" type="button" id="account-logout">Uitloggen</button>
+                </div>
+
+                <!-- Je gegevens: downloaden en verwijderen (AVG). -->
+                <div class="account-danger">
+                    <p class="account-danger__title">Je gegevens</p>
+                    <p class="account-danger__text">
+                        Download alles wat we over je account bewaren, of verwijder je account met alles erop.
+                        Meer daarover in de <a href="/privacy.html#rechten" target="_blank" rel="noopener">privacyverklaring</a>.
+                    </p>
+                    <div class="account-danger__actions">
+                        <button class="btn" type="button" id="account-export">Mijn gegevens downloaden</button>
+                        <button class="btn btn--danger" type="button" id="account-delete">Account verwijderen</button>
+                    </div>
                 </div>
             </div>
 

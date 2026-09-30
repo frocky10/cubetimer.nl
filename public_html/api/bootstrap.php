@@ -11,6 +11,7 @@ require_once __DIR__ . '/lib/Http.php';
 require_once __DIR__ . '/lib/Database.php';
 require_once __DIR__ . '/lib/Auth.php';
 require_once __DIR__ . '/lib/RateLimiter.php';
+require_once __DIR__ . '/lib/BotGuard.php';
 require_once __DIR__ . '/lib/GitHubIssues.php';
 require_once __DIR__ . '/lib/SiteTime.php';
 require_once __DIR__ . '/lib/Events.php';
@@ -32,6 +33,7 @@ require_once __DIR__ . '/lib/Duels.php';
 require_once __DIR__ . '/lib/Wca.php';
 require_once __DIR__ . '/lib/Mailer.php';
 require_once __DIR__ . '/lib/AccountMail.php';
+require_once __DIR__ . '/lib/AccountData.php';
 
 $debug = Config::get('debug', false) === true;
 
