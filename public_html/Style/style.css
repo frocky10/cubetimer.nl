@@ -744,6 +744,20 @@ textarea.input {
     min-height: 1.2em;
 }
 
+/* Kleine tekstknop onder een formulier: "Wachtwoord vergeten?", "Terug". */
+.auth-link {
+    align-self: center;
+    color: var(--text-muted);
+}
+
+.account-verify {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
 .form-error:empty {
     min-height: 0;
 }
@@ -2782,6 +2796,24 @@ body.is-timing #timer {
    knoppen anders niet naast de twee keuzelijsten. */
 .board-filters__period {
     grid-column: 1 / -1;
+}
+
+/* Bladeren door de ranglijst. */
+.board-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+.board-pager__label {
+    min-width: 8rem;
+    text-align: center;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
 }
 
 .board-filters .segmented {

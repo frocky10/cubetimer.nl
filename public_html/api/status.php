@@ -26,6 +26,8 @@ $algorithmsReady = $databaseReady && Database::hasTable('user_algorithms');
 $gamesReady = $databaseReady && Database::hasTable('game_runs');
 $duelsReady = $gamesReady && $followsReady && Database::hasTable('duels');
 $wcaReady = $tournamentsReady && Wca::isReady();
+$mailReady = $databaseReady && Mailer::isEnabled();
+$verifyReady = $mailReady && AccountMail::isAvailable();
 
 $user = Auth::user();
 
@@ -43,6 +45,8 @@ Http::ok([
         'games'        => $gamesReady,
         'duels'        => $duelsReady,
         'wcaTournaments' => $wcaReady,
+        'mail'         => $mailReady,
+        'emailVerification' => $verifyReady,
     ],
     'timezone'      => SiteTime::zoneName(),
     'authenticated' => $user !== null,
