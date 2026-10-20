@@ -1,7 +1,8 @@
-# CubeTimer — werkafspraken
+# CubeTimer — handboek voor ontwikkelaars
 
-Dit bestand is het geheugen van het project. Lees het aan het begin van elke
-sessie; dan hoeft er niets opnieuw uitgelegd te worden.
+Hoe CubeTimer in elkaar zit, welke afspraken er gelden en waarom dingen zijn
+zoals ze zijn. Lees dit voordat je iets aanpast; de README is het korte
+overzicht, dit is het lange.
 
 **Taal:** de code, commentaar, commits en de interface zijn in het Nederlands.
 Uitzondering: bestaande Engelse identifiers in `script.js` (`saveTime`,
@@ -44,6 +45,8 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 - Helemaal in het Engels onder /en/ (interface, servermeldingen, mails, leerpagina,
   uitleg, privacy en voorwaarden), met de taal in Instellingen en hreflang
 - Een uitlegpagina met veelgestelde vragen (/uitleg.html, /en/faq.html)
+- Acht gidsen voor speedcubers (/gidsen/, /en/guides/) en een over-pagina
+  (/over.html, /en/about.html)
 
 ---
 
@@ -51,6 +54,8 @@ kleine PHP-API, draaiend op shared hosting met DirectAdmin.
 
 ```
 .github/workflows/deploy.yml   FTP-deploy naar DirectAdmin (branch: Release)
+.claude/CLAUDE.md              Laadt dit handboek in Claude Code, plus een paar extra afspraken
+docs/                          Dit handboek en de screenshots voor de README
 database/                      Genummerde SQL-migraties + uitleg
 tools/                         Hulpscripts voor het ontwikkelen (niet gedeployd)
 taal/en/                       Bron van alle Engelse teksten (html, js, server), zie Tweetalig
@@ -59,9 +64,12 @@ public_html/                   Precies wat er op de server komt te staan
   leren.html                   Leerpagina: beginner, F2L, OLL, PLL
   uitleg.html                  Uitleg en veelgestelde vragen (FAQ-structured data)
   privacy.html                 Privacyverklaring (AVG, cookies, je rechten)
+  over.html                    Over CubeTimer, met contact
+  gidsen/                      Gidsen: notatie, CFOP, sneller worden, gemiddelden, …
   voorwaarden.html             Gebruiksvoorwaarden
   en/                          De Engelse site: index.html en learn.html gegenereerd door
-                               tools/vertalen.php; faq, privacy en terms met de hand
+                               tools/vertalen.php; faq, privacy, terms, about en
+                               guides/ met de hand
   profiel.php                  Openbaar profiel, serverside gerenderd
   404.html                     Eigen foutpagina (noindex, paden vanaf de root)
   .htaccess                    Eén adres (https, zonder www), /u/naam, 404, caching
@@ -130,16 +138,16 @@ public_html/                   Precies wat er op de server komt te staan
 1. **Altijd op een eigen branch werken**, nooit rechtstreeks op `main`.
 2. **`Release` is de deploybranch.** Een push naar `Release` zet `public_html/`
    via FTP live. Alleen mergen naar `Release` als het echt de deur uit mag.
-3. **Vragen stellen voordat er code komt** als er een keuze te maken valt die
-   het werk wezenlijk verandert.
+3. **Eerst overleggen, dan bouwen** als er een keuze te maken valt die het
+   werk wezenlijk verandert.
 4. **De roadmap staat in GitHub issues.** Kijk daar voordat je iets nieuws
    bedenkt; veel staat er al (leaderboards #13, tournament mode #12/#14,
    XP en levels #28, achievements #27, rank #26, tutorials #21).
 5. **Elke database-wijziging is een nieuw genummerd bestand** in `database/`.
    Zie `database/README.md`. Nooit een al geïmporteerd bestand aanpassen.
-6. **Werk de checklist in `README.md` bij** zodra er iets af is of bij komt.
-   Die lijst verwijst naar de issuenummers en is de snelste manier om te zien
-   waar het project staat.
+6. **Werk `README.md` bij** als er een functie bij komt of verdwijnt. De README
+   is wat bezoekers van de repository als eerste zien: een kort overzicht van
+   wat de site kan, niet een logboek. Wat er nog moet gebeuren staat in de issues.
 7. **Geen geheimen in git.** Wachtwoorden en tokens horen uitsluitend in
    `~/cubetimer_config.php` op de server.
 
@@ -185,6 +193,8 @@ bash tools/cubing-bouwen.sh [versie]
 # De Engelse versie bouwen, en controleren dat elke tekst een vertaling heeft
 # (HTML, UI.t() in de scripts, meldingen en catalogi van de server). Draai na
 # elke wijziging aan een tekst, index.html of leren.html. Zie Tweetalig.
+# Vraagt PHP 8.4 (Dom\HTMLDocument). Heb je die niet, dan werkt de WebAssembly-
+# versie ook: PHP=8.4 npx -y -p @php-wasm/cli php-wasm-cli tools/vertalen.php
 php tools/vertalen.php
 php tools/vertalen.php --controleer
 
@@ -206,11 +216,9 @@ importeer `database/001_*.sql` en `002_*.sql`, en leg een
 `cubetimer_config.php` één map boven `public_html` neer (die staat in
 `.gitignore`).
 
-> **Let op bij testen van de bug-knop:** de uitgaande proxy van sommige
-> ontwikkelomgevingen voegt geldige GitHub-inloggegevens toe aan verzoeken naar
-> `api.github.com`. Een "test"-melding kan dan een écht issue aanmaken, ook met
-> een nepnaam als token. Laat `github.token` bij het testen leeg en test alleen
-> de validatie- en spamcontroles.
+> **Let op bij testen van de bug-knop:** met een geldig token maakt een
+> "test"-melding een écht, openbaar issue aan. Laat `github.token` bij het testen
+> leeg en test alleen de validatie- en spamcontroles.
 
 ---
 
@@ -775,6 +783,7 @@ op één adres, **`https://cubetimer.nl`**, zonder www.
 | Niet in Google | `profiel.php`, `404.html` | `noindex, follow` als meta-tag en als `X-Robots-Tag`-header. De 404-pagina geeft ook echt een 404 |
 | Titel en omschrijving | `<head>` | Titel kort en krachtig, altijd eindigend op ` \| cubetimer.nl` (keuze van de eigenaar; hooguit 50 tekens, de controle kijkt het na), omschrijving 70-160 tekens. Geschreven voor mensen, met de woorden waarop gezocht wordt ("Rubik's cube timer", "kubus oplossen") gewoon in de zin, niet opgesomd |
 | FAQ | `uitleg.html`, `en/faq.html` | In de footer heet de link overal "FAQ" ("Uitleg" paste niet op één regel). Echte antwoorden op vragen waarop gezocht wordt (Ao5, WCA-inspectie, +2 en DNF, smart cubes), met `FAQPage` in de JSON-LD. Google toont FAQ-resultaten alleen nog bij een paar soorten sites, maar de tekst zelf helpt wel |
+| Gidsen | `gidsen/`, `en/guides/` | Acht artikelen (notatie, van beginner naar CFOP, sneller worden, gemiddelden, goede tijden, je eerste wedstrijd, een speedcube kiezen, de WCA-events) plus een overzicht, met `Article`-JSON-LD en een kruimelpad. Ze bestaan vooral omdat AdSense de site afwees als "weinig waardevolle inhoud": een timer is een hulpmiddel zonder tekst, en Google keurt een site pas goed als er genoeg eigen, leesbare inhoud op staat. Samen met `over.html` (wie we zijn, contact) en de FAQ is dat er nu. Een nieuwe gids: kopieer een bestaande, in beide talen, en zet hem in de sitemap, in `PAGINAS` (twee keer, zie Tweetalig) en in de lijst op beide overzichtspagina's |
 | Zoekwoorden | `<meta name="keywords">` | Staat erin, maar Google gebruikt hem niet. Wat telt is de zichtbare tekst |
 | Kop | `index.html` | Een `<h1>` met `.visually-hidden`: het logo staat er al, een zichtbare kop zou de timer in de weg zitten. Er is bewust geen verborgen lap tekst voor zoekmachines; dat ziet Google als misleiding |
 | Delen | `og:*` en `twitter:card` | `Pictures/og-image.png` (1200x630), altijd als volledig adres; een relatief pad toont in WhatsApp niets |
@@ -838,7 +847,8 @@ toelichting bij gemarkeerde tijden (alleen voor de beheerder) blijft Nederlands.
 
 **Adressen**: `/` ↔ `/en/`, `/leren.html` ↔ `/en/learn.html`, `/uitleg.html` ↔
 `/en/faq.html`, `/privacy.html` ↔ `/en/privacy.html`, `/voorwaarden.html` ↔
-`/en/terms.html`, `/u/naam` ↔ `/en/u/naam`. Die lijst staat twee keer: `PAGINAS`
+`/en/terms.html`, `/over.html` ↔ `/en/about.html`, `/gidsen/…` ↔ `/en/guides/…`
+(per gids een eigen Engelse naam), `/u/naam` ↔ `/en/u/naam`. Die lijst staat twee keer: `PAGINAS`
 in `tools/vertalen.php` en in `ui.js` (`UI.pad()`). Alle paden in de scripts
 beginnen bij de root (`/api/`, `/Script/`), anders klopt het niet vanuit `/en/`.
 
@@ -856,8 +866,10 @@ Nederlands spreekt krijgt één keer een toast met het aanbod.
 
 **Met de hand geschreven**: `uitleg.html`/`en/faq.html` (gemaakt uit één lijst
 vragen, maar daarna gewoon twee bestanden), `privacy.html`/`en/privacy.html` en
-`voorwaarden.html`/`en/terms.html`. **Verander je er één, verander dan de
-ander mee.** In de Engelse privacy en voorwaarden staat dat bij verschil de
+`voorwaarden.html`/`en/terms.html`, en de gidsen en de over-pagina
+(`gidsen/`/`en/guides/`, `over.html`/`en/about.html`). **Verander je er één,
+verander dan de ander mee.** Bovenaan elk bestand staat waar zijn tegenhanger
+staat. In de Engelse privacy en voorwaarden staat dat bij verschil de
 Nederlandse tekst geldt. `404.html` is tweetalig.
 
 ## Privacy en toestemming
@@ -978,7 +990,7 @@ uit en verbergt de interface "wachtwoord vergeten" en de bevestigingsvraag
 De landcode staat als tekstbadge naast de naam, niet als vlag. Emoji-vlaggen
 worden op Windows als losse letters getoond, en dat is voor het grootste deel
 van de desktopbezoekers lelijker dan de code zelf. **Besloten: er komen geen
-echte vlaggen**, ook niet als meegeleverde SVG's. Niet meer voorstellen.
+echte vlaggen**, ook niet als meegeleverde SVG's.
 
 De codes staan in `ui.js` (`COUNTRY_CODES`, 195 stuks). De **namen** komen uit
 de browser via `Intl.DisplayNames`, dus er is geen vertaallijst om bij te
@@ -1268,14 +1280,12 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
 
 ---
 
-## Bekende punten voor later
+## Bekende beperkingen en keuzes
 
-- **De historische toernooien zijn niet getest tegen de echte WCA-API.** Die was
-  vanuit de ontwikkelomgeving niet bereikbaar. Alles is gebouwd op de
-  gedocumenteerde vorm en getest met `tools/wca-voorbeeld/`. Controleer na de
-  deploy: kies een comp in het toernooivenster, en kijk bij problemen in de
-  PHP-errorlog naar regels die met `[cubetimer] WCA` beginnen. Het zou kunnen
-  dat `/competitions/{id}/scrambles` niet bestaat; dan speel je met gewone
+- De historische toernooien zijn gebouwd op de gedocumenteerde vorm van de
+  WCA-API, getest met `tools/wca-voorbeeld/` en daarna op de echte site. Gaat er
+  iets mis, kijk dan in de PHP-errorlog naar regels die met `[cubetimer] WCA`
+  beginnen. Kent de WCA de scrambles van een comp niet, dan speel je met gewone
   scrambles en werkt de rest gewoon.
 - De bekende kampioenschappen in het WCA-keuzescherm staan vast in
   `Wca::FEATURED`. Een nieuw WK erbij is een regel.
@@ -1286,26 +1296,21 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
   `buildMetrics()` in `Achievements`, met `game_runs` als bron.
 - Solves uit een spelmodus komen niet in je sessie (net als bij toernooien).
   Wil je ze wel in je statistieken, dan kan de capture-handler ze ook doorgeven.
-
-- **Na de deploy, voor de eigenaar**: in AdSense onder Privacy en berichten het
-  bericht voor de Europese regelgeving aanzetten (met Consent Mode), en
-  controleren dat `security.app_key` in de config staat. Zonder CMP laadt
-  Analytics nooit (bewust). De mailbox `privacy@cubetimer.nl` bestaat.
-- In Google Search Console na de deploy de sitemap opnieuw insturen: er staan nu
-  ook de Engelse pagina's en de uitleg in.
+- Zonder het toestemmingsvenster (AdSense > Privacy en berichten) laadt
+  Analytics nooit. Dat is bewust.
 - De privacyverklaring noemt de hostingpartij niet bij naam. Wil je dat wel
   (netter), zet dan naam en land erbij in hoofdstuk 6.
-- De meldknop maakt een GitHub-issue. De repository is privé; de
-  privacyverklaring zegt dat, en vraagt toch om geen persoonlijke gegevens in een
-  melding te zetten. Wordt de repository openbaar, pas dan hoofdstuk 4 aan.
+- De repository is openbaar, en de meldknop maakt daar een issue. Daarom gaat
+  de gebruikersnaam van de melder niet mee (alleen of hij was ingelogd), en zegt
+  de privacyverklaring (hoofdstuk 4) dat meldingen openbaar zijn. Wie de melder
+  is staat alleen in `feedback_reports`.
 - E-mailadres wijzigen kan nog niet vanuit de site. Komt dat, stuur dan een
   nieuwe bevestigingsmail en zet `email_verified_at` terug op NULL; een oude
   link werkt dan vanzelf niet meer (`email_verifications.email_lower`).
 - De statistieken rekenen in de browser over alle sessies. Bij duizenden solves
   kan dat beter naar een query op `solves` met de index
   `(user_id, event, solved_at)`, die daar al voor ligt.
-- De tijdweergave blijft `mm:ss:mmm`. Dat is besloten; niet meer voorstellen om
-  er `11.53` van te maken.
+- De tijdweergave blijft `mm:ss:mmm`, niet `11.53`. **Besloten.**
 - De herberekening na een synchronisatie draait over álle solves. Bij 18.000
   solves duurt dat 2,5 seconde. Wordt dat een probleem, dan is de volgende stap
   alleen de staart herberekenen met een `records_computed_through`-markering.
@@ -1317,7 +1322,7 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
   (`Challenges::ROTATING_EVENTS`, acht stuks, dus een cyclus van acht dagen).
   Megaminx, Square-1 en Clock doen niet mee: hun notatie is te eigenzinnig om
   een aangeleverde scramble betrouwbaar te controleren. Zie
-  `Events::SCRAMBLE_FORMATS`. **Besloten: zo laten**; niet meer voorstellen.
+  `Events::SCRAMBLE_FORMATS`. **Besloten: zo laten.**
 - Loopt de voorraad voor het roulerende event leeg, dan is er die dag geen
   tweede scramble van de dag. Dat is bewust; liever geen opdracht dan een
   scramble waarvan we de herkomst niet kennen.
@@ -1342,8 +1347,8 @@ Dezelfde nepcubes kun je in de browser gebruiken: laad `vendor/aes.js`,
 - Valt de verbinding met een smart cube weg, dan verbind je opnieuw met één
   klik; automatisch opnieuw verbinden zit er niet in (was een keuze).
 - De smart-cubedrivers zijn getest met nagebootste cubes, GAN ook tegen
-  gan-web-bluetooth. Met een echte cube: de eigenaar heeft een GAN en een QiYi;
-  MoYu, Giiker en GoCube heeft niemand van ons. Bij de oude MoYu (MHC) is
+  gan-web-bluetooth, en met een echte GAN en QiYi. MoYu, Giiker en GoCube zijn
+  alleen nagebootst getest. Bij de oude MoYu (MHC) is
   draaien tegen de klok in onzeker: csTimer leest de hoek zonder teken, en dat
   hebben we zo overgenomen.
 - De gyroscoop van GAN-cubes (kantelen van de hele cube) wordt niet gebruikt.

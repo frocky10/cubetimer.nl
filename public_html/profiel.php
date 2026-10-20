@@ -40,7 +40,7 @@ if ($profiel === null) {
     http_response_code(404);
 }
 
-// Profielen horen niet in zoekmachines (zie CLAUDE.md, SEO). De header werkt
+// Profielen horen niet in zoekmachines (zie docs/ontwikkelen.md, SEO). De header werkt
 // ook voor crawlers die de HTML niet lezen; de meta-tag hieronder zegt hetzelfde.
 header('X-Robots-Tag: noindex, follow');
 

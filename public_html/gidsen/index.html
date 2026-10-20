@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!-- Met de hand bijgehouden; de Engelse versie staat in /en/guides/. Pas je hier iets aan, doe dat daar ook. -->
+<html lang="nl" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Gidsen voor speedcubers | cubetimer.nl</title>
+    <meta name="description" content="Gidsen over de Rubik's kubus: notatie, van beginner naar CFOP, sneller worden, gemiddelden, goede tijden, wedstrijden en speedcubes." />
+    <link rel="canonical" href="https://cubetimer.nl/gidsen/" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="nl_NL" />
+    <meta property="og:url" content="https://cubetimer.nl/gidsen/" />
+    <meta property="og:title" content="Gidsen voor speedcubers | cubetimer.nl" />
+    <meta property="og:description" content="Gidsen over de Rubik's kubus: notatie, van beginner naar CFOP, sneller worden, gemiddelden, goede tijden, wedstrijden en speedcubes." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "CollectionPage",
+            "@id": "https://cubetimer.nl/gidsen/#pagina",
+            "url": "https://cubetimer.nl/gidsen/",
+            "name": "Gidsen voor speedcubers",
+            "description": "Gidsen over de Rubik's kubus: notatie, van beginner naar CFOP, sneller worden, gemiddelden, goede tijden, wedstrijden en speedcubes.",
+            "inLanguage": "nl",
+            "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/#website",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/"
+            },
+            "breadcrumb": {
+                "@id": "https://cubetimer.nl/gidsen/#kruimelpad"
+            }
+        },
+        {
+            "@type": "Organization",
+            "@id": "https://cubetimer.nl/#organisatie",
+            "name": "CubeTimer",
+            "url": "https://cubetimer.nl/",
+            "logo": "https://cubetimer.nl/Pictures/favicon-192.png"
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://cubetimer.nl/gidsen/#kruimelpad",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "CubeTimer",
+                    "item": "https://cubetimer.nl/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Gidsen",
+                    "item": "https://cubetimer.nl/gidsen/"
+                }
+            ]
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+            } catch (err) { /* privemodus */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/" aria-label="Naar de timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn btn--primary" href="/">Naar de timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <h1>Gidsen voor speedcubers</h1>
+                <p>Uitleg voor wie de kubus kan oplossen en verder wil. Over de notatie, de methode die de meeste speedcubers gebruiken, hoe je sneller wordt en wat er op een officiële wedstrijd gebeurt. Wil je eerst leren oplossen? Begin dan bij de <a href="/leren.html">beginnersmethode op de leerpagina</a>.</p>
+                <ul class="gids-lijst">
+                    <li><a class="gids-kaart" href="/gidsen/notatie.html"><strong>Kubusnotatie: zo lees je zetten</strong><span>R, U', F2, Rw en M: wat de letters betekenen en hoe je een scramble of algoritme leest.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/cfop.html"><strong>Van beginner naar CFOP</strong><span>Kruis onderop, F2L, de laatste laag in vier stappen en daarna alle PLL's en OLL's.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/sneller-worden.html"><strong>Sneller worden met je kubus</strong><span>Vooruitkijken, langzaam oefenen, minder hergrepen en meten waar je tijd blijft.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/gemiddelden.html"><strong>Ao5, Ao12 en je statistieken</strong><span>Hoe een Ao5 berekend wordt, wat een DNF doet, en welk getal het meest zegt over je niveau.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/hoe-snel.html"><strong>Wat is een goede tijd?</strong><span>De niveaus van sub-1 tot de wereldtop, en hoe lang het meestal duurt om er te komen.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/eerste-wedstrijd.html"><strong>Je eerste WCA-wedstrijd</strong><span>Inschrijven, wat je meeneemt, hoe de dag gaat en hoe een poging met een stackmat verloopt.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/speedcube-kiezen.html"><strong>Een speedcube kiezen</strong><span>Magneten, goedkoop of duur, spanning, smeren en wanneer een smart cube de moeite waard is.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/wca-events.html"><strong>De 17 WCA-events op een rij</strong><span>Van 2x2 tot Multi-Blind: hoe elk event werkt en hoe de uitslag bepaald wordt.</span></a></li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/">Timer</a>
+        <a href="/leren.html">Leren</a>
+        <a href="/gidsen/" aria-current="page">Gidsen</a>
+        <a href="/uitleg.html">FAQ</a>
+        <a href="/over.html">Over</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/voorwaarden.html">Voorwaarden</a>
+        <a href="/#cookie-instellingen">Cookie-instellingen</a>
+        <a href="/en/guides/#taal=en" hreflang="en" lang="en" data-taalwissel="en">English</a>
+    </footer>
+</body>
+</html>

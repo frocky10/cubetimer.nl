@@ -4454,6 +4454,57 @@ a.board-cuber__name:hover {
     font-weight: 600;
 }
 
+/* De gidsen (/gidsen/, /en/guides/): dezelfde opmaak als hierboven, plus een
+   terugknop en kaartjes naar de andere gidsen. */
+.gids-terug {
+    font-size: 0.85rem;
+}
+
+.legal .gids-terug a {
+    color: var(--text-muted);
+    text-decoration: none;
+}
+
+.legal .gids-terug a:hover {
+    color: var(--accent-text);
+}
+
+.legal .gids-lijst {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: var(--space-3);
+    padding: 0;
+    list-style: none;
+}
+
+.legal .gids-lijst li + li {
+    margin-top: 0;
+}
+
+.legal .gids-kaart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    height: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    color: var(--text);
+    text-decoration: none;
+    line-height: 1.45;
+}
+
+.legal .gids-kaart span {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.legal .gids-kaart:hover,
+.legal .gids-kaart:focus-visible {
+    border-color: var(--accent-text);
+}
+
 /* De voettekst: op de timer onderaan de zijbalk, elders onder de pagina. */
 .site-footer {
     position: relative;
