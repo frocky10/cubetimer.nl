@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!-- Met de hand bijgehouden; de Nederlandse versie staat in /gidsen/notatie.html. Pas je hier iets aan, doe dat daar ook. -->
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Cube notation explained | cubetimer.nl</title>
+    <meta name="description" content="What do R, U', F2 and M mean? Rubik's cube notation explained: faces, primes, wide moves, slice moves and rotations, with examples." />
+    <link rel="canonical" href="https://cubetimer.nl/en/guides/notation.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/notatie.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/notation.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/notatie.html" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:url" content="https://cubetimer.nl/en/guides/notation.html" />
+    <meta property="og:title" content="Cube notation explained | cubetimer.nl" />
+    <meta property="og:description" content="What do R, U', F2 and M mean? Rubik's cube notation explained: faces, primes, wide moves, slice moves and rotations, with examples." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "Article",
+            "@id": "https://cubetimer.nl/en/guides/notation.html#pagina",
+            "url": "https://cubetimer.nl/en/guides/notation.html",
+            "name": "Cube notation: how to read moves and algorithms",
+            "description": "What do R, U', F2 and M mean? Rubik's cube notation explained: faces, primes, wide moves, slice moves and rotations, with examples.",
+            "inLanguage": "en",
+            "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/#website",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/"
+            },
+            "breadcrumb": {
+                "@id": "https://cubetimer.nl/en/guides/notation.html#kruimelpad"
+            },
+            "headline": "Cube notation: how to read moves and algorithms",
+            "image": "https://cubetimer.nl/Pictures/og-image.png",
+            "datePublished": "2026-10-20",
+            "dateModified": "2026-10-20",
+            "mainEntityOfPage": "https://cubetimer.nl/en/guides/notation.html",
+            "author": {
+                "@id": "https://cubetimer.nl/#organisatie"
+            },
+            "publisher": {
+                "@id": "https://cubetimer.nl/#organisatie"
+            }
+        },
+        {
+            "@type": "Organization",
+            "@id": "https://cubetimer.nl/#organisatie",
+            "name": "CubeTimer",
+            "url": "https://cubetimer.nl/",
+            "logo": "https://cubetimer.nl/Pictures/favicon-192.png"
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://cubetimer.nl/en/guides/notation.html#kruimelpad",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "CubeTimer",
+                    "item": "https://cubetimer.nl/en/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Guides",
+                    "item": "https://cubetimer.nl/en/guides/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "Cube notation explained",
+                    "item": "https://cubetimer.nl/en/guides/notation.html"
+                }
+            ]
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+            } catch (err) { /* privemodus */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/en/" aria-label="Go to the timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn btn--primary" href="/en/">Go to the timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <p class="gids-terug"><a href="/en/guides/">← All guides</a></p>
+                <h1>Cube notation: how to read moves and algorithms</h1>
+                <p class="legal__meta">Updated 20 October 2026 · 6 min read</p>
+                <p>Look up any algorithm and you get a string of letters like <code>R U R' U'</code>. That is the standard notation for the Rubik's cube, and every website, video and competition uses the same one. Once you can read it, you can follow any algorithm and apply any scramble yourself. It takes about fifteen minutes to learn.</p>
+
+                <nav class="legal__summary" aria-label="On this page">
+                    <ul class="legal__toc">
+                        <li><a href="#vlakken">The six faces</a></li>
+                        <li><a href="#tekens">Prime and 2</a></li>
+                        <li><a href="#vasthouden">How do you hold the cube for a scramble?</a></li>
+                        <li><a href="#breed">Wide moves: two layers at once</a></li>
+                        <li><a href="#slices">Middle layers: M, E and S</a></li>
+                        <li><a href="#rotaties">Turning the whole cube: x, y and z</a></li>
+                        <li><a href="#algoritmes">Reading an algorithm</a></li>
+                        <li><a href="#andere-puzzels">What about the other puzzles?</a></li>
+                        <li><a href="#oefenen">Practise it yourself</a></li>
+                    </ul>
+                </nav>
+
+                <h2 id="vlakken">The six faces</h2>
+                <p>Each letter stands for one face of the cube:</p>
+                <div class="legal__table-wrap">
+                <table>
+                <thead><tr><th>Letter</th><th>Name</th><th>Which face</th></tr></thead>
+                <tbody>
+                <tr><td><code>R</code></td><td>Right</td><td>the right side</td></tr>
+                <tr><td><code>L</code></td><td>Left</td><td>the left side</td></tr>
+                <tr><td><code>U</code></td><td>Up</td><td>the top</td></tr>
+                <tr><td><code>D</code></td><td>Down</td><td>the bottom</td></tr>
+                <tr><td><code>F</code></td><td>Front</td><td>the side facing you</td></tr>
+                <tr><td><code>B</code></td><td>Back</td><td>the side facing away from you</td></tr>
+                </tbody>
+                </table>
+                </div>
+                <p>A letter on its own means: turn that face a quarter turn <strong>clockwise</strong>, as if you were looking straight at that face. That last part is where beginners usually go wrong. <code>R</code> turns the right side away from you, upwards. <code>L</code> is also clockwise when you look at the left side, so it moves towards you. On <code>U</code> the top layer moves to the left, on <code>D</code> the bottom layer moves to the right.</p>
+                <p>Colours don't matter. An algorithm is about positions, not colours: <code>R</code> is always whichever layer is on the right at that moment.</p>
+
+                <h2 id="tekens">Prime and 2</h2>
+                <ul>
+                <li><strong>An apostrophe</strong> (<code>R'</code>, pronounced "R prime") is a quarter turn <strong>counter-clockwise</strong>. So <code>R'</code> undoes <code>R</code>.</li>
+                <li><strong>A 2</strong> (<code>R2</code>) is a half turn. The direction doesn't matter; <code>R2</code> and <code>R2'</code> end up in the same place. Just pick whichever direction feels best in your hands.</li>
+                </ul>
+                <p>With these twelve moves plus the half turns you can already read every 3x3 scramble. A WCA scramble consists of nothing else, for example <code>D2 F' R2 U2 B' L2 F U2 R' D' B2 L U' F2</code>.</p>
+
+                <h2 id="vasthouden">How do you hold the cube for a scramble?</h2>
+                <p>At an official competition every 3x3 is scrambled with <strong>white on top and green in front</strong>. Do the same at home: then you can compare your scramble with someone else's, and you notice straight away if you made a mistake. The scrambles in the CubeTimer timer assume the same orientation.</p>
+                <p>While solving, hold the cube however you like. Most people who learn CFOP solve the cross on the bottom. That's why last-layer algorithms are written for the top layer: you can see it, and it's where your fingers work most easily.</p>
+
+                <h2 id="breed">Wide moves: two layers at once</h2>
+                <p>A lowercase letter, or a letter followed by a <code>w</code>, turns two layers at once: the face itself and the layer next to it. <code>r</code> and <code>Rw</code> mean the same thing. On a 3x3, <code>r</code> is the same as <code>R</code> plus the middle layer in the same direction.</p>
+                <p>On bigger cubes you can turn more layers at once. Then there is a number in front: <code>3Rw</code> turns the three right-hand layers of a 6x6 or 7x7. That is also how they appear in the official scrambles for those events.</p>
+
+                <h2 id="slices">Middle layers: M, E and S</h2>
+                <p>The middle layers have their own letters. They don't follow a face of their own, but turn along with one of the outer faces:</p>
+                <ul>
+                <li><code>M</code> (Middle) is the layer between <code>L</code> and <code>R</code>, and turns the same way as <code>L</code>.</li>
+                <li><code>E</code> (Equator) is the layer between <code>U</code> and <code>D</code>, and turns like <code>D</code>.</li>
+                <li><code>S</code> (Standing) is the layer between <code>F</code> and <code>B</code>, and turns like <code>F</code>.</li>
+                </ul>
+                <p>You'll see <code>M</code> a lot: in PLL algorithms like the H perm (<code>M2 U M2 U2 M2 U M2</code>), and in the Roux method it makes up most of the last step.</p>
+
+                <h2 id="rotaties">Turning the whole cube: x, y and z</h2>
+                <p>Sometimes you need to turn the cube in your hands without changing anything about its state. There are three letters for that:</p>
+                <ul>
+                <li><code>x</code>: the whole cube turns like <code>R</code>.</li>
+                <li><code>y</code>: the whole cube turns like <code>U</code>.</li>
+                <li><code>z</code>: the whole cube turns like <code>F</code>.</li>
+                </ul>
+                <p>The prime and the 2 work here too: <code>y'</code> is a quarter turn the other way, <code>x2</code> turns the cube upside down. In a fast solve you want as few rotations as possible, because each one costs time and you briefly lose track of the pieces. That's why good F2L solutions use a <code>U</code> move more often than a <code>y</code>.</p>
+
+                <h2 id="algoritmes">Reading an algorithm</h2>
+                <p>An algorithm is simply a sequence of moves. A few things you'll see often:</p>
+                <ul>
+                <li><strong>Brackets</strong> are only there to group moves: <code>(R U R' U') (R' F R F')</code>. You just do everything in order. They show which parts go together in one smooth motion.</li>
+                <li><strong>Triggers</strong> are short sequences that keep coming back. <code>R U R' U'</code> is known as the "sexy move" and appears in dozens of algorithms. <code>R U R' U R U2 R'</code> is the Sune, one of the first OLLs people learn.</li>
+                <li><strong>A U move at the start or end</strong> (often in brackets, or called AUF: <em>adjust U face</em>) lines up the top layer before or after the algorithm. It isn't really part of the algorithm, and how many you need depends on how the case is positioned.</li>
+                </ul>
+                <p>Reversing an algorithm is easy: read it from back to front and flip the prime on every move. The inverse of <code>R U R'</code> is <code>R U' R'</code>. That's also how the practice button on the <a href="/en/learn.html">learn page</a> builds the setup scramble for each case: the algorithm backwards.</p>
+
+                <h2 id="andere-puzzels">What about the other puzzles?</h2>
+                <p>The 2x2 up to the 7x7 use the same letters. The other WCA puzzles have notation of their own, which you'll mostly see in scrambles:</p>
+                <ul>
+                <li><strong>Pyraminx</strong>: <code>U</code>, <code>L</code>, <code>R</code> and <code>B</code> turn a corner with two layers; lowercase letters (<code>u</code>, <code>l</code>, <code>r</code>, <code>b</code>) turn only the tip.</li>
+                <li><strong>Skewb</strong>: the same four letters, but each move turns half the puzzle around a corner.</li>
+                <li><strong>Megaminx</strong>: <code>R++</code> and <code>D--</code> turn a large part of the puzzle two fifths of a turn; <code>U</code> and <code>U'</code> turn the top face.</li>
+                <li><strong>Square-1</strong>: pairs like <code>(1,0)</code> say how many steps the top and bottom layer turn, and a <code>/</code> is a turn of the right half.</li>
+                <li><strong>Clock</strong>: moves like <code>UR3+</code> say which pins are up and how many hours you turn a wheel.</li>
+                </ul>
+
+                <h2 id="oefenen">Practise it yourself</h2>
+                <p>The quickest way to learn notation is to use it. Open the <a href="/en/">timer</a>, take the scramble at the top and apply it move by move, with white on top and green in front. Then undo it all, from back to front. Do that a few times and you'll read a scramble as easily as a word.</p>
+                <p>After that it's time to learn real algorithms. The <a href="/en/guides/cfop.html">beginner to CFOP guide</a> tells you in which order, and the <a href="/en/learn.html">learn page</a> has all of them, each with a diagram calculated from the moves themselves.</p>
+
+                <h2 id="meer-gidsen">More guides</h2>
+                <ul class="gids-lijst">
+                    <li><a class="gids-kaart" href="/en/guides/cfop.html"><strong>From beginner to CFOP</strong><span>Cross on the bottom, F2L, the four-look last layer, and then every PLL and OLL.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/get-faster.html"><strong>How to get faster at cubing</strong><span>Lookahead, slow solving, fewer regrips and measuring where your time goes.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/averages.html"><strong>Ao5, Ao12 and your stats</strong><span>How an Ao5 is calculated, what a DNF does, and which number says most about your level.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/how-fast.html"><strong>What is a good cubing time?</strong><span>The levels from sub-1 to world class, and how long it usually takes to get there.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/first-competition.html"><strong>Your first WCA competition</strong><span>Registering, what to bring, how the day goes and how an attempt on a stackmat works.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/choosing-a-speedcube.html"><strong>How to choose a speedcube</strong><span>Magnets, cheap or expensive, tension, lube and when a smart cube is worth it.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/wca-events.html"><strong>All 17 WCA events explained</strong><span>From 2x2 to Multi-Blind: how each event works and how results are decided.</span></a></li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/en/">Timer</a>
+        <a href="/en/learn.html">Learn</a>
+        <a href="/en/guides/">Guides</a>
+        <a href="/en/faq.html">FAQ</a>
+        <a href="/en/about.html">About</a>
+        <a href="/en/privacy.html">Privacy</a>
+        <a href="/en/terms.html">Terms</a>
+        <a href="/en/#cookie-instellingen">Cookie settings</a>
+        <a href="/gidsen/notatie.html#taal=nl" hreflang="nl" lang="nl" data-taalwissel="nl">Nederlands</a>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!-- Met de hand bijgehouden; de Engelse versie staat in /en/guides/averages.html. Pas je hier iets aan, doe dat daar ook. -->
+<html lang="nl" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Ao5, Ao12 en je statistieken | cubetimer.nl</title>
+    <meta name="description" content="Hoe werken Ao5, Ao12, Mo3 en Ao100? Wat doen een +2 en een DNF met je gemiddelde, en welk getal zegt het meest over je niveau?" />
+    <link rel="canonical" href="https://cubetimer.nl/gidsen/gemiddelden.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/gemiddelden.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/averages.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/gemiddelden.html" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="nl_NL" />
+    <meta property="og:url" content="https://cubetimer.nl/gidsen/gemiddelden.html" />
+    <meta property="og:title" content="Ao5, Ao12 en je statistieken | cubetimer.nl" />
+    <meta property="og:description" content="Hoe werken Ao5, Ao12, Mo3 en Ao100? Wat doen een +2 en een DNF met je gemiddelde, en welk getal zegt het meest over je niveau?" />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "Article",
+            "@id": "https://cubetimer.nl/gidsen/gemiddelden.html#pagina",
+            "url": "https://cubetimer.nl/gidsen/gemiddelden.html",
+            "name": "Ao5, Ao12 en je statistieken uitgelegd",
+            "description": "Hoe werken Ao5, Ao12, Mo3 en Ao100? Wat doen een +2 en een DNF met je gemiddelde, en welk getal zegt het meest over je niveau?",
+            "inLanguage": "nl",
+            "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/#website",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/"
+            },
+            "breadcrumb": {
+                "@id": "https://cubetimer.nl/gidsen/gemiddelden.html#kruimelpad"
+            },
+            "headline": "Ao5, Ao12 en je statistieken uitgelegd",
+            "image": "https://cubetimer.nl/Pictures/og-image.png",
+            "datePublished": "2026-10-20",
+            "dateModified": "2026-10-20",
+            "mainEntityOfPage": "https://cubetimer.nl/gidsen/gemiddelden.html",
+            "author": {
+                "@id": "https://cubetimer.nl/#organisatie"
+            },
+            "publisher": {
+                "@id": "https://cubetimer.nl/#organisatie"
+            }
+        },
+        {
+            "@type": "Organization",
+            "@id": "https://cubetimer.nl/#organisatie",
+            "name": "CubeTimer",
+            "url": "https://cubetimer.nl/",
+            "logo": "https://cubetimer.nl/Pictures/favicon-192.png"
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://cubetimer.nl/gidsen/gemiddelden.html#kruimelpad",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "CubeTimer",
+                    "item": "https://cubetimer.nl/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Gidsen",
+                    "item": "https://cubetimer.nl/gidsen/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "Ao5, Ao12 en je statistieken",
+                    "item": "https://cubetimer.nl/gidsen/gemiddelden.html"
+                }
+            ]
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+            } catch (err) { /* privemodus */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/" aria-label="Naar de timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn btn--primary" href="/">Naar de timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <p class="gids-terug"><a href="/gidsen/">← Alle gidsen</a></p>
+                <h1>Ao5, Ao12 en je statistieken uitgelegd</h1>
+                <p class="legal__meta">Bijgewerkt op 20 oktober 2026 · 5 minuten lezen</p>
+                <p>Een timer voor speedcubers laat veel meer zien dan je laatste tijd: Ao5, Ao12, Mo3, beste en slechtste, mediaan. Hier staat wat die getallen betekenen, hoe ze berekend worden en welke het meest zegt over hoe goed je bent.</p>
+
+                <nav class="legal__summary" aria-label="Op deze pagina">
+                    <ul class="legal__toc">
+                        <li><a href="#single">Single: één tijd</a></li>
+                        <li><a href="#ao5">Ao5: het gemiddelde van een wedstrijd</a></li>
+                        <li><a href="#dnf">Wat doen +2 en DNF met je gemiddelde?</a></li>
+                        <li><a href="#ao12">Ao12, Ao50 en Ao100</a></li>
+                        <li><a href="#mo3">Mo3: gewoon het gemiddelde</a></li>
+                        <li><a href="#lopend">Je huidige gemiddelde en je beste gemiddelde</a></li>
+                        <li><a href="#mediaan">Mediaan, beste en slechtste</a></li>
+                        <li><a href="#periodes">Per sessie, per dag en per week</a></li>
+                        <li><a href="#welke">Welk getal moet je in de gaten houden?</a></li>
+                    </ul>
+                </nav>
+
+                <h2 id="single">Single: één tijd</h2>
+                <p>Een <strong>single</strong> is gewoon de tijd van één solve. Je beste single is je snelste solve ooit. Hij is leuk om te verbeteren, maar hij zegt maar beperkt iets over je niveau: één makkelijke scramble, of een laatste laag die toevallig al goed ligt (een "PLL skip"), en je zit seconden onder je normale tijd.</p>
+
+                <h2 id="ao5">Ao5: het gemiddelde van een wedstrijd</h2>
+                <p><strong>Ao5</strong> staat voor <em>average of 5</em>. Je neemt vijf solves, haalt de snelste en de langzaamste weg, en neemt het gemiddelde van de drie die overblijven. Zo telt één uitschieter, naar boven of naar beneden, niet mee.</p>
+                <p>Een voorbeeld. Je vijf tijden zijn 12,31, 10,87, 14,02, 11,50 en 13,11 seconden. De snelste (10,87) en de langzaamste (14,02) vallen weg. Het gemiddelde van de rest is (12,31 + 11,50 + 13,11) / 3 = 12,31 seconden.</p>
+                <p>Op een officiële WCA-wedstrijd bepaalt bij de meeste events de Ao5 je plek in de uitslag. Daarom is het ook het getal waar cubers elkaar het vaakst op vergelijken. De WCA rondt een gemiddelde af op honderdsten van een seconde; CubeTimer laat de duizendsten zien, in de vorm <code>00:12:307</code> (minuten, seconden, milliseconden).</p>
+
+                <h2 id="dnf">Wat doen +2 en DNF met je gemiddelde?</h2>
+                <ul>
+                <li><strong>Een +2</strong> telt gewoon mee met twee seconden erbij. Een solve van 11,50 met een +2 is in het gemiddelde 13,50.</li>
+                <li><strong>Een DNF</strong> (<em>did not finish</em>) telt als de langzaamste tijd die er is. Zit er één DNF in je Ao5, dan valt die weg als slechtste tijd en heb je toch een gemiddelde.</li>
+                <li><strong>Twee DNF's</strong> in een Ao5 betekenen dat het hele gemiddelde een DNF is: er valt er maar één weg, de andere moet meetellen, en dat kan niet.</li>
+                </ul>
+                <p>Zie de <a href="/uitleg.html">veelgestelde vragen</a> voor wanneer je op een wedstrijd een +2 of een DNF krijgt.</p>
+
+                <h2 id="ao12">Ao12, Ao50 en Ao100</h2>
+                <p>Hetzelfde idee met meer solves. Bij een <strong>Ao12</strong> vallen ook de snelste en de langzaamste weg, en is het gemiddelde over de tien die overblijven. Hoe meer solves, hoe minder een enkele scramble uitmaakt, en hoe beter het getal laat zien wat je echt kunt.</p>
+                <ul>
+                <li><strong>Ao5</strong>: hoe je het doet in een ronde op een wedstrijd.</li>
+                <li><strong>Ao12</strong>: het meest gebruikte getal voor je "huidige niveau".</li>
+                <li><strong>Ao50 en Ao100</strong>: je niveau over een langere periode. Een nieuw Ao100-record betekent echt dat je beter geworden bent.</li>
+                </ul>
+                <p>Niet elke timer rekent lange gemiddelden op dezelfde manier. Sommige halen bij een Ao50 of Ao100 vijf procent aan beide kanten weg. CubeTimer houdt het bij de regel van de WCA: alleen de snelste en de langzaamste vallen weg, ook bij honderd solves. Twee DNF's maken daarom ook een Ao100 tot een DNF. Vergelijk je gemiddelden uit verschillende timers dus niet zomaar met elkaar.</p>
+
+                <h2 id="mo3">Mo3: gewoon het gemiddelde</h2>
+                <p>Een <strong>Mo3</strong> (<em>mean of 3</em>) is het gewone gemiddelde van drie solves, zonder dat er iets wegvalt. De WCA gebruikt het voor events waarbij één poging lang duurt, zoals 6x6, 7x7 en Fewest Moves. Eén DNF maakt een Mo3 meteen een DNF.</p>
+
+                <h2 id="lopend">Je huidige gemiddelde en je beste gemiddelde</h2>
+                <p>Elk gemiddelde bestaat in twee vormen:</p>
+                <ul>
+                <li>Je <strong>huidige</strong> Ao5 is het gemiddelde van je laatste vijf solves. Na elke solve schuift het een plekje op. In de tijdentabel van CubeTimer staan de Ao5 en de Ao12 bij elke solve, zodat je kunt terugkijken hoe je op dat moment ging.</li>
+                <li>Je <strong>beste</strong> Ao5 is het snelste gemiddelde van vijf solves direct achter elkaar dat je ooit gehaald hebt. Dat is het getal dat op je profiel en op de ranglijsten staat.</li>
+                </ul>
+                <p>Het beste gemiddelde wordt berekend over elk blok van aaneengesloten solves, niet over je vijf snelste losse tijden. Een Ao5 van vijf goede solves verspreid over een week bestaat dus niet: het moeten vijf solves achter elkaar zijn.</p>
+
+                <h2 id="mediaan">Mediaan, beste en slechtste</h2>
+                <p>De <strong>mediaan</strong> is de middelste tijd als je al je tijden op volgorde legt. Hij lijkt op het gemiddelde, maar trekt zich niets aan van uitschieters: een solve waarbij de kubus uit je hand viel maakt de mediaan niet langzamer. Liggen je gemiddelde en je mediaan ver uit elkaar, dan heb je veel uitschieters naar boven.</p>
+                <p>Je <strong>slechtste</strong> tijd zegt ook iets. Wie heel consistent is, heeft zijn slechtste tijd niet zo ver van zijn gemiddelde. Op een wedstrijd is consistentie vaak belangrijker dan een snelle single: een ronde met vijf nette solves wint het van een ronde met twee snelle en drie mislukte.</p>
+
+                <h2 id="periodes">Per sessie, per dag en per week</h2>
+                <p>In CubeTimer kun je de statistieken op drie manieren bekijken:</p>
+                <ul>
+                <li><strong>Sessie</strong>: alle solves in de sessie die je open hebt.</li>
+                <li><strong>Vandaag</strong> en <strong>deze week</strong>: alle solves van dat event in die periode, uit al je sessies samen.</li>
+                </ul>
+                <p>Vergelijk vooral je weekgemiddelde met dat van vorige week. Per dag schommelt het te veel: na een slechte nacht of een lange dag ben je zomaar een paar seconden langzamer, en dat zegt niets over je vooruitgang.</p>
+
+                <h2 id="welke">Welk getal moet je in de gaten houden?</h2>
+                <p>Je <strong>Ao12</strong> voor hoe je nu gaat, en je <strong>Ao100</strong> voor of je vooruitgaat. Een snelle single vier je, maar train er niet op. Hoe je dat getal omlaag krijgt, staat in <a href="/gidsen/sneller-worden.html">sneller worden met je kubus</a>. En wil je weten hoe je gemiddelde zich verhoudt tot dat van anderen, lees dan <a href="/gidsen/hoe-snel.html">wat is een goede tijd?</a></p>
+
+                <h2 id="meer-gidsen">Meer gidsen</h2>
+                <ul class="gids-lijst">
+                    <li><a class="gids-kaart" href="/gidsen/notatie.html"><strong>Kubusnotatie: zo lees je zetten</strong><span>R, U', F2, Rw en M: wat de letters betekenen en hoe je een scramble of algoritme leest.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/cfop.html"><strong>Van beginner naar CFOP</strong><span>Kruis onderop, F2L, de laatste laag in vier stappen en daarna alle PLL's en OLL's.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/sneller-worden.html"><strong>Sneller worden met je kubus</strong><span>Vooruitkijken, langzaam oefenen, minder hergrepen en meten waar je tijd blijft.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/hoe-snel.html"><strong>Wat is een goede tijd?</strong><span>De niveaus van sub-1 tot de wereldtop, en hoe lang het meestal duurt om er te komen.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/eerste-wedstrijd.html"><strong>Je eerste WCA-wedstrijd</strong><span>Inschrijven, wat je meeneemt, hoe de dag gaat en hoe een poging met een stackmat verloopt.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/speedcube-kiezen.html"><strong>Een speedcube kiezen</strong><span>Magneten, goedkoop of duur, spanning, smeren en wanneer een smart cube de moeite waard is.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/wca-events.html"><strong>De 17 WCA-events op een rij</strong><span>Van 2x2 tot Multi-Blind: hoe elk event werkt en hoe de uitslag bepaald wordt.</span></a></li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/">Timer</a>
+        <a href="/leren.html">Leren</a>
+        <a href="/gidsen/">Gidsen</a>
+        <a href="/uitleg.html">FAQ</a>
+        <a href="/over.html">Over</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/voorwaarden.html">Voorwaarden</a>
+        <a href="/#cookie-instellingen">Cookie-instellingen</a>
+        <a href="/en/guides/averages.html#taal=en" hreflang="en" lang="en" data-taalwissel="en">English</a>
+    </footer>
+</body>
+</html>

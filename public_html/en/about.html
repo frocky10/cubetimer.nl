@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<!-- Met de hand bijgehouden; de Nederlandse versie staat in /over.html. Pas je hier iets aan, doe dat daar ook. -->
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>About CubeTimer | cubetimer.nl</title>
+    <meta name="description" content="Who makes CubeTimer, why it exists, how it is paid for and how to get in touch. A free online timer for speedcubers." />
+    <link rel="canonical" href="https://cubetimer.nl/en/about.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/over.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/about.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/over.html" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:url" content="https://cubetimer.nl/en/about.html" />
+    <meta property="og:title" content="About CubeTimer | cubetimer.nl" />
+    <meta property="og:description" content="Who makes CubeTimer, why it exists, how it is paid for and how to get in touch. A free online timer for speedcubers." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "AboutPage",
+            "@id": "https://cubetimer.nl/en/about.html#pagina",
+            "url": "https://cubetimer.nl/en/about.html",
+            "name": "About CubeTimer",
+            "description": "Who makes CubeTimer, why it exists, how it is paid for and how to get in touch. A free online timer for speedcubers.",
+            "inLanguage": "en",
+            "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/#website",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/"
+            },
+            "breadcrumb": {
+                "@id": "https://cubetimer.nl/en/about.html#kruimelpad"
+            }
+        },
+        {
+            "@type": "Organization",
+            "@id": "https://cubetimer.nl/#organisatie",
+            "name": "CubeTimer",
+            "url": "https://cubetimer.nl/",
+            "logo": "https://cubetimer.nl/Pictures/favicon-192.png"
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://cubetimer.nl/en/about.html#kruimelpad",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "CubeTimer",
+                    "item": "https://cubetimer.nl/en/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "About CubeTimer",
+                    "item": "https://cubetimer.nl/en/about.html"
+                }
+            ]
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+            } catch (err) { /* privemodus */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/en/" aria-label="Go to the timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn btn--primary" href="/en/">Go to the timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <h1>About CubeTimer</h1>
+                <p>CubeTimer is a free timer for speedcubers, made in the Netherlands. You open the site, press the space bar and time. No installation, no account needed, and it keeps working if your internet drops out for a moment.</p>
+
+                <h2 id="waarom">Why another timer?</h2>
+                <p>There are good timers already. We were missing one that looks calm, works in Dutch as well as English, and still does everything a dedicated cuber wants: official scrambles, WCA inspection, proper statistics and smart cubes. And we wanted timing itself to be more fun if you want it to be, with leaderboards, a scramble of the day, tournaments, game modes and achievements. If you don't need any of that, all you see is a timer.</p>
+
+                <h2 id="wat">What you can do with it</h2>
+                <ul>
+                <li><strong>Time</strong> with the space bar or a tap on your screen, with WCA inspection and automatic +2 and DNF.</li>
+                <li><strong>Official scrambles</strong> for all 17 WCA events, made with cubing.js, the same kind as at a competition.</li>
+                <li><strong>Track your times</strong> in sessions, with Ao5, Ao12 up to Ao100, a graph and statistics per day and per week.</li>
+                <li><strong>Connect a smart cube</strong> (GAN, QiYi, X-Man, MoYu, Giiker, GoCube) and see per solve how long the cross, F2L, OLL and PLL took.</li>
+                <li><strong>Learn</strong>: the beginner's method, F2L and every OLL and PLL algorithm on the <a href="/en/learn.html">learn page</a>, and <a href="/en/guides/">guides</a> on notation, practice, averages and competitions.</li>
+                <li><strong>Measure yourself against others</strong> on the leaderboards, in the daily challenges, in tournaments against a simulated field, or at a real past WCA competition against the real times from back then.</li>
+                </ul>
+
+                <h2 id="principes">How we want to do it</h2>
+                <ul>
+                <li><strong>Free.</strong> The site is paid for by advertising. Ads are only personalised if you agree to that.</li>
+                <li><strong>Your times are yours.</strong> Without an account they're only stored in your own browser. With an account you can always download them with one click, and delete your account with everything on it yourself.</li>
+                <li><strong>No requests to third parties without consent.</strong> The font and the scramble code are on our own server. Google Analytics only loads once you say yes. How that works exactly is in the <a href="/en/privacy.html">privacy policy</a>.</li>
+                <li><strong>Fair leaderboards.</strong> Records and averages are calculated on the server from your solves, not in your browser. Times that look impossibly fast only count once someone has reviewed them.</li>
+                </ul>
+
+                <h2 id="open">The code</h2>
+                <p>CubeTimer's source code is public on <a href="https://github.com/frocky10/cubetimer.nl" rel="noopener">GitHub</a>. There you can see how everything works, from calculating an Ao5 to talking to a smart cube. The list of what's coming next is there too, as issues.</p>
+
+                <h2 id="contact">Contact</h2>
+                <p>Found a bug or have an idea? Use the feedback button at the top right of the timer. Your report then arrives as an issue on GitHub, with your browser and screen size included, so we can find the problem faster. Note: those reports are publicly readable, so don't put any personal information in them.</p>
+                <p>For anything else, and for questions about your data, email <a href="mailto:privacy@cubetimer.nl">privacy@cubetimer.nl</a>. Answers to common questions are in the <a href="/en/faq.html">FAQ</a>.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/en/">Timer</a>
+        <a href="/en/learn.html">Learn</a>
+        <a href="/en/guides/">Guides</a>
+        <a href="/en/faq.html">FAQ</a>
+        <a href="/en/about.html" aria-current="page">About</a>
+        <a href="/en/privacy.html">Privacy</a>
+        <a href="/en/terms.html">Terms</a>
+        <a href="/en/#cookie-instellingen">Cookie settings</a>
+        <a href="/over.html#taal=nl" hreflang="nl" lang="nl" data-taalwissel="nl">Nederlands</a>
+    </footer>
+</body>
+</html>

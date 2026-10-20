@@ -77,4 +77,144 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/terms.html" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/voorwaarden.html" />
     </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/notatie.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/notatie.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/notation.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/notatie.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/notation.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/notatie.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/notation.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/notatie.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/cfop.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/cfop.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/cfop.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/cfop.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/cfop.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/cfop.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/cfop.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/cfop.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/sneller-worden.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/sneller-worden.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/get-faster.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/sneller-worden.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/get-faster.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/sneller-worden.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/get-faster.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/sneller-worden.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/gemiddelden.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/gemiddelden.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/averages.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/gemiddelden.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/averages.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/gemiddelden.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/averages.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/gemiddelden.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/hoe-snel.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/hoe-snel.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/how-fast.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/hoe-snel.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/how-fast.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/hoe-snel.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/how-fast.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/hoe-snel.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/eerste-wedstrijd.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/eerste-wedstrijd.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/first-competition.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/eerste-wedstrijd.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/first-competition.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/eerste-wedstrijd.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/first-competition.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/eerste-wedstrijd.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/speedcube-kiezen.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/speedcube-kiezen.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/choosing-a-speedcube.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/speedcube-kiezen.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/choosing-a-speedcube.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/speedcube-kiezen.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/choosing-a-speedcube.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/speedcube-kiezen.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/gidsen/wca-events.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/wca-events.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/wca-events.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/wca-events.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/guides/wca-events.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/wca-events.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/wca-events.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/wca-events.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/over.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/over.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/about.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/over.html" />
+    </url>
+    <url>
+        <loc>https://cubetimer.nl/en/about.html</loc>
+        <lastmod>2026-10-20</lastmod>
+        <xhtml:link rel="alternate" hreflang="nl" href="https://cubetimer.nl/over.html" />
+        <xhtml:link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/about.html" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/over.html" />
+    </url>
 </urlset>

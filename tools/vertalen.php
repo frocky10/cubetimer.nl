@@ -47,12 +47,23 @@ const SITE = 'https://cubetimer.nl';
 
 /** Nederlandse pagina => Engelse pagina. De enige plek waar dat staat. */
 const PAGINAS = [
-    '/'                 => '/en/',
-    '/index.html'       => '/en/',
-    '/leren.html'       => '/en/learn.html',
-    '/privacy.html'     => '/en/privacy.html',
-    '/voorwaarden.html' => '/en/terms.html',
-    '/uitleg.html'      => '/en/faq.html',
+    '/'                               => '/en/',
+    '/index.html'                     => '/en/',
+    '/leren.html'                     => '/en/learn.html',
+    '/privacy.html'                   => '/en/privacy.html',
+    '/voorwaarden.html'               => '/en/terms.html',
+    '/uitleg.html'                    => '/en/faq.html',
+    '/gidsen/'                        => '/en/guides/',
+    '/gidsen/index.html'              => '/en/guides/',
+    '/gidsen/notatie.html'            => '/en/guides/notation.html',
+    '/gidsen/cfop.html'               => '/en/guides/cfop.html',
+    '/gidsen/sneller-worden.html'     => '/en/guides/get-faster.html',
+    '/gidsen/gemiddelden.html'        => '/en/guides/averages.html',
+    '/gidsen/hoe-snel.html'           => '/en/guides/how-fast.html',
+    '/gidsen/eerste-wedstrijd.html'   => '/en/guides/first-competition.html',
+    '/gidsen/speedcube-kiezen.html'   => '/en/guides/choosing-a-speedcube.html',
+    '/gidsen/wca-events.html'         => '/en/guides/wca-events.html',
+    '/over.html'                      => '/en/about.html',
 ];
 
 /** Welke pagina's gegenereerd worden. */
