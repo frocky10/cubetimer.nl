@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!-- Met de hand bijgehouden; de Engelse versie staat in /en/guides/notation.html. Pas je hier iets aan, doe dat daar ook. -->
+<html lang="nl" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>Kubusnotatie: zo lees je zetten | cubetimer.nl</title>
+    <meta name="description" content="Wat betekenen R, U', F2 en M? Uitleg van de notatie voor de Rubik's kubus: vlakken, accenten, brede zetten, middenlagen en rotaties." />
+    <link rel="canonical" href="https://cubetimer.nl/gidsen/notatie.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/notatie.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/notation.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/notatie.html" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="nl_NL" />
+    <meta property="og:url" content="https://cubetimer.nl/gidsen/notatie.html" />
+    <meta property="og:title" content="Kubusnotatie: zo lees je zetten | cubetimer.nl" />
+    <meta property="og:description" content="Wat betekenen R, U', F2 en M? Uitleg van de notatie voor de Rubik's kubus: vlakken, accenten, brede zetten, middenlagen en rotaties." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "Article",
+            "@id": "https://cubetimer.nl/gidsen/notatie.html#pagina",
+            "url": "https://cubetimer.nl/gidsen/notatie.html",
+            "name": "Kubusnotatie: zo lees je zetten en algoritmes",
+            "description": "Wat betekenen R, U', F2 en M? Uitleg van de notatie voor de Rubik's kubus: vlakken, accenten, brede zetten, middenlagen en rotaties.",
+            "inLanguage": "nl",
+            "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/#website",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/"
+            },
+            "breadcrumb": {
+                "@id": "https://cubetimer.nl/gidsen/notatie.html#kruimelpad"
+            },
+            "headline": "Kubusnotatie: zo lees je zetten en algoritmes",
+            "image": "https://cubetimer.nl/Pictures/og-image.png",
+            "datePublished": "2026-10-20",
+            "dateModified": "2026-10-20",
+            "mainEntityOfPage": "https://cubetimer.nl/gidsen/notatie.html",
+            "author": {
+                "@id": "https://cubetimer.nl/#organisatie"
+            },
+            "publisher": {
+                "@id": "https://cubetimer.nl/#organisatie"
+            }
+        },
+        {
+            "@type": "Organization",
+            "@id": "https://cubetimer.nl/#organisatie",
+            "name": "CubeTimer",
+            "url": "https://cubetimer.nl/",
+            "logo": "https://cubetimer.nl/Pictures/favicon-192.png"
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://cubetimer.nl/gidsen/notatie.html#kruimelpad",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "CubeTimer",
+                    "item": "https://cubetimer.nl/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Gidsen",
+                    "item": "https://cubetimer.nl/gidsen/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "Kubusnotatie: zo lees je zetten",
+                    "item": "https://cubetimer.nl/gidsen/notatie.html"
+                }
+            ]
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+            } catch (err) { /* privemodus */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/" aria-label="Naar de timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn btn--primary" href="/">Naar de timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <p class="gids-terug"><a href="/gidsen/">← Alle gidsen</a></p>
+                <h1>Kubusnotatie: zo lees je zetten en algoritmes</h1>
+                <p class="legal__meta">Bijgewerkt op 20 oktober 2026 · 6 minuten lezen</p>
+                <p>Wie een algoritme opzoekt, krijgt een rijtje letters als <code>R U R' U'</code>. Dat is de standaardnotatie voor de Rubik's kubus, en iedere site, video en wedstrijd gebruikt dezelfde. Als je die eenmaal kunt lezen, kun je elk algoritme volgen en elke scramble zelf neerzetten. Het kost een kwartier om te leren.</p>
+
+                <nav class="legal__summary" aria-label="Op deze pagina">
+                    <ul class="legal__toc">
+                        <li><a href="#vlakken">De zes vlakken</a></li>
+                        <li><a href="#tekens">Accent en 2</a></li>
+                        <li><a href="#vasthouden">Hoe houd je de kubus vast bij een scramble?</a></li>
+                        <li><a href="#breed">Brede zetten: twee lagen tegelijk</a></li>
+                        <li><a href="#slices">Middenlagen: M, E en S</a></li>
+                        <li><a href="#rotaties">De hele kubus draaien: x, y en z</a></li>
+                        <li><a href="#algoritmes">Een algoritme lezen</a></li>
+                        <li><a href="#andere-puzzels">En de andere puzzels?</a></li>
+                        <li><a href="#oefenen">Zelf oefenen</a></li>
+                    </ul>
+                </nav>
+
+                <h2 id="vlakken">De zes vlakken</h2>
+                <p>Elke letter staat voor een vlak van de kubus. De letters komen uit het Engels:</p>
+                <div class="legal__table-wrap">
+                <table>
+                <thead><tr><th>Letter</th><th>Engels</th><th>Welk vlak</th></tr></thead>
+                <tbody>
+                <tr><td><code>R</code></td><td>Right</td><td>rechts</td></tr>
+                <tr><td><code>L</code></td><td>Left</td><td>links</td></tr>
+                <tr><td><code>U</code></td><td>Up</td><td>boven</td></tr>
+                <tr><td><code>D</code></td><td>Down</td><td>onder</td></tr>
+                <tr><td><code>F</code></td><td>Front</td><td>voorkant, naar je toe</td></tr>
+                <tr><td><code>B</code></td><td>Back</td><td>achterkant, van je af</td></tr>
+                </tbody>
+                </table>
+                </div>
+                <p>Een letter zonder iets erachter betekent: draai dat vlak een kwart slag <strong>met de klok mee</strong>, gezien alsof je recht op dat vlak kijkt. Dat laatste is waar het in het begin vaak misgaat. <code>R</code> draait de rechterkant van je af, naar boven toe. <code>L</code> is ook met de klok mee als je naar de linkerkant kijkt, en gaat daardoor juist naar je toe. Bij <code>U</code> draait de bovenlaag naar links, bij <code>D</code> de onderlaag naar rechts.</p>
+                <p>De kleuren doen er niet toe. Een algoritme gaat over plekken, niet over kleuren: <code>R</code> is altijd de laag die op dat moment rechts zit.</p>
+
+                <h2 id="tekens">Accent en 2</h2>
+                <ul>
+                <li><strong>Een accent</strong> (<code>R'</code>, uitgesproken als "R prime") is een kwart slag <strong>tegen de klok in</strong>. <code>R'</code> maakt dus <code>R</code> ongedaan.</li>
+                <li><strong>Een 2</strong> (<code>R2</code>) is een halve slag. Welke kant je op draait maakt niet uit; <code>R2</code> en <code>R2'</code> komen op hetzelfde uit. Je kiest gewoon de richting die het lekkerst in je hand ligt.</li>
+                </ul>
+                <p>Met deze twaalf zetten plus de halve slagen kun je al elke scramble voor 3x3 lezen. Een WCA-scramble bestaat er alleen uit, bijvoorbeeld <code>D2 F' R2 U2 B' L2 F U2 R' D' B2 L U' F2</code>.</p>
+
+                <h2 id="vasthouden">Hoe houd je de kubus vast bij een scramble?</h2>
+                <p>Op een officiële wedstrijd wordt elke 3x3 gescrambeld met <strong>wit boven en groen voor</strong>. Doe dat thuis ook, dan kun je jouw scramble vergelijken met die van een ander, en zie je meteen of je een zet verkeerd hebt gedaan. De scrambles in de timer van CubeTimer gaan van dezelfde houding uit.</p>
+                <p>Tijdens het oplossen houd je de kubus zoals je wilt. De meeste mensen die CFOP leren, leggen het kruis onderop. Daarom staan algoritmes voor de laatste laag geschreven voor de bovenlaag: die zie je, en daar werken je vingers het makkelijkst.</p>
+
+                <h2 id="breed">Brede zetten: twee lagen tegelijk</h2>
+                <p>Een kleine letter, of een letter met een <code>w</code> erachter, draait twee lagen tegelijk: het vlak zelf en de laag ernaast. <code>r</code> en <code>Rw</code> betekenen hetzelfde. Op een 3x3 komt <code>r</code> neer op <code>R</code> plus de middelste laag in dezelfde richting.</p>
+                <p>Op grotere kubussen kun je meer lagen tegelijk draaien. Dan staat er een getal voor: <code>3Rw</code> draait de drie rechterlagen van een 6x6 of 7x7. Zo staan ze ook in de officiële scrambles voor die events.</p>
+
+                <h2 id="slices">Middenlagen: M, E en S</h2>
+                <p>De middelste lagen hebben een eigen letter. Ze draaien niet met de klok van een eigen vlak mee, maar met een van de buitenkanten:</p>
+                <ul>
+                <li><code>M</code> (Middle) is de laag tussen <code>L</code> en <code>R</code>, en draait dezelfde kant op als <code>L</code>.</li>
+                <li><code>E</code> (Equator) is de laag tussen <code>U</code> en <code>D</code>, en draait als <code>D</code>.</li>
+                <li><code>S</code> (Standing) is de laag tussen <code>F</code> en <code>B</code>, en draait als <code>F</code>.</li>
+                </ul>
+                <p><code>M</code> kom je vaak tegen: in PLL-algoritmes zoals de H-perm (<code>M2 U M2 U2 M2 U M2</code>), en bij de Roux-methode zelfs het grootste deel van de laatste stap.</p>
+
+                <h2 id="rotaties">De hele kubus draaien: x, y en z</h2>
+                <p>Soms moet je de kubus in je handen draaien zonder iets aan de stand te veranderen. Daarvoor zijn er drie letters:</p>
+                <ul>
+                <li><code>x</code>: de hele kubus draait zoals <code>R</code>.</li>
+                <li><code>y</code>: de hele kubus draait zoals <code>U</code>.</li>
+                <li><code>z</code>: de hele kubus draait zoals <code>F</code>.</li>
+                </ul>
+                <p>Ook hier werken het accent en de 2: <code>y'</code> is een kwart slag de andere kant op, <code>x2</code> zet de kubus op zijn kop. In een snelle solve wil je zo min mogelijk draaien, want elke draai kost tijd en je verliest even het overzicht. Daarom zie je in goede F2L-oplossingen vaker een <code>U</code>-zet dan een <code>y</code>.</p>
+
+                <h2 id="algoritmes">Een algoritme lezen</h2>
+                <p>Een algoritme is gewoon een rijtje zetten achter elkaar. Een paar dingen die je vaak ziet:</p>
+                <ul>
+                <li><strong>Haakjes</strong> zijn alleen een hulpmiddel om te groeperen: <code>(R U R' U') (R' F R F')</code>. Je voert alles gewoon achter elkaar uit. Ze laten zien welke stukjes in één vloeiende beweging gaan.</li>
+                <li><strong>Triggers</strong> zijn korte reeksen die steeds terugkomen. <code>R U R' U'</code> heet in het Engels de "sexy move" en zit in tientallen algoritmes. <code>R U R' U R U2 R'</code> is de Sune, een van de eerste OLL's die mensen leren.</li>
+                <li><strong>Een U-zet aan het begin of eind</strong> (vaak tussen haakjes, of met de naam AUF: <em>adjust U face</em>) draait de bovenlaag goed voordat of nadat je het algoritme doet. Die hoort niet echt bij het algoritme, en hoeveel je er nodig hebt hangt af van hoe het geval voor je ligt.</li>
+                </ul>
+                <p>Een algoritme terugdraaien is makkelijk: je leest het van achter naar voren en zet bij elke zet het accent om. Het omgekeerde van <code>R U R'</code> is <code>R U' R'</code>. Zo maakt de oefenknop op de <a href="/leren.html">leerpagina</a> ook de opzetscramble voor elk geval: het algoritme achterstevoren.</p>
+
+                <h2 id="andere-puzzels">En de andere puzzels?</h2>
+                <p>De 2x2 tot en met de 7x7 gebruiken dezelfde letters. De andere WCA-puzzels hebben een eigen notatie, die je vooral in scrambles tegenkomt:</p>
+                <ul>
+                <li><strong>Pyraminx</strong>: <code>U</code>, <code>L</code>, <code>R</code> en <code>B</code> draaien een hoek met twee lagen; kleine letters (<code>u</code>, <code>l</code>, <code>r</code>, <code>b</code>) draaien alleen het puntje.</li>
+                <li><strong>Skewb</strong>: dezelfde vier letters, maar elke zet draait de halve puzzel om een hoek.</li>
+                <li><strong>Megaminx</strong>: <code>R++</code> en <code>D--</code> draaien een groot deel van de puzzel twee vijfde slag; <code>U</code> en <code>U'</code> draaien het bovenvlak.</li>
+                <li><strong>Square-1</strong>: paren als <code>(1,0)</code> zeggen hoeveel stapjes de boven- en onderlaag draaien, een <code>/</code> is de draai van de rechterhelft.</li>
+                <li><strong>Clock</strong>: zetten als <code>UR3+</code> zeggen welke pinnen omhoog staan en hoeveel uur je aan een wieltje draait.</li>
+                </ul>
+
+                <h2 id="oefenen">Zelf oefenen</h2>
+                <p>De snelste manier om notatie te leren is gewoon doen. Open de <a href="/">timer</a>, neem de scramble die bovenaan staat en zet hem zet voor zet neer, met wit boven en groen voor. Draai daarna alles terug, van achter naar voren. Doe dat een paar keer, en je leest een scramble net zo makkelijk als een woord.</p>
+                <p>Daarna is het tijd om echte algoritmes te leren. De <a href="/gidsen/cfop.html">gids van beginner naar CFOP</a> zegt in welke volgorde, en op de <a href="/leren.html">leerpagina</a> staan ze allemaal, met een plaatje dat uit de zetten zelf berekend is.</p>
+
+                <h2 id="meer-gidsen">Meer gidsen</h2>
+                <ul class="gids-lijst">
+                    <li><a class="gids-kaart" href="/gidsen/cfop.html"><strong>Van beginner naar CFOP</strong><span>Kruis onderop, F2L, de laatste laag in vier stappen en daarna alle PLL's en OLL's.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/sneller-worden.html"><strong>Sneller worden met je kubus</strong><span>Vooruitkijken, langzaam oefenen, minder hergrepen en meten waar je tijd blijft.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/gemiddelden.html"><strong>Ao5, Ao12 en je statistieken</strong><span>Hoe een Ao5 berekend wordt, wat een DNF doet, en welk getal het meest zegt over je niveau.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/hoe-snel.html"><strong>Wat is een goede tijd?</strong><span>De niveaus van sub-1 tot de wereldtop, en hoe lang het meestal duurt om er te komen.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/eerste-wedstrijd.html"><strong>Je eerste WCA-wedstrijd</strong><span>Inschrijven, wat je meeneemt, hoe de dag gaat en hoe een poging met een stackmat verloopt.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/speedcube-kiezen.html"><strong>Een speedcube kiezen</strong><span>Magneten, goedkoop of duur, spanning, smeren en wanneer een smart cube de moeite waard is.</span></a></li>
+                    <li><a class="gids-kaart" href="/gidsen/wca-events.html"><strong>De 17 WCA-events op een rij</strong><span>Van 2x2 tot Multi-Blind: hoe elk event werkt en hoe de uitslag bepaald wordt.</span></a></li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/">Timer</a>
+        <a href="/leren.html">Leren</a>
+        <a href="/gidsen/">Gidsen</a>
+        <a href="/uitleg.html">FAQ</a>
+        <a href="/over.html">Over</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/voorwaarden.html">Voorwaarden</a>
+        <a href="/#cookie-instellingen">Cookie-instellingen</a>
+        <a href="/en/guides/notation.html#taal=en" hreflang="en" lang="en" data-taalwissel="en">English</a>
+    </footer>
+</body>
+</html>

@@ -11,7 +11,7 @@
     <meta name="keywords" content="cube timer, rubiks cube timer, rubik's cube timer online, speedcube timer, speedcubing timer, online timer, wca scrambles, scramble generator, ao5, ao12, inspection time, smart cube timer, gan cube timer, cstimer alternative">
     <meta name="google-adsense-account" content="ca-pub-9889350952616788">
 
-    <!-- SEO: het ene echte adres van deze pagina (zie CLAUDE.md, SEO). -->
+    <!-- SEO: het ene echte adres van deze pagina (zie docs/ontwikkelen.md, SEO). -->
     <link rel="canonical" href="https://cubetimer.nl/en/">
     <!-- Dezelfde pagina in het Engels (gegenereerd door tools/vertalen.php). -->
     <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/">
@@ -162,7 +162,7 @@
          adblocker), dan laden we Analytics niet: liever geen statistieken dan
          zonder toestemming. AdSense leest de toestemming zelf uit de CMP; zonder
          toestemming toont het alleen niet-gepersonaliseerde advertenties.
-         Zie het hoofdstuk Privacy in CLAUDE.md. -->
+         Zie het hoofdstuk Privacy in docs/ontwikkelen.md. -->
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
@@ -421,7 +421,9 @@
                 </section>
             </div>
             <footer class="site-footer" aria-label="About this site">
+                <a href="/en/guides/">Guides</a>
                 <a href="/en/faq.html">FAQ</a>
+                <a href="/en/about.html">About</a>
                 <a href="/en/privacy.html">Privacy</a>
                 <a href="/en/terms.html">Terms</a>
                 <a href="/en/#cookie-instellingen" data-cookie-instellingen="">Cookie settings</a>
@@ -809,7 +811,7 @@
             <div class="modal__header">
                 <p class="modal__eyebrow">Feedback</p>
                 <h2 class="modal__title" id="feedback-modal-title">Send feedback</h2>
-                <p class="modal__subtitle">Your report goes straight to our issue list on GitHub.</p>
+                <p class="modal__subtitle">Your report becomes a public issue on GitHub.</p>
             </div>
 
             <form id="feedback-form" class="modal__body" novalidate="">
@@ -850,7 +852,7 @@
                     <input type="text" id="feedback-website" name="website" tabindex="-1" autocomplete="off">
                 </div>
 
-                <p class="notice">Your browser, screen size and current event are sent along so we can reproduce the problem. No times are included. Your report becomes an issue in our task list on GitHub, so please leave out personal details. See the <a href="/en/privacy.html#reports" target="_blank" rel="noopener">privacy policy</a>.</p>
+                <p class="notice">Your browser, screen size and current event are sent along so we can reproduce the problem. No times are included, and neither is your username. Your report is publicly readable on GitHub, so please leave out personal details. See the <a href="/en/privacy.html#reports" target="_blank" rel="noopener">privacy policy</a>.</p>
 
                 <p class="form-error" id="feedback-error" role="alert"></p>
 

@@ -114,11 +114,10 @@ foreach ($contextFields as $label => $key) {
 }
 $contextLines[] = sprintf('| Gemeld op | %s UTC |', gmdate('Y-m-d H:i'));
 
+// De issues zijn openbaar: wel of de melder was ingelogd, niet wie het is.
+// Wie het is staat in de database (feedback_reports.user_id).
 $currentUser = Auth::user();
-$reporter = $currentUser !== null
-    ? 'ingelogd als **' . $neutralize((string) $currentUser['username']) . '**'
-    : 'niet ingelogd';
-$contextLines[] = sprintf('| Melder | %s |', $reporter);
+$contextLines[] = sprintf('| Ingelogd | %s |', $currentUser !== null ? 'ja' : 'nee');
 
 /* -------------------------------------------------------------------------
  * Issue samenstellen

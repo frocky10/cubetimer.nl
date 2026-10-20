@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<!-- Met de hand bijgehouden; de Nederlandse versie staat in /gidsen/sneller-worden.html. Pas je hier iets aan, doe dat daar ook. -->
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#060911" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f7fd" media="(prefers-color-scheme: light)" />
+    <title>How to get faster at cubing | cubetimer.nl</title>
+    <meta name="description" content="Is your average stuck? How to get faster: lookahead, slow solving, using inspection well and measuring where your time goes." />
+    <link rel="canonical" href="https://cubetimer.nl/en/guides/get-faster.html" />
+    <link rel="alternate" hreflang="nl" href="https://cubetimer.nl/gidsen/sneller-worden.html" />
+    <link rel="alternate" hreflang="en" href="https://cubetimer.nl/en/guides/get-faster.html" />
+    <link rel="alternate" hreflang="x-default" href="https://cubetimer.nl/gidsen/sneller-worden.html" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/png" href="/Pictures/favicon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/Pictures/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="CubeTimer" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:url" content="https://cubetimer.nl/en/guides/get-faster.html" />
+    <meta property="og:title" content="How to get faster at cubing | cubetimer.nl" />
+    <meta property="og:description" content="Is your average stuck? How to get faster: lookahead, slow solving, using inspection well and measuring where your time goes." />
+    <meta property="og:image" content="https://cubetimer.nl/Pictures/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "Article",
+            "@id": "https://cubetimer.nl/en/guides/get-faster.html#pagina",
+            "url": "https://cubetimer.nl/en/guides/get-faster.html",
+            "name": "How to get faster at cubing",
+            "description": "Is your average stuck? How to get faster: lookahead, slow solving, using inspection well and measuring where your time goes.",
+            "inLanguage": "en",
+            "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://cubetimer.nl/#website",
+                "name": "CubeTimer",
+                "url": "https://cubetimer.nl/"
+            },
+            "breadcrumb": {
+                "@id": "https://cubetimer.nl/en/guides/get-faster.html#kruimelpad"
+            },
+            "headline": "How to get faster at cubing",
+            "image": "https://cubetimer.nl/Pictures/og-image.png",
+            "datePublished": "2026-10-20",
+            "dateModified": "2026-10-20",
+            "mainEntityOfPage": "https://cubetimer.nl/en/guides/get-faster.html",
+            "author": {
+                "@id": "https://cubetimer.nl/#organisatie"
+            },
+            "publisher": {
+                "@id": "https://cubetimer.nl/#organisatie"
+            }
+        },
+        {
+            "@type": "Organization",
+            "@id": "https://cubetimer.nl/#organisatie",
+            "name": "CubeTimer",
+            "url": "https://cubetimer.nl/",
+            "logo": "https://cubetimer.nl/Pictures/favicon-192.png"
+        },
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://cubetimer.nl/en/guides/get-faster.html#kruimelpad",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "CubeTimer",
+                    "item": "https://cubetimer.nl/en/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Guides",
+                    "item": "https://cubetimer.nl/en/guides/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": "How to get faster at cubing",
+                    "item": "https://cubetimer.nl/en/guides/get-faster.html"
+                }
+            ]
+        }
+    ]
+}
+    </script>
+
+    <link rel="stylesheet" href="/Style/style.css" />
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('cubetimer_theme');
+                if (stored !== 'light' && stored !== 'dark') {
+                    stored = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', stored);
+                var gekozen = /^#taal=(nl|en)$/.exec(location.hash);
+                if (gekozen) {
+                    localStorage.setItem('cubetimer_taal', gekozen[1]);
+                    history.replaceState(null, '', location.pathname + location.search);
+                }
+            } catch (err) { /* privemodus */ }
+        })();
+    </script>
+</head>
+<body class="profile-page">
+    <header class="profile-topbar">
+        <a class="profile-topbar__brand" href="/en/" aria-label="Go to the timer">
+            <img src="/Pictures/CubeTimerLogo_V2.png" alt="CubeTimer" width="752" height="345" />
+        </a>
+        <div class="profile-topbar__actions">
+            <a class="btn btn--primary" href="/en/">Go to the timer</a>
+        </div>
+    </header>
+
+    <main class="profile-main">
+        <article class="panel">
+            <div class="panel__body legal">
+                <p class="gids-terug"><a href="/en/guides/">← All guides</a></p>
+                <h1>How to get faster at cubing</h1>
+                <p class="legal__meta">Updated 20 October 2026 · 5 min read</p>
+                <p>Getting faster happens on its own at first: a few seconds off every week. Then it gets harder, and sometimes your average stays stuck for weeks. This guide is about what helps then. Almost none of it is about turning faster.</p>
+
+                <nav class="legal__summary" aria-label="On this page">
+                    <ul class="legal__toc">
+                        <li><a href="#pauzes">Most of your time is in the pauses</a></li>
+                        <li><a href="#langzaam">Practise slowly</a></li>
+                        <li><a href="#kruis">Plan more during inspection</a></li>
+                        <li><a href="#vingers">Finger tricks and turning without regrips</a></li>
+                        <li><a href="#algoritmes">Algorithms: recognising matters as much as executing</a></li>
+                        <li><a href="#meten">Measure where your time goes</a></li>
+                        <li><a href="#gemiddelden">Watch your average, not your best time</a></li>
+                        <li><a href="#plateau">When you're stuck</a></li>
+                        <li><a href="#kubus">And your cube?</a></li>
+                    </ul>
+                </nav>
+
+                <h2 id="pauzes">Most of your time is in the pauses</h2>
+                <p>Watch a video of one of your own solves, or pay attention while you solve. You probably turn in short, fast bursts, with moments in between where you stop and search. For most cubers slower than about fifteen seconds, most of the time is in those pauses, not in the turning.</p>
+                <p>That's why the most important skill is <strong>lookahead</strong>. While you insert one F2L pair, your eyes are already looking for the pieces of the next one. That only works if your hands can do the job without you watching them.</p>
+
+                <h2 id="langzaam">Practise slowly</h2>
+                <p>The best exercise for lookahead sounds contradictory: solve the cube very slowly, but <strong>without stopping even once</strong>. Pick a pace at which you can manage that, even if it's half your normal speed. You'll notice that you see much more, and that you already know what to do with the next pair.</p>
+                <p>Do ten or twenty of these in a row, a few times a week. It feels slow, but a solve without pauses at a calm pace is faster than one at full speed with three stops. Once the pace feels comfortable, turn a little faster.</p>
+
+                <h2 id="kruis">Plan more during inspection</h2>
+                <p>You get fifteen seconds to look at the cube. Use them to plan the whole cross, down to the last move. Once that always works, try to find the first F2L pair as well: where will that corner and edge be once your cross is done?</p>
+                <p>Turn on WCA inspection in the <a href="/en/">timer</a> and you practise under the same conditions as at a competition. Start after fifteen seconds and you get a +2, just like there.</p>
+
+                <h2 id="vingers">Finger tricks and turning without regrips</h2>
+                <p>Fast turning comes from your fingers, not your wrist. You do a <code>U</code> with your right index finger pushing the top layer to the left, a <code>U'</code> with your left index finger. <code>R</code> and <code>R'</code> come from your wrist, but do every other move with your fingers wherever you can.</p>
+                <ul>
+                <li><strong>Regrips</strong> (changing how you hold the cube) cost time. Choose algorithms that don't need one, even if they're a move longer.</li>
+                <li><strong>Cube rotations</strong> (<code>y</code>, <code>x</code>) cost even more: you have to read the cube again afterwards. Learn to solve F2L cases in the back slots too, so you don't have to rotate.</li>
+                <li><strong>Turn calmly but smoothly.</strong> A cube that locks up because a layer wasn't lined up costs more than you gain with a quick move.</li>
+                </ul>
+
+                <h2 id="algoritmes">Algorithms: recognising matters as much as executing</h2>
+                <p>Knowing an algorithm means two things: recognising the case and executing the moves. The first one is often forgotten. If you need two seconds to look at the sides for every PLL, it barely matters how fast you turn it.</p>
+                <p>Practise recognition separately. On the <a href="/en/learn.html">learn page</a> every case has a practice button that opens the timer with exactly that case set up. That way you drill one algorithm ten times in a row, until you no longer have to search for it. What you still need to learn is in the <a href="/en/guides/cfop.html">beginner to CFOP guide</a>.</p>
+
+                <h2 id="meten">Measure where your time goes</h2>
+                <p>You can only practise in a focused way if you know what goes wrong. A few ways to find out:</p>
+                <ul>
+                <li><strong>Film a solve</strong> and play it back slowly. Count the pauses. Where do you stop: after the cross, between pairs, when recognising OLL?</li>
+                <li><strong>With a smart cube</strong>, CubeTimer does it for you. After every solve you see the time and number of moves for each phase (cross, F2L, OLL, PLL), plus your turns per second. If F2L takes two thirds of your time every time, you know where to focus.</li>
+                <li><strong>Compare with an example.</strong> Find a reconstruction of a solve by a strong cuber (you can find them online, with the scramble) and do the same scramble yourself. Where do you use more moves?</li>
+                </ul>
+
+                <h2 id="gemiddelden">Watch your average, not your best time</h2>
+                <p>A fast single is nice, but it doesn't say much: an easy scramble can hand you ten seconds. Whether you're really improving shows in your Ao12 and your Ao100. How those work is explained in <a href="/en/guides/averages.html">Ao5, Ao12 and your stats</a>.</p>
+                <p>In CubeTimer the statistics panel shows your averages for today and this week next to those of the whole session, and the graph next to the scramble shows how your times are trending. An average that slowly drops is exactly what you want to see, even if your best time hasn't improved in weeks.</p>
+
+                <h2 id="plateau">When you're stuck</h2>
+                <p>Every cuber spends weeks at the same average now and then. That's normal, and it usually means one part is lagging behind. What often helps:</p>
+                <ul>
+                <li><strong>Change what you practise.</strong> Spend a week on slow solves only, or crosses only, or learn five new algorithms.</li>
+                <li><strong>Practise short and often.</strong> Twenty minutes a day does more than three hours on a Sunday. After a while your concentration fades, and then you're mostly practising sloppiness.</li>
+                <li><strong>Warm up.</strong> The first five solves of a session are almost always slower. Don't judge yourself on them.</li>
+                <li><strong>Play a game.</strong> The game modes in the timer (streak, survival, ladder, speedrun) make you stay under a target time, which trains consistency in a different way than a normal session.</li>
+                </ul>
+
+                <h2 id="kubus">And your cube?</h2>
+                <p>A good speedcube helps, but less than you'd think. The difference between a ten-euro cube and a sixty-euro one is mostly in feel and setup. Read <a href="/en/guides/choosing-a-speedcube.html">how to choose a speedcube</a> if you're unsure; in most cases your time is better spent practising than on a new cube.</p>
+
+                <h2 id="meer-gidsen">More guides</h2>
+                <ul class="gids-lijst">
+                    <li><a class="gids-kaart" href="/en/guides/notation.html"><strong>Cube notation explained</strong><span>R, U', F2, Rw and M: what the letters mean and how to read a scramble or an algorithm.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/cfop.html"><strong>From beginner to CFOP</strong><span>Cross on the bottom, F2L, the four-look last layer, and then every PLL and OLL.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/averages.html"><strong>Ao5, Ao12 and your stats</strong><span>How an Ao5 is calculated, what a DNF does, and which number says most about your level.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/how-fast.html"><strong>What is a good cubing time?</strong><span>The levels from sub-1 to world class, and how long it usually takes to get there.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/first-competition.html"><strong>Your first WCA competition</strong><span>Registering, what to bring, how the day goes and how an attempt on a stackmat works.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/choosing-a-speedcube.html"><strong>How to choose a speedcube</strong><span>Magnets, cheap or expensive, tension, lube and when a smart cube is worth it.</span></a></li>
+                    <li><a class="gids-kaart" href="/en/guides/wca-events.html"><strong>All 17 WCA events explained</strong><span>From 2x2 to Multi-Blind: how each event works and how results are decided.</span></a></li>
+                </ul>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">
+        <a href="/en/">Timer</a>
+        <a href="/en/learn.html">Learn</a>
+        <a href="/en/guides/">Guides</a>
+        <a href="/en/faq.html">FAQ</a>
+        <a href="/en/about.html">About</a>
+        <a href="/en/privacy.html">Privacy</a>
+        <a href="/en/terms.html">Terms</a>
+        <a href="/en/#cookie-instellingen">Cookie settings</a>
+        <a href="/gidsen/sneller-worden.html#taal=nl" hreflang="nl" lang="nl" data-taalwissel="nl">Nederlands</a>
+    </footer>
+</body>
+</html>
